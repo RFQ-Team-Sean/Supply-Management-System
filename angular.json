@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "airsuplly": {
+    "eyepopil": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/airsuplly",
+            "outputPath": "dist/airsupply",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -62,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "airsuplly:build:production"
+              "buildTarget": "eyepopil:build:production"
             },
             "development": {
-              "buildTarget": "airsuplly:build:development"
+              "buildTarget": "eyepopil:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -73,7 +73,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "airsuplly:build"
+            "buildTarget": "eyepopil:build"
           }
         },
         "test": {
@@ -96,5 +96,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "559e1464-6120-4d78-a654-70b98b4fbe4c"
   }
 }

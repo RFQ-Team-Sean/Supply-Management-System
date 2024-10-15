@@ -1,0 +1,124 @@
+/* Sidebar base styles */
+.fixed {
+  transition: width 0.3s ease-in-out, padding 0.3s ease-in-out; /* Smooth width and padding transitions */
+}
+
+/* Adjust collapsed sidebar width and padding */
+.w-20 {
+  width: 6rem; /* Collapsed width */
+  padding: 0 0.5rem; /* Padding adjustment for minimized state */
+}
+
+/* Adjust expanded sidebar width and padding */
+.w-64 {
+  width: 18rem; /* Expanded width */
+  padding: 0 1rem; /* Padding adjustment for expanded state */
+}
+
+/* Adjust font-weight for menu items */
+.menu-item {
+  font-weight: 500; /* Adjust this value as needed (normal: 400, bold: 700, etc.) */
+}
+
+/* Add this class for truncation */
+.truncate {
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  text-overflow: ellipsis; /* Show ellipsis for overflow */
+  width: 100%; /* Ensure it takes full width */
+}
+
+/* Sidebar hover text */
+.sidebar-hover-text {
+  display: none;
+}
+
+/* Adjust styles for sidebar items */
+.w-20 .sidebar-hover-text:hover {
+  display: block;
+  position: absolute;
+  left: 6rem; /* Adjust based on new collapsed width */
+  background-color: #000054;
+  padding: 5px 10px;
+  border-radius: 4px;
+  z-index: 100;
+}
+
+/* Dropdown handling when collapsed */
+.w-20 .pl-10 {
+  padding-left: 1.5rem;
+}
+
+/* Hide sub-menu in collapsed state */
+.w-20 ul {
+  display: none;
+}
+
+/* Show sub-menu in expanded state */
+.w-64 ul {
+  display: block;
+}
+
+/* Toggle button arrow animation */
+button svg.rotate-180 {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease-in-out; /* Smooth transition for the button icon */
+}
+
+/* Dropdown icon animation */
+button svg {
+  transition: transform 0.3s ease-in-out;
+}
+
+button svg.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Active route indicator */
+.active-route {
+  position: relative;
+  background-color: #0173AD !important;
+}
+
+.active-route::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 70%;
+  background-color: var(--color-accent-light);
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.w-20 .active-route::after {
+  width: 100%;
+  height: 4px;
+  top: auto;
+  bottom: 0;
+  left: 0;
+  transform: none;
+  border-radius: 0;
+}
+
+.icon-container {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-size {
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+  line-height: 24px;
+}
+
+.active-icon {
+  color: var(--color-secondary);
+}
