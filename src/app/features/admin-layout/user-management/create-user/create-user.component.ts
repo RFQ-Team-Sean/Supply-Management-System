@@ -1,22 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SupabaseService } from '../../../../core/services/supabase.service';
-
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-create-user',
   standalone: true,
-  imports: [ReactiveFormsModule ],
+  imports: [ ],
   templateUrl: './create-user.component.html',
   styleUrl: './create-user.component.css'
 })
-export class CreateUserComponent implements OnInit{
+export class CreateUserComponent {
 
-  constructor( ) { 
-  }
-  ngOnInit(): void {
-    throw new Error('Method not implemented.');
-  }
-
-  
 }
