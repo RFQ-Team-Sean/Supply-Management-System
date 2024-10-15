@@ -9,7 +9,6 @@ import { AdminLayoutComponent } from './features/admin-layout/admin-layout.compo
 import { ADashboardComponent } from './features/admin-layout/a-dashboard/a-dashboard.component';
 import { UUsermanagement } from './features/user-layout/u-usermanagement/u-usermanagement.component';
 import { UPurchasemanagement } from './features/user-layout/u-purchaserequest/u-purchaserequest.component';
-import { UReceivedComponent } from './features/user-layout/u-received/u-received.component';
 import { USupplymanagement } from './features/user-layout/u-supplymanagement/u-supplymanagement.component';
 import { UReports } from './features/user-layout/u-reports/u-reports.component';
 import { ViewDetailsComponent } from './shared/components/view-details/view-details.component';
@@ -48,7 +47,6 @@ export const routes: Routes = [
       { path: 'dashboard', component: UDashboardComponent },
       { path: 'u-usermagement', component: UUsermanagement },
       { path: 'u-purchasemanagement', component: UPurchasemanagement },
-      { path: 'received', component: UReceivedComponent },
       { path: 'u-supplymanagement', component: USupplymanagement },
       { path: 'u-inventorymanagement', component: UInventorymanagement},
       { path: 'u-reports', component: UReports },
