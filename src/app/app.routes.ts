@@ -22,7 +22,6 @@ import { AReportsComponent } from './features/admin-layout/a-reports/a-reports.c
 import { UserDetailComponent } from './features/admin-layout/user-management/user-detail/user-detail.component';
 import { UInventorymanagement } from './features/user-layout/u-inventorymanagement/u-inventorymanagement.component';
 import { CreateUserComponent } from './features/admin-layout/user-management/create-user/create-user.component';
-import { AUsermanagementComponent } from './features/admin-layout/a-usermanagement/a-usermanagementcomponent';
 import { UNotification } from './features/user-layout/u-notification/u-notificationcomponent';
 import { USystemsetting } from './features/user-layout/u-systemsetting/u-systemsetting.component';
 import { UProfileComponent } from './features/user-layout/u-profile/u-profile.component';
@@ -67,7 +66,6 @@ export const routes: Routes = [
       { path: 'a-purchaserequest', component: APerchaserequestComponent },
       { path: 'a-supplymanagement', component: ASupplymanagement },
       { path: 'a-inventorymanagement', component: AInventorymanagement },
-      { path: 'a-usermanagement', component: AUsermanagementComponent },
       { path: 'a-systemsettings', component: ASystemsettings },
       { path: 'a-reports', component: AReportsComponent },
       { path: 'a-notification', component: ANotification },

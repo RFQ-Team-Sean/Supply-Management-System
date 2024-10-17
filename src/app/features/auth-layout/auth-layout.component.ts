@@ -1,4 +1,3 @@
-// src/app/features/auth-layout/auth-layout.component.ts
 import { Component } from '@angular/core';
 import { LoginFormComponent } from './login-form/login-form.component';
 @Component({
@@ -6,7 +5,7 @@ import { LoginFormComponent } from './login-form/login-form.component';
   standalone: true,
   templateUrl: './auth-layout.component.html',
   styleUrls: ['./auth-layout.component.css'],
-  imports: [LoginFormComponent],  // Import the LoginFormComponent here
+  imports: [LoginFormComponent],
 })
 export class AuthLayoutComponent {
   // Component logic here

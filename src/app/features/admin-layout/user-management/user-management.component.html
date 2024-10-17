@@ -33,7 +33,6 @@
         <tr>
           <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
           <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-          <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Office</th>
           <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
           <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
           <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -41,16 +40,16 @@
       </thead>
       <tbody class="divide-y divide-gray-200">
         <tr *ngFor="let user of displayedUsers" class="hover:bg-gray-50 transition duration-300">
-          <td class="py-4 px-6 text-center text-sm font-medium text-gray-900">{{ user.name }}</td>
-          <td class="py-4 px-6 text-center text-sm text-gray-500">{{ user.email }}</td>
-          <td class="py-4 px-6 text-center text-sm text-gray-500">{{ user.office_name }}</td>
+          <td class="py-4 px-6 text-center text-sm font-medium text-gray-900"></td>
+          <td class="py-4 px-6 text-center text-sm text-gray-500"></td>
+          <td class="py-4 px-6 text-center text-sm text-gray-500"></td>
           <td class="py-4 px-6 text-center text-sm">
             <div [ngStyle]="{'background-color': user.account_status === 'active' ? '#16a34a' : (user.account_status === 'inactive' ? '#dc2626' : 'transparent')}"
                  class="text-white py-1 px-2 rounded-full">
               {{ user.account_status }}
             </div>
           </td>
-          <td class="py-4 px-6 text-center text-sm text-gray-500">{{ user.role }}</td>
+          <td class="py-4 px-6 text-center text-sm text-gray-500"></td>
           <td class="py-4 px-6 text-center text-sm font-medium">
             <div class="flex justify-center items-center">
               <button (click)="toggleSubMenu(user.account_id)" class="p-1">
