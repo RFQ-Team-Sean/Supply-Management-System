@@ -12,11 +12,10 @@ import { UPurchasemanagement } from './features/user-layout/u-purchaserequest/u-
 import { USupplymanagement } from './features/user-layout/u-supplymanagement/u-supplymanagement.component';
 import { UReports } from './features/user-layout/u-reports/u-reports.component';
 import { ViewDetailsComponent } from './shared/components/view-details/view-details.component';
-import { APerchaserequestComponent } from './features/admin-layout/a-purchaserequest/a-purchaserequest.component';
+import { APurchaserequestComponent } from './features/admin-layout/a-purchaserequest/a-purchaserequest.component';
 import { ASupplymanagement } from './features/admin-layout/a-supplymanagement/a-supplymanagement.component';
 import { AInventorymanagement } from './features/admin-layout/a-inventorymanagement/a-inventorymanagement.component';
 import { ANotification } from './features/admin-layout/a-notification/a-notification.component';
-import { ASystemsettings } from './features/admin-layout/a-systemsettings/a-systemsettings.component';
 import { UserManagementComponent } from './features/admin-layout/user-management/user-management.component';
 import { AReportsComponent } from './features/admin-layout/a-reports/a-reports.component';
 import { UserDetailComponent } from './features/admin-layout/user-management/user-detail/user-detail.component';
@@ -63,10 +62,9 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: ADashboardComponent },
-      { path: 'a-purchaserequest', component: APerchaserequestComponent },
+      { path: 'a-purchaserequest', component: APurchaserequestComponent },
       { path: 'a-supplymanagement', component: ASupplymanagement },
       { path: 'a-inventorymanagement', component: AInventorymanagement },
-      { path: 'a-systemsettings', component: ASystemsettings },
       { path: 'a-reports', component: AReportsComponent },
       { path: 'a-notification', component: ANotification },
       { path: 'user-management', component: UserManagementComponent },

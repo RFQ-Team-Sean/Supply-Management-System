@@ -1,7 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { SupabaseService, User } from '../../../core/services/supabase.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+
+interface User {
+  account_id: number;
+  name: string;
+  email: string;
+  role: string;
+  account_status: string;
+  showActions?: boolean; // To manage the visibility of the submenu
+}
 
 @Component({
   selector: 'app-user-management',
@@ -16,21 +24,28 @@ export class UserManagementComponent implements OnInit {
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalPages: number = 0;
-  visibleSubMenuUserId: number | null = null;
 
-  constructor(private supabaseService: SupabaseService, private router: Router) {}
+  constructor(private router: Router) {}
 
-  async ngOnInit(): Promise<void> {
-    await this.fetchUsers();
+  ngOnInit(): void {
+    this.initializeDummyData();
+    this.totalPages = Math.ceil(this.users.length / this.itemsPerPage);
+    this.updateDisplayedUsers();
   }
 
-  async fetchUsers(): Promise<void> {
-    const users = await this.supabaseService.getUsers();
-    if (users.length) {
-      this.users = users;
-      this.totalPages = Math.ceil(this.users.length / this.itemsPerPage);
-      this.updateDisplayedUsers();
-    }
+  initializeDummyData(): void {
+    this.users = [
+      { account_id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'Admin', account_status: 'active' },
+      { account_id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Accountant', account_status: 'inactive' },
+      { account_id: 3, name: 'Michael Brown', email: 'michael.brown@example.com', role: 'Manager', account_status: 'active' },
+      { account_id: 4, name: 'Emily Davis', email: 'emily.davis@example.com', role: 'Employee', account_status: 'inactive' },
+      { account_id: 5, name: 'David Wilson', email: 'david.wilson@example.com', role: 'Auditor', account_status: 'active' },
+      { account_id: 6, name: 'Sarah Johnson', email: 'sarah.johnson@example.com', role: 'Admin', account_status: 'active' },
+      { account_id: 7, name: 'Chris Lee', email: 'chris.lee@example.com', role: 'Employee', account_status: 'inactive' },
+      { account_id: 8, name: 'Patricia Garcia', email: 'patricia.garcia@example.com', role: 'Manager', account_status: 'active' },
+      { account_id: 9, name: 'Robert Martinez', email: 'robert.martinez@example.com', role: 'Auditor', account_status: 'inactive' },
+      { account_id: 10, name: 'Linda Clark', email: 'linda.clark@example.com', role: 'Accountant', account_status: 'active' }
+    ];
   }
 
   updateDisplayedUsers(): void {
@@ -45,18 +60,14 @@ export class UserManagementComponent implements OnInit {
     this.updateDisplayedUsers();
   }
 
-  toggleSubMenu(userId: number): void {
-    this.visibleSubMenuUserId = this.visibleSubMenuUserId === userId ? null : userId;
-  }
-
-  isSubMenuVisible(userId: number): boolean {
-    return this.visibleSubMenuUserId === userId;
+  toggleActions(user: User): void {
+    user.showActions = !user.showActions; // Toggle the visibility
   }
 
   deactivateUser(user: User): void {
     const index = this.users.findIndex(u => u.account_id === user.account_id);
     if (index !== -1) {
-      this.users[index].account_status = 'Inactive';
+      this.users[index].account_status = 'inactive';
       this.updateDisplayedUsers();
     }
   }
@@ -64,7 +75,7 @@ export class UserManagementComponent implements OnInit {
   activateUser(user: User): void {
     const index = this.users.findIndex(u => u.account_id === user.account_id);
     if (index !== -1) {
-      this.users[index].account_status = 'Active';
+      this.users[index].account_status = 'active';
       this.updateDisplayedUsers();
     }
   }
@@ -78,7 +89,12 @@ export class UserManagementComponent implements OnInit {
     this.updateDisplayedUsers();
   }
 
-  createUser(param: string): void {
+  editUser(user: User): void {
+    // You can implement the logic to navigate to the edit user page here
+    this.router.navigate(['/admin/edit-user', user.account_id]);
+  }
+
+  createUser(): void {
     this.router.navigate(['/admin/create-user']);
   }
 }

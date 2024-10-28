@@ -1,1 +1,83 @@
-<h1>Purchase Request Management Works</h1>
+<div class="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Purchase Request Management</h1>
+        <a href="#" (click)="createRequest()" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 flex items-center">
+            <img loading="lazy" src="https://cdn.builder.io/api/v1/image/assets/TEMP/3bc03f2eaff970435ce71413c1af4cd0a22283e24cadf3b17a569bf2beae0364?placeholderIfAbsent=true&apiKey=377401e3604042c7b3deecb062253d04" class="w-4 h-4 mr-2" alt="Eye Icon" />
+            New Request
+        </a>
+    </div>
+
+    <!-- Search Input -->
+    <div class="flex mb-4">
+        <div class="flex-grow flex items-center border rounded-l-lg px-2 bg-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input type="text" placeholder="Search" class="w-full p-2 focus:outline-none" />
+        </div>
+        <button class="bg-gray-100 px-4 py-2 rounded-r-lg hover:bg-gray-200 transition duration-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+            </svg>
+            Filter
+        </button>
+    </div>
+
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="min-w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PR ID</th>
+                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Item Description</th>
+                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
+                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <tr *ngFor="let purchase of displayedRequests" class="hover:bg-gray-50 transition duration-300">
+                    <td class="py-4 px-6 text-center text-sm font-medium text-gray-900">{{ purchase.pr_id }}</td>
+                    <td class="py-4 px-6 text-center text-sm text-gray-500">{{ purchase.department }}</td>
+                    <td class="py-4 px-6 text-center text-sm text-gray-500">{{ purchase.item_description }}</td>
+                    <td class="py-4 px-6 text-center text-sm text-gray-500">{{ purchase.quantity }}</td>
+                    <td class="py-4 px-6 text-center text-sm text-gray-500">{{ purchase.unit_price | currency }}</td>
+                    <td class="py-4 px-6 text-center text-sm text-gray-500">{{ purchase.total_amount | currency }}</td>
+                    <td class="py-4 px-6 text-center text-sm">
+                        <div [ngStyle]="{'background-color': purchase.status === 'Approved' ? '#00A700' : purchase.status === 'Rejected' ? '#FF0000' : '#000054'}" class="text-white py-1 px-2 rounded-full">
+                            {{ purchase.status }}
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-center text-sm font-medium relative">
+                        <button (click)="toggleActions(purchase)" class="px-2 py-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition duration-300">
+                            Actions
+                        </button>
+                        <div *ngIf="purchase.showActions" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+                            <div class="flex flex-col">
+                                <button (click)="detailsPurchase(purchase)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Details</button>
+                                <button (click)="approvePurchase(purchase)" class="px-4 py-2 text-left hover:bg-green-500 hover:text-white">Approve</button>
+                                <button (click)="rejectPurchase(purchase)" class="px-4 py-2 text-left hover:bg-red-500 hover:text-white">Reject</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flex items-center justify-between mt-4">
+        <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+            Previous
+        </button>
+        <div class="flex space-x-2">
+            <span *ngFor="let page of [].constructor(totalPages); let i = index" (click)="changePage(i + 1)" [ngClass]="{'bg-blue-500 text-white': currentPage === i + 1, 'bg-gray-200 text-gray-700': currentPage !== i + 1}" class="px-3 py-1 rounded-lg cursor-pointer">
+                {{ i + 1 }}
+            </span>
+        </div>
+        <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+            Next
+        </button>
+    </div>
+</div>

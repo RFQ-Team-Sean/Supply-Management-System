@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ASystemsettings } from './a-systemsettings.component';
+import { PurchaseDetailComponent } from './purchase-detail.component';
 
-describe('ASystemsettings', () => {
-  let component: ASystemsettings;
-  let fixture: ComponentFixture<ASystemsettings>;
+describe('PurchaseDetailComponent', () => {
+  let component: PurchaseDetailComponent;
+  let fixture: ComponentFixture<PurchaseDetailComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ASystemsettings]
+      imports: [PurchaseDetailComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(ASystemsettings);
+    fixture = TestBed.createComponent(PurchaseDetailComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -232,7 +232,7 @@ async insertAccount(name: string, username: string, password: string, role: stri
     return null;
   }
   const { data, error } = await this.supabase
-    .from('account')
+    .from('users')
     .insert([{ name, username, password, role }]);
   if (error) {
     console.error('Error inserting account:', error);

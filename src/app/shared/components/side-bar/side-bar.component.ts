@@ -35,7 +35,7 @@ export class SideBarComponent implements OnInit {
     {
       label: 'User Management',
       icon: 'ic:outline-school',
-      route: '/admin/a-usermanagement',
+      route: '/admin/user-management',
     },
     { label: 'Purchase Request Management', 
       icon: 'ic:baseline-format-list-bulleted', 
@@ -55,11 +55,6 @@ export class SideBarComponent implements OnInit {
       label: 'Reports',
       icon: 'ic:baseline-assessment',
       route: '/admin/a-reports',
-    },
-    {
-      label: 'System Settings',
-      icon: 'ic:baseline-settings',
-      route: '/admin/a-systemsettings',  
     },
     {
       label: 'Notifications',
