@@ -1,63 +1,113 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 import { SupabaseService, User } from '../../../core/services/supabase.service';
 
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login-form.component.html',
-  styleUrls: ['./login-form.component.css'],
+  styleUrls: ['./login-form.component.css']
 })
-export class LoginFormComponent {
-  email: string = '';
-  password: string = '';
+export class LoginFormComponent implements OnDestroy {
+  loginForm: FormGroup;
+  isLoading = false;
+  errorMessage = '';
+  private destroy$ = new Subject<void>();
 
-  constructor(private router: Router, private supabaseService: SupabaseService) {}
+  constructor(
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private supabaseService: SupabaseService
+  ) {
+    this.loginForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
+    });
+  }
 
-  async signIn() {
-    console.log('Attempting sign-in');
-    try {
-      const { data, error } = await this.supabaseService.signIn(this.email, this.password);
-      if (error) {
-        alert('Invalid credentials');
-        console.error('Sign-in error:', error);
-        return;
+  async onSubmit(): Promise<void> {
+    if (this.loginForm.valid && !this.isLoading) {
+      this.isLoading = true;
+      this.errorMessage = '';
+
+      try {
+        const { email, password } = this.loginForm.value;
+        await this.performSignIn(email, password);
+      } catch (error) {
+        console.error('Login error:', error);
+        this.errorMessage = 'An unexpected error occurred';
+      } finally {
+        this.isLoading = false;
       }
-
-      // Fetch all users and filter by the email provided during sign-in
-      const users: User[] = await this.supabaseService.getUsers();
-      const user = users.find(u => u.email === this.email);
-      
-      if (user) {
-        localStorage.setItem('userRole', user.role);
-        if (user.role === 'user') {
-          this.router.navigate(['/user/dashboard']);
-        } else if (user.role === 'admin') {
-          this.router.navigate(['/admin/dashboard']);
-        }
-      } else {
-        alert('Role not found');
-      }
-    } catch (error) {
-      console.error('Error during sign-in:', error);
     }
   }
 
-  onSubmit() {
-    this.signIn();
+  async autoSignIn(email: string, password: string): Promise<void> {
+    if (!this.isLoading) {
+      this.isLoading = true;
+      this.errorMessage = '';
+      
+      try {
+        await this.performSignIn(email, password);
+      } catch (error) {
+        console.error('Auto sign-in error:', error);
+        this.errorMessage = 'An unexpected error occurred';
+      } finally {
+        this.isLoading = false;
+      }
+    }
   }
 
-  autoSignInUser() {
-    this.email = 'user@gmail.com';
-    this.password = 'password';
-    this.signIn();
+  private async performSignIn(email: string, password: string): Promise<void> {
+    const { data, error } = await this.supabaseService.signIn(email, password);
+
+    if (error) {
+      this.errorMessage = typeof error === 'string' ? error : 'Invalid email or password';
+      return;
+    }
+
+    if (!data?.user) {
+      this.errorMessage = 'Login failed';
+      return;
+    }
+
+    this.supabaseService.currentUser$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((user: User | null) => {
+      if (user) {
+        localStorage.setItem('userRole', user.role);
+        this.handleNavigation(user.role);
+      } else {
+        this.errorMessage = 'User role not found';
+      }
+    });
   }
 
-  autoSignInAdmin() {
-    this.email = 'admin@gmail.com';
-    this.password = 'password';
-    this.signIn();
+  private handleNavigation(role: string): void {
+    const roleRoutes: { [key: string]: string } = {
+      'admin': '/admin/dashboard',
+      'gso': '/gso/dashboard',
+      'department': '/department/dashboard',
+      'property_management': '/property/dashboard',
+      'bac': '/bac/dashboard'
+    };
+
+    const normalizedRole = role.toLowerCase().replace(' ', '_');
+    const route = roleRoutes[normalizedRole];
+    
+    if (route) {
+      this.router.navigate([route]);
+    } else {
+      this.errorMessage = 'Invalid user role';
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

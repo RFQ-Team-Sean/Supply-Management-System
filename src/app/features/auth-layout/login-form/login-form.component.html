@@ -1,42 +1,95 @@
-<section class="flex flex-col max-w-[450px]">
-  <h1 class="text-2xl font-bold text-center" style="color: var(--color-primary);">Login</h1>
-  <form (ngSubmit)="onSubmit()" class="flex flex-col p-4 mt-6 w-full bg-white rounded-lg border border-solid border-zinc-300 min-w-[330px]">
-    <!-- Email Field -->
-    <label for="email" class="sr-only">Email</label>
+<div class="section flex flex-col max-w-[450px]">
+  <h1 id="login" class="text-2xl font-bold text-center" style="color: var(--color-primary);">Login</h1>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mt-4">
     <div class="flex flex-col w-full">
-      <span class="leading-snug opacity-80 text-sm" style="color: var(--color-primary);">Email</span>
-      <input type="email" id="email" [(ngModel)]="email" name="email" class="flex overflow-hidden items-center px-3 py-2 mt-1 w-full leading-none bg-white rounded-lg border border-solid border-zinc-300 min-w-[200px] text-gray-600 text-sm" aria-label="Enter your email" />
+      <label for="email">Email</label>
+      <input 
+        id="email"
+        type="email"
+        formControlName="email"
+        class="mt-1 p-2 border rounded-md w-full"
+        aria-describedby="emailError"
+      />
+      <div 
+        id="emailError"
+        class="text-red-500 text-sm mt-1" 
+        *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+      >
+        <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
+        <span *ngIf="loginForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+      </div>
     </div>
-    
-    <!-- Password Field -->
-    <label for="password" class="sr-only mt-4">Password</label>
+
     <div class="flex flex-col mt-4 w-full">
-      <span class="leading-snug opacity-80 text-sm" style="color: var(--color-primary);">Password</span>
-      <input type="password" id="password" [(ngModel)]="password" name="password" class="flex overflow-hidden items-center px-3 py-2 mt-1 w-full leading-none bg-white rounded-lg border border-solid border-zinc-300 min-w-[200px] text-gray-600 text-sm" aria-label="Enter your password" />
+      <label for="password">Password</label>
+      <input 
+        id="password"
+        type="password"
+        formControlName="password"
+        class="mt-1 p-2 border rounded-md w-full"
+        aria-describedby="passwordError"
+      />
+      <div 
+        id="passwordError"
+        class="text-red-500 text-sm mt-1" 
+        *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+      >
+        <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
+        <span *ngIf="loginForm.get('password')?.errors?.['minlength']">
+          Password must be at least 6 characters
+        </span>
+      </div>
     </div>
-    
-    <!-- Sign In Button -->
-    <button type="submit" class="flex gap-2 items-center mt-4 w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-secondary);">
-      Sign in
+
+    <div class="mt-2 text-red-500 text-sm text-center" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <button 
+      type="submit" 
+      class="w-full mt-4 p-2 rounded-md text-white"
+      [style.background-color]="'var(--color-primary)'"
+      [disabled]="isLoading || loginForm.invalid"
+    >
+      {{ isLoading ? 'Signing in...' : 'Sign in' }}
+    </button>
+  </form>
+
+  <div class="flex flex-col mt-4 w-full space-y-2">
+    <button 
+      class="p-2 rounded-md border hover:bg-gray-50"
+      (click)="autoSignIn('gso@gmail.com', 'password')"
+    >
+      Sign in as General Service Office
     </button>
 
-    <!-- Automatic Sign-in Buttons -->
-    <div class="flex flex-col mt-4 w-full">
-      <button type="button" (click)="autoSignInUser()" class="flex gap-2 items-center w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-primary);">
-        Sign in as General Service Office
-      </button>
-      <button type="button" (click)="autoSignInAdmin()" class="flex gap-2 items-center mt-2 w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-primary);">
-        Sign in as Admin
-      </button>
-      <button type="button" (click)="autoSignInAdmin()" class="flex gap-2 items-center mt-2 w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-primary);">
-        Sign in as Department User
-      </button>
-      <button type="button" (click)="autoSignInAdmin()" class="flex gap-2 items-center mt-2 w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-primary);">
-        Sign in as Property Officer
-      </button>
-      <button type="button" (click)="autoSignInAdmin()" class="flex gap-2 items-center mt-2 w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-primary);">
-        Sign in as BAC Staff
-      </button>
-    </div>
-  </form>
-</section>
+    <button 
+      class="p-2 rounded-md border hover:bg-gray-50"
+      (click)="autoSignIn('admin@gmail.com', 'password')"
+    >
+      Sign in as Admin
+    </button>
+
+    <button 
+      class="p-2 rounded-md border hover:bg-gray-50"
+      (click)="autoSignIn('department@gmail.com', 'password')"
+    >
+      Sign in as Department User
+    </button>
+
+    <button 
+      class="p-2 rounded-md border hover:bg-gray-50"
+      (click)="autoSignIn('property@gmail.com', 'password')"
+    >
+      Sign in as Property Officer
+    </button>
+
+    <button 
+      class="p-2 rounded-md border hover:bg-gray-50"
+      (click)="autoSignIn('bac@gmail.com', 'password')"
+    >
+      Sign in as BAC Staff
+    </button>
+  </div>
+</div>
