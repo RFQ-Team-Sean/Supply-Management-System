@@ -1,3 +1,4 @@
+// login-form.component.ts
 import { Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -55,7 +56,7 @@ export class LoginFormComponent implements OnDestroy {
         await this.performSignIn(email, password);
       } catch (error) {
         console.error('Auto sign-in error:', error);
-        this.errorMessage = 'An unexpected error occurred';
+        this.errorMessage = 'Auto sign-in failed';
       } finally {
         this.isLoading = false;
       }
@@ -79,7 +80,6 @@ export class LoginFormComponent implements OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe((user: User | null) => {
       if (user) {
-        localStorage.setItem('userRole', user.role);
         this.handleNavigation(user.role);
       } else {
         this.errorMessage = 'User role not found';

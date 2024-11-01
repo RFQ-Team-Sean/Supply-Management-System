@@ -1,6 +1,7 @@
-<div class="section flex flex-col max-w-[450px]">
+<!-- login-form.component.html -->
+<section class="flex flex-col max-w-[450px]">
   <h1 id="login" class="text-2xl font-bold text-center" style="color: var(--color-primary);">Login</h1>
-
+  
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mt-4">
     <div class="flex flex-col w-full">
       <label for="email">Email</label>
@@ -8,12 +9,11 @@
         id="email"
         type="email"
         formControlName="email"
-        class="mt-1 p-2 border rounded-md w-full"
-        aria-describedby="emailError"
-      />
+        class="mt-1 p-2 border rounded"
+      >
       <div 
         id="emailError"
-        class="text-red-500 text-sm mt-1" 
+        class="text-red-500 text-sm mt-1"
         *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
       >
         <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
@@ -27,18 +27,15 @@
         id="password"
         type="password"
         formControlName="password"
-        class="mt-1 p-2 border rounded-md w-full"
-        aria-describedby="passwordError"
-      />
+        class="mt-1 p-2 border rounded"
+      >
       <div 
         id="passwordError"
-        class="text-red-500 text-sm mt-1" 
+        class="text-red-500 text-sm mt-1"
         *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
       >
         <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
-        <span *ngIf="loginForm.get('password')?.errors?.['minlength']">
-          Password must be at least 6 characters
-        </span>
+        <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</span>
       </div>
     </div>
 
@@ -47,10 +44,9 @@
     </div>
 
     <button 
-      type="submit" 
-      class="w-full mt-4 p-2 rounded-md text-white"
-      [style.background-color]="'var(--color-primary)'"
-      [disabled]="isLoading || loginForm.invalid"
+      type="submit"
+      class="mt-4 w-full p-2 bg-primary text-white rounded"
+      [disabled]="isLoading"
     >
       {{ isLoading ? 'Signing in...' : 'Sign in' }}
     </button>
@@ -58,38 +54,43 @@
 
   <div class="flex flex-col mt-4 w-full space-y-2">
     <button 
-      class="p-2 rounded-md border hover:bg-gray-50"
+      class="p-2 border rounded hover:bg-gray-100"
       (click)="autoSignIn('gso@gmail.com', 'password')"
+      [disabled]="isLoading"
     >
       Sign in as General Service Office
     </button>
 
     <button 
-      class="p-2 rounded-md border hover:bg-gray-50"
+      class="p-2 border rounded hover:bg-gray-100"
       (click)="autoSignIn('admin@gmail.com', 'password')"
+      [disabled]="isLoading"
     >
       Sign in as Admin
     </button>
 
     <button 
-      class="p-2 rounded-md border hover:bg-gray-50"
+      class="p-2 border rounded hover:bg-gray-100"
       (click)="autoSignIn('department@gmail.com', 'password')"
+      [disabled]="isLoading"
     >
       Sign in as Department User
     </button>
 
     <button 
-      class="p-2 rounded-md border hover:bg-gray-50"
+      class="p-2 border rounded hover:bg-gray-100"
       (click)="autoSignIn('property@gmail.com', 'password')"
+      [disabled]="isLoading"
     >
       Sign in as Property Officer
     </button>
 
     <button 
-      class="p-2 rounded-md border hover:bg-gray-50"
+      class="p-2 border rounded hover:bg-gray-100"
       (click)="autoSignIn('bac@gmail.com', 'password')"
+      [disabled]="isLoading"
     >
       Sign in as BAC Staff
     </button>
   </div>
-</div>
+</section>
