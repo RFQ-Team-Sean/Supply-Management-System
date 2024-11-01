@@ -35,19 +35,24 @@ import { AProfileComponent } from './features/admin-layout/a-profile/a-profile.c
 import { ViewDetailsComponent } from './shared/components/view-details/view-details.component';
 
 export const routes: Routes = [
+  // Default route - redirect to login
   {
     path: '',
-    redirectTo: '/auth/login',
-    pathMatch: 'full',
+    redirectTo: 'auth/login',
+    pathMatch: 'full'
   },
+  
+  // Auth routes
   {
     path: 'auth',
     component: AuthLayoutComponent,
     children: [
       { path: '', redirectTo: 'login', pathMatch: 'full' },
-      { path: 'login', component: LoginFormComponent },
+      { path: 'login', component: LoginFormComponent }
     ]
   },
+  
+  // GSO routes
   {
     path: 'gso',
     component: UserLayoutComponent,
@@ -67,6 +72,8 @@ export const routes: Routes = [
       { path: 'profile', component: UProfileComponent },
     ],
   },
+  
+  // Department routes
   {
     path: 'department',
     component: UserLayoutComponent,
@@ -81,6 +88,8 @@ export const routes: Routes = [
       { path: 'profile', component: UProfileComponent },
     ],
   },
+  
+  // Property Management routes
   {
     path: 'property',
     component: UserLayoutComponent,
@@ -95,6 +104,8 @@ export const routes: Routes = [
       { path: 'profile', component: UProfileComponent },
     ],
   },
+  
+  // BAC routes
   {
     path: 'bac',
     component: UserLayoutComponent,
@@ -108,6 +119,8 @@ export const routes: Routes = [
       { path: 'profile', component: UProfileComponent },
     ],
   },
+  
+  // Admin routes
   {
     path: 'admin',
     component: AdminLayoutComponent,
@@ -128,10 +141,12 @@ export const routes: Routes = [
       { path: 'profile', component: AProfileComponent },
     ],
   },
+  
+  // Wildcard route - redirect to login
   {
     path: '**',
-    redirectTo: '/auth/login',
-  },
+    redirectTo: 'auth/login'
+  }
 ];
 
 @NgModule({
