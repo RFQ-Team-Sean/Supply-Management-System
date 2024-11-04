@@ -37,19 +37,31 @@ export class SideBarComponent implements OnInit {
       icon: 'ic:outline-school',
       route: '/admin/user-management',
     },
-    { label: 'Purchase Request Management', 
+    { label: 'Activity Logs', 
       icon: 'ic:baseline-format-list-bulleted', 
-      route: '/admin/a-purchaserequest' 
+      route: '/admin/a-activitylogs' 
     },
     {
-      label: 'Supplier Management',
-      icon: 'ic:baseline-format-list-bulleted',
-      route: '/admin/a-supplymanagement',
-    },
-    {
-      label: 'Inventory Management',
-      icon: 'ic:baseline-format-list-bulleted',
-      route: '/admin/a-inventorymanagement',
+      label: 'System Settings',
+      icon: 'ic:baseline-settings',
+      route: '',  // Empty route since it will have sub-items
+      children: [
+        {
+          label: 'None',
+          icon: 'ic:baseline-manage-accounts',
+          route: '/admin/',
+        },
+        {
+          label: 'None',
+          icon: 'ic:baseline-business',
+          route: '/admin/',
+        },
+        {
+          label: 'None',
+          icon: 'ic:baseline-category',
+          route: '/admin/',
+        },
+      ]
     },
     {
       label: 'Reports',
@@ -63,25 +75,20 @@ export class SideBarComponent implements OnInit {
     },
   ];
 
-  UserMenu: MenuItem[] = [
+  DepartmentuserMenu: MenuItem[] = [
     {
       label: 'Dashboard',
       icon: 'ic:sharp-dashboard',
       route: '/user/dashboard',
     },
     {
-      label: 'User Management',
+      label: 'PPMP Management',
       icon: 'ic:outline-school',
-      route: '/user/u-usermagement',
+      route: '/user/u-ppmpmanagement',
     },
     { label: 'Purchase Request Management', 
       icon: 'ic:baseline-format-list-bulleted', 
       route: '/user/u-purchasemanagement' 
-    },
-    {
-      label: 'Supplier Management',
-      icon: 'ic:baseline-format-list-bulleted',
-      route: '/user/u-supplymanagement',
     },
     {
       label: 'Inventory Management',
@@ -94,14 +101,58 @@ export class SideBarComponent implements OnInit {
       route: '/user/u-reports',
     },
     {
-      label: 'System Settings',
+      label: 'Notifications',
       icon: 'ic:baseline-list-alt',
-      route: '/user/u-systemsetting',
+      route: '/user/u-notification',
+    },
+  ];
+
+  GsoMenu: MenuItem[] = [
+    {
+      label: 'Dashboard',
+      icon: 'ic:sharp-dashboard',
+      route: '/gso/dashboard',
+    },
+    { label: 'Purchase Request Management', 
+      icon: 'ic:baseline-format-list-bulleted', 
+      route: '/gso/u-purchasemanagement' 
+    },
+    {
+      label: 'Inventory Management',
+      icon: 'ic:baseline-format-list-bulleted',
+      route: '/gso/gso-inventorymanagement',
+    },
+    {
+      label: 'Reports',
+      icon: 'ic:baseline-list-alt',
+      route: '/gso/gso-reports',
     },
     {
       label: 'Notifications',
       icon: 'ic:baseline-list-alt',
-      route: '/user/u-notification',
+      route: '/gso/gso-notifications',
+    },
+    {
+      label: 'System Settings',
+      icon: 'ic:baseline-settings',
+      route: '',  // Empty route since it will have sub-items
+      children: [
+        {
+          label: 'None',
+          icon: 'ic:baseline-manage-accounts',
+          route: '/admin/',
+        },
+        {
+          label: 'None',
+          icon: 'ic:baseline-business',
+          route: '/admin/',
+        },
+        {
+          label: 'None',
+          icon: 'ic:baseline-category',
+          route: '/admin/',
+        },
+      ]
     },
   ];
 
@@ -130,17 +181,21 @@ export class SideBarComponent implements OnInit {
   }
 
   setMenuByRole() {
-    const userRole = localStorage.getItem('userRole') as 'user' | 'admin';
+    const userRole = localStorage.getItem('userRole') as 'user' | 'admin' | 'gso';
     console.log('User Role:', userRole);
     switch (userRole) {
       case 'user':
-        this.currentMenu = [...this.UserMenu];
-        this.title = 'User Portal'; // Set title for user menu
+        this.currentMenu = [...this.DepartmentuserMenu];
+        this.title = 'Department Staff Portal'; // Set title for user menu
         break;
       case 'admin':
         this.currentMenu = [...this.AdminMenu];
-        this.title = 'Admin Portal'; // Set title for admin menu
+        this.title = 'Administrator Portal'; 
         break;
+      case 'gso':
+        this.currentMenu = [...this.AdminMenu];
+        this.title = 'GSO Portal'; 
+        break;     
       default:
         console.error('Invalid role');
         this.router.navigate(['/login']);

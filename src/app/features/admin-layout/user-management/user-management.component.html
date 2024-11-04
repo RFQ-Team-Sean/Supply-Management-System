@@ -23,7 +23,7 @@
     </button>
   </div>
 
-  <div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="bg-white rounded-lg shadow overflow-visible"> <!-- Allow overflow -->
     <table class="min-w-full">
       <thead class="bg-gray-50">
         <tr>
@@ -39,16 +39,15 @@
           <td class="py-4 px-6 text-center text-sm font-medium text-gray-900">{{ user.name }}</td>
           <td class="py-4 px-6 text-center text-sm text-gray-500">{{ user.email }}</td>
           <td class="py-4 px-6 text-center text-sm text-gray-500">{{ user.role }}</td>
-          <td class="py-4 px-6 text-center text-sm">
-            <div [ngStyle]="{'background-color': user.account_status === 'active' ? '#16a34a' : '#dc2626'}" class="text-white py-1 px-2 rounded-full">
-              {{ user.account_status }}
-            </div>
+          <td class="py-4 px-6 text-center text-sm font-medium" [ngClass]="{'text-green-600': user.account_status === 'Active', 'text-red-600': user.account_status === 'Inactive'}">
+            {{ user.account_status }}
           </td>
+  
           <td class="py-4 px-6 text-center text-sm font-medium relative">
-            <button (click)="toggleActions(user)" class="px-2 py-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition duration-300">
-              Actions
+            <button (click)="toggleActions(user)" class="flex justify-center items-center h-full w-full">
+              <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
             </button>
-            <div *ngIf="user.showActions" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+            <div *ngIf="currentOpenActionId === user.account_id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10 overflow-visible"> <!-- Conditional visibility -->
               <div class="flex flex-col">
                 <button (click)="editUser(user)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Edit</button>
                 <button (click)="activateUser(user)" class="px-4 py-2 text-left hover:bg-green-500 hover:text-white">Activate</button>
@@ -61,6 +60,7 @@
       </tbody>
     </table>
   </div>
+  
 
   <div class="flex items-center justify-between mt-4">
     <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">

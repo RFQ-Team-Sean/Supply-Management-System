@@ -22,8 +22,9 @@ export class UserManagementComponent implements OnInit {
   users: User[] = [];
   displayedUsers: User[] = [];
   currentPage: number = 1;
-  itemsPerPage: number = 10;
+  itemsPerPage: number = 8;
   totalPages: number = 0;
+  currentOpenActionId: number | null = null;
 
   constructor(private router: Router) {}
 
@@ -35,16 +36,16 @@ export class UserManagementComponent implements OnInit {
 
   initializeDummyData(): void {
     this.users = [
-      { account_id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'Admin', account_status: 'active' },
-      { account_id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Accountant', account_status: 'inactive' },
-      { account_id: 3, name: 'Michael Brown', email: 'michael.brown@example.com', role: 'Manager', account_status: 'active' },
-      { account_id: 4, name: 'Emily Davis', email: 'emily.davis@example.com', role: 'Employee', account_status: 'inactive' },
-      { account_id: 5, name: 'David Wilson', email: 'david.wilson@example.com', role: 'Auditor', account_status: 'active' },
-      { account_id: 6, name: 'Sarah Johnson', email: 'sarah.johnson@example.com', role: 'Admin', account_status: 'active' },
-      { account_id: 7, name: 'Chris Lee', email: 'chris.lee@example.com', role: 'Employee', account_status: 'inactive' },
-      { account_id: 8, name: 'Patricia Garcia', email: 'patricia.garcia@example.com', role: 'Manager', account_status: 'active' },
-      { account_id: 9, name: 'Robert Martinez', email: 'robert.martinez@example.com', role: 'Auditor', account_status: 'inactive' },
-      { account_id: 10, name: 'Linda Clark', email: 'linda.clark@example.com', role: 'Accountant', account_status: 'active' }
+      { account_id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'Admin', account_status: 'Active' },
+      { account_id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'Accountant', account_status: 'Inactive' },
+      { account_id: 3, name: 'Michael Brown', email: 'michael.brown@example.com', role: 'Manager', account_status: 'Active' },
+      { account_id: 4, name: 'Emily Davis', email: 'emily.davis@example.com', role: 'Employee', account_status: 'Inactive' },
+      { account_id: 5, name: 'David Wilson', email: 'david.wilson@example.com', role: 'Auditor', account_status: 'Active' },
+      { account_id: 6, name: 'Sarah Johnson', email: 'sarah.johnson@example.com', role: 'Admin', account_status: 'Active' },
+      { account_id: 7, name: 'Chris Lee', email: 'chris.lee@example.com', role: 'Employee', account_status: 'Inactive' },
+      { account_id: 8, name: 'Patricia Garcia', email: 'patricia.garcia@example.com', role: 'Manager', account_status: 'Active' },
+      { account_id: 9, name: 'Robert Martinez', email: 'robert.martinez@example.com', role: 'Auditor', account_status: 'Inactive' },
+      { account_id: 10, name: 'Linda Clark', email: 'linda.clark@example.com', role: 'Accountant', account_status: 'Active' }
     ];
   }
 
@@ -61,7 +62,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   toggleActions(user: User): void {
-    user.showActions = !user.showActions; // Toggle the visibility
+    this.currentOpenActionId = this.currentOpenActionId === user.account_id ? null : user.account_id;
   }
 
   deactivateUser(user: User): void {
@@ -97,4 +98,5 @@ export class UserManagementComponent implements OnInit {
   createUser(): void {
     this.router.navigate(['/admin/create-user']);
   }
+  
 }
