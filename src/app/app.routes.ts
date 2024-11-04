@@ -9,13 +9,13 @@ import { LoginFormComponent } from './features/auth-layout/login-form/login-form
 // User Layout and Components
 import { UserLayoutComponent } from './features/user-layout/user-layout.component';
 import { UDashboardComponent } from './features/user-layout/u-dashboard/u-dashboard.component';
-import { UUsermanagement } from './features/user-layout/u-usermanagement/u-usermanagement.component';
-import { UPurchasemanagement } from './features/user-layout/u-purchaserequest/u-purchaserequest.component';
-import { USupplymanagement } from './features/user-layout/u-supplymanagement/u-supplymanagement.component';
-import { UInventorymanagement } from './features/user-layout/u-inventorymanagement/u-inventorymanagement.component';
-import { UReports } from './features/user-layout/u-reports/u-reports.component';
-import { USystemsetting } from './features/user-layout/u-systemsetting/u-systemsetting.component';
-import { UNotification } from './features/user-layout/u-notification/u-notificationcomponent';
+import { UUsermanagement} from './features/user-layout/u-usermanagement/u-usermanagement.component';
+import { UPurchasemanagement} from './features/user-layout/u-purchaserequest/u-purchaserequest.component';
+import { USupplymanagement} from './features/user-layout/u-supplymanagement/u-supplymanagement.component';
+import { UInventorymanagement} from './features/user-layout/u-inventorymanagement/u-inventorymanagement.component';
+import { UReports} from './features/user-layout/u-reports/u-reports.component';
+import { USystemsetting} from './features/user-layout/u-systemsetting/u-systemsetting.component';
+import { UNotification} from './features/user-layout/u-notification/u-notification.component';
 import { UProfileComponent } from './features/user-layout/u-profile/u-profile.component';
 
 // Admin Layout and Components
@@ -38,18 +38,18 @@ export const routes: Routes = [
   // Default route - redirect to login
   {
     path: '',
-    redirectTo: 'auth/login',
+    redirectTo: '/login',
     pathMatch: 'full'
   },
-  
+
   // Auth routes
   {
-    path: 'auth',
-    component: AuthLayoutComponent,
-    children: [
-      { path: '', redirectTo: 'login', pathMatch: 'full' },
-      { path: 'login', component: LoginFormComponent }
-    ]
+   path: 'login',
+  component: AuthLayoutComponent,
+  //   children: [
+  //     { path: '', redirectTo: 'login-form', pathMatch: 'full' },
+  //     { path: 'login-form', component: LoginFormComponent }
+  //   ]
   },
   
   // GSO routes
@@ -61,18 +61,18 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: UDashboardComponent },
-      { path: 'usermagement', component: UUsermanagement },
-      { path: 'purchase-management', component: UPurchasemanagement },
-      { path: 'supply-management', component: USupplymanagement },
-      { path: 'inventory-management', component: UInventorymanagement },
-      { path: 'reports', component: UReports },
-      { path: 'system-setting', component: USystemsetting },
-      { path: 'notification', component: UNotification },
+      { path: 'usermanagement', component: UUsermanagement},
+      { path: 'purchase-management', component: UPurchasemanagement},
+      { path: 'supply-management', component: USupplymanagement},
+      { path: 'inventory-management', component: UInventorymanagement},
+      { path: 'reports', component: UReports},
+      { path: 'system-setting', component: USystemsetting},
+      { path: 'notification', component: UNotification},
       { path: 'view-details/:documentCode', component: ViewDetailsComponent },
       { path: 'profile', component: UProfileComponent },
     ],
   },
-  
+
   // Department routes
   {
     path: 'department',
@@ -82,13 +82,13 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: UDashboardComponent },
-      { path: 'purchase-management', component: UPurchasemanagement },
-      { path: 'inventory-management', component: UInventorymanagement },
-      { path: 'notification', component: UNotification },
+      { path: 'purchase-management', component: UPurchasemanagement},
+      { path: 'inventory-management', component: UInventorymanagement},
+      { path: 'notification', component: UNotification},
       { path: 'profile', component: UProfileComponent },
     ],
   },
-  
+
   // Property Management routes
   {
     path: 'property',
@@ -98,13 +98,13 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: UDashboardComponent },
-      { path: 'inventory-management', component: UInventorymanagement },
-      { path: 'reports', component: UReports },
-      { path: 'notification', component: UNotification },
+      { path: 'inventory-management', component: UInventorymanagement},
+      { path: 'reports', component: UReports},
+      { path: 'notification', component: UNotification},
       { path: 'profile', component: UProfileComponent },
     ],
   },
-  
+
   // BAC routes
   {
     path: 'bac',
@@ -114,12 +114,12 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: UDashboardComponent },
-      { path: 'purchase-management', component: UPurchasemanagement },
-      { path: 'notification', component: UNotification },
+      { path: 'purchase-management', component: UPurchasemanagement},
+      { path: 'notification', component: UNotification},
       { path: 'profile', component: UProfileComponent },
     ],
   },
-  
+
   // Admin routes
   {
     path: 'admin',
@@ -130,10 +130,10 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: ADashboardComponent },
       { path: 'purchase-request', component: APurchaserequestComponent },
-      { path: 'supply-management', component: ASupplymanagement },
-      { path: 'inventory-management', component: AInventorymanagement },
+      { path: 'supply-management', component: ASupplymanagement},
+      { path: 'inventory-management', component: AInventorymanagement},
       { path: 'reports', component: AReportsComponent },
-      { path: 'notification', component: ANotification },
+      { path: 'notification', component: ANotification},
       { path: 'user-management', component: UserManagementComponent },
       { path: 'user-detail/:id', component: UserDetailComponent },
       { path: 'create-user', component: CreateUserComponent },
@@ -141,11 +141,11 @@ export const routes: Routes = [
       { path: 'profile', component: AProfileComponent },
     ],
   },
-  
-  // Wildcard route - redirect to login
+
+  // Wildcard route - redirect to auth login-form
   {
     path: '**',
-    redirectTo: 'auth/login'
+    redirectTo: 'auth/login-form'
   }
 ];
 

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UNotification } from './u-notificationcomponent';
+import { UNotification } from './u-notification.component';
 
 describe('UNotification', () => {
   let component: UNotification;
