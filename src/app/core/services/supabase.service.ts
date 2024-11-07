@@ -1,11 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { createClient, PostgrestError, SupabaseClient, User as SupabaseUser, AuthError } from '@supabase/supabase-js';
-import { environment } from '../../environments/environment';
-import { PLATFORM_ID, Inject } from '@angular/core';
-
-
-
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { environment } from './../../environments/environment';
+import { BehaviorSubject } from 'rxjs';
 
 export interface User {
   account_id: number;
@@ -17,267 +14,253 @@ export interface User {
   profile_image: string;
 }
 
-interface AppUser extends SupabaseUser {
-  account_id?: string | number;
-  name?: string;
-  username?: string;
-  account_status?: string;
-  app_metadata: any;
-  user_metadata: any;
-  aud: string;
-  created_at: string;
-  email: string; 
-}
-
-
 @Injectable({
   providedIn: 'root',
 })
 export class SupabaseService {
-  from(table: string) {
-    throw new Error('Method not implemented.');
-  }
-  private supabase: SupabaseClient | null = null;
-  currentUser: User | null = null;  // Add this line to store the current user details
-
-  private supabaseInitPromise: Promise<void> | null = null;
-  client: any;
+  private supabase!: SupabaseClient;
+  private userSubject = new BehaviorSubject<User | null>(null);
+  user$ = this.userSubject.asObservable();
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-    this.supabaseInitPromise = this.initializeSupabase();
-    this.initializeSupabase().then(() => {
-    }).catch(error => {
-      console.error('Error during Supabase initialization:', error);
-    });
-    this.checkSession(); //Added
-  }
+    if (isPlatformBrowser(this.platformId)) {
+      this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
+        auth: {
+          persistSession: true,
+          storageKey: 'auth-token',
+          storage: localStorage,
+          autoRefreshToken: true,
+          detectSessionInUrl: false,
+        },
+      });
 
-  private checkSession(): void {
-    if (!this.supabase) {
-        console.error('Supabase client not initialized.');
-        return;
-    }
-
-    this.supabase.auth.getSession().then(({ data: { session }, error }) => {
-        if (error) {
-            console.error('Error fetching session:', error.message);
-        } else if (session) {
+      // Set up auth state change listener
+      this.supabase.auth.onAuthStateChange((event, session) => {
+        if (session?.user) {
+          this.loadUserProfile(session.user.email);
         } else {
-            console.error('No active session.');
+          this.userSubject.next(null);
         }
-    });
-}
+      });
 
-async getCurrentUserId(): Promise<string | null> {
-  if (!this.supabase) {
-    console.error('Supabase client not initialized.');
-    return null;
+      // Check for existing session
+      this.supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          this.loadUserProfile(session.user.email);
+        }
+      });
+    }
   }
 
-  try {
-    const { data: { user } } = await this.supabase.auth.getUser(); // Await the promise and destructure the user
-    return user?.id || null; // Return the user ID if it exists
-  } catch (error) {
-    console.error('Error fetching current user:', (error as Error).message);
-    return null;
-  }
-}
+  private async loadUserProfile(email: string | undefined): Promise<void> {
+    if (!email) return;
 
-// Initialize Supabase client if running on the browser
-private async initializeSupabase(): Promise<void> {
-  if (isPlatformBrowser(this.platformId)) {
     try {
-      this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
-      console.log('Supabase client initialized successfully');
+      const { data, error } = await this.supabase
+        .from('account')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        this.userSubject.next(data as User);
+      }
     } catch (error) {
-      console.error('Error initializing Supabase client:', (error as Error).message);
-      throw error;
+      console.error('Error loading user profile:', error);
+      this.userSubject.next(null);
     }
+  }
+
+  async signIn(email: string, password: string): Promise<{ data: any; error: any }> {
+    const maxAttempts = 3;
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      try {
+        // Attempt to acquire a lock if LockManager API is available
+        if (navigator?.locks) {
+          return navigator.locks.request("sb-auth-token", { mode: "exclusive" }, async () => {
+            const { data: authData, error: authError } = await this.supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+
+            if (authError) {
+              return { data: null, error: authError };
+            }
+
+            const { data: userData, error: userError } = await this.supabase
+              .from('account')
+              .select('*')
+              .eq('email', email)
+              .single();
+
+            if (userError) {
+              return { data: null, error: userError };
+            }
+
+            this.userSubject.next(userData as User);
+            return { data: { auth: authData, user: userData }, error: null };
+          });
+        } else {
+          // Fallback in case LockManager API is not available
+          console.warn("LockManager API not available.");
+          const { data: authData, error: authError } = await this.supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (authError) {
+            return { data: null, error: authError };
+          }
+
+          const { data: userData, error: userError } = await this.supabase
+            .from('account')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+          if (userError) {
+            return { data: null, error: userError };
+          }
+
+          this.userSubject.next(userData as User);
+          return { data: { auth: authData, user: userData }, error: null };
+        }
+      } catch (error) {
+        console.warn('Failed to acquire lock, retrying...', error);
+        attempts++;
+        await new Promise((res) => setTimeout(res, 1000)); // Wait before retrying
+      }
+    }
+
+    return { data: null, error: new Error('Failed to acquire lock after several attempts.') };
+  }
+
+  async signOut(): Promise<void> {
+    await this.supabase.auth.signOut();
+    this.userSubject.next(null);
+    localStorage.removeItem('userRole');
+  }
+
+  getCurrentUser(): User | null {
+    return this.userSubject.getValue();
   }
 }
 
-private async ensureSupabaseInitialized(): Promise<void> {
-  if (this.supabaseInitPromise) {
-    // Wait for the initialization promise to complete
-    await this.supabaseInitPromise;
-  }
-}
+//latest
 
-// Sign in using email and password
-async signIn(email: string, password: string): Promise<{ data: any, error: any }> {
-  if (!this.supabase) {
-    console.error('Supabase client not initialized.');
-    return { data: null, error: 'Supabase client not initialized' };
-  }
-  try {
-    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      console.error('Sign-in error:', (error as Error).message);
-      return { data: null, error };
-    }
-    
-    this.checkSession(); //Added 
+// import { Injectable, Inject, PLATFORM_ID, inject } from '@angular/core';
+// import { isPlatformBrowser } from '@angular/common';
+// import { createClient, SupabaseClient } from '@supabase/supabase-js';
+// import { environment } from './../../environments/environment';
+// import { BehaviorSubject } from 'rxjs';
+// import { Router } from '@angular/router';
 
-    // Fetch current user details to store them
-    const userResponse = await this.supabase
-      .from('account')
-      .select('*')
-      .eq('email', email)
-      .single();  // Fetch the current user based on the email
+// export interface User {
+//   account_id: number;
+//   name: string;
+//   username: string;
+//   email: string;
+//   account_status: string;
+//   role: string;
+//   profile_image: string;
+// }
 
-    if (userResponse.error) {
-      console.error('Error fetching current user:', userResponse.error.message);
-      return { data: null, error: userResponse.error };
-    }
+// @Injectable({
+//   providedIn: 'root',
+// })
+// export class SupabaseService {
+//   private supabase!: SupabaseClient;
+//   private userSubject = new BehaviorSubject<User | null>(null);
+//   user$ = this.userSubject.asObservable();
+//   private router = inject(Router);
 
-    this.currentUser = userResponse.data as User;  // Store the user details
+//   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+//     if (isPlatformBrowser(this.platformId)) {
+//       this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey, {
+//         auth: {
+//           persistSession: true,
+//           storageKey: 'auth-token',
+//           storage: localStorage,
+//           autoRefreshToken: true,
+//           detectSessionInUrl: false,
+//         },
+//       });
 
-    return { data, error: null };
-  } catch (error) {
-    console.error('Error during sign-in:', (error as Error).message);
-    return { data: null, error: 'Error during sign-in' };
-  }
-}
+//       // Check for existing session
+//       this.supabase.auth.getSession().then(({ data: { session } }) => {
+//         if (session?.user) {
+//           this.loadUserProfile(session.user.email);
+//         }
+//       });
 
-async getUserRole(email: string): Promise<string | null> {
-  if (!this.supabase) {
-    console.error('Supabase client not initialized.');
-    return null;
-  }
-  try {
-    const { data, error } = await this.supabase
-      .from('account')
-      .select('*')
-      .eq('email', email)
-      .single();
-    if (error) {
-      console.error('Error fetching user role:', (error as PostgrestError).message);
-      return null;
-    }
-    return data?.role ?? null;
-  } catch (error) {
-    console.error('Error fetching user role:', (error as Error).message);
-    return null;
-  }
-}
+//       // Set up auth state change listener
+//       this.supabase.auth.onAuthStateChange(async (event, session) => {
+//         if (event === 'SIGNED_IN' && session?.user) {
+//           await this.loadUserProfile(session.user.email);
+//         } else if (event === 'SIGNED_OUT') {
+//           this.userSubject.next(null);
+//           await this.router.navigate(['/auth/login']);
+//         }
+//       });
+//     }
+//   }
 
-async getUsers(): Promise<User[]> {
-  if (!this.supabase) {
-    console.error('Supabase client not initialized.');
-    return [];
-  }
-  
-  const { data, error } = await this.supabase
-  .from('account')
-  .select('*');
+//   private async loadUserProfile(email: string | undefined): Promise<void> {
+//     if (!email) return;
 
-  if (error) {
-    console.error('Error fetching users:', error);
-    return [];
-  }
-  return data as User[];
-}
+//     try {
+//       const { data, error } = await this.supabase
+//         .from('account')
+//         .select('*')
+//         .eq('email', email)
+//         .single();
 
-async getRoles(): Promise<string[]> {
-  if (!this.supabase) return [];
-  try {
-    const { data, error } = await this.supabase.from('account').select('role');
-    if (error) {
-      console.error('Error fetching roles:', error.message);
-      return [];
-    }
-    return data.map((item: { role: string }) => item.role);
-  } catch (error) {
-    console.error('Error:', (error as Error).message);
-    return [];
-  }
-}
+//       if (error) throw error;
+//       if (data) {
+//         this.userSubject.next(data as User);
+//       }
+//     } catch (error) {
+//       console.error('Error loading user profile:', error);
+//       this.userSubject.next(null);
+//     }
+//   }
 
-async fetchCurrentUser(): Promise<void> {
-  if (!this.supabase) {
-    console.error('Supabase client not initialized.');
-    this.currentUser = null;
-    return;
-  }
+//   async signIn(email: string, password: string): Promise<{ data: any; error: any }> {
+//     try {
+//       const { data: authData, error: authError } = await this.supabase.auth.signInWithPassword({
+//         email,
+//         password,
+//       });
 
-  try {
-    const { data, error } = await this.supabase.auth.getSession();
+//       if (authError) return { data: null, error: authError };
 
-    if (error) {
-      console.error('Error fetching session:', error.message);
-      this.currentUser = null;
-      return;
-    }
+//       const { data: userData, error: userError } = await this.supabase
+//         .from('account')
+//         .select('*')
+//         .eq('email', email)
+//         .single();
 
-    // Ensure data and session are not null
-    if (data?.session?.user) {
-      const appUser = data.session.user as AppUser;
-      this.currentUser = {
-        ...appUser,
-        account_id: appUser.account_id ? Number(appUser.account_id) : undefined,
-        // ... map other properties as needed
-      } as unknown as User;
-    } else {
-      this.currentUser = null;
-    }
-  } catch (error) {
-    console.error('Unexpected error:', (error as Error).message);
-    this.currentUser = null;
-  }
-}
+//       if (userError) return { data: null, error: userError };
 
-async insertAccount(name: string, username: string, password: string, role: string) {
-  if (!this.supabase) {
-    console.error('Supabase client not initialized.');
-    return null;
-  }
-  const { data, error } = await this.supabase
-    .from('users')
-    .insert([{ name, username, password, role }]);
-  if (error) {
-    console.error('Error inserting account:', error);
-    return null;
-  }
-  console.log('Account successfully inserted:', data);
-  return data;
-}
+//       this.userSubject.next(userData as User);
+//       return { data: { auth: authData, user: userData }, error: null };
+//     } catch (error) {
+//       console.error('Error during sign in:', error);
+//       return { data: null, error };
+//     }
+//   }
 
-async getCurrentUser(): Promise<User | null> {
-  if (!this.supabase) {
-    console.error('Supabase client not initialized.');
-    return null;
-  }
+//   async signOut(): Promise<void> {
+//     await this.supabase.auth.signOut();
+//     this.userSubject.next(null);
+//     localStorage.removeItem('userRole');
+//     await this.router.navigate(['/auth/login']);
+//   }
 
-  try {
-    const { data, error } = await this.supabase.auth.getSession();
-    if (error || !data.session) {
-      console.error('Error fetching user session or no session found:', error?.message);
-      return null;
-    }
-
-    const user = data.session.user;
-    if (!user) {
-      console.error('No user is logged in.');
-      return null;
-    }
-
-    // Fetch user details based on the correct column names in the account table
-    const { data: userDetails, error: userError } = await this.supabase
-      .from('account') // Make sure this is the correct table name
-      .select('*') // Ensure to select the correct columns
-      .eq('email', user.email) // Adjust the condition based on your table schema
-      .single();
-
-    if (userError) {
-      console.error('Error fetching user details:', userError.message);
-      return null;
-    }
-
-    return userDetails as User;
-  } catch (err) {
-    console.error('Unexpected error fetching current user:', err);
-    return null;
-  }
-}
-
-}
+//   getCurrentUser(): User | null {
+//     return this.userSubject.getValue();
+//   }
+// }

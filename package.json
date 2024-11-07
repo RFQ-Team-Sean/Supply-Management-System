@@ -21,7 +21,7 @@
     "@angular/platform-server": "^17.3.12",
     "@angular/router": "^17.3.12",
     "@angular/ssr": "^17.3.9",
-    "@supabase/supabase-js": "^2.45.4",
+    "@supabase/supabase-js": "^2.46.1",
     "angularx-qrcode": "^17.0.1",
     "bcryptjs": "^2.4.3",
     "chart.js": "^4.4.4",
