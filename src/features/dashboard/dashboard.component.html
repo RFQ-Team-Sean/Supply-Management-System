@@ -1,37 +1,54 @@
-<section class="dashboard-container">
-  <header class="dashboard-header">
-    <h1>{{welcomeMessage}}</h1>
-    <p>{{description}}</p>
-  </header>
-
-  <div class="search-bar">
-    <input type="search" placeholder="Search..." class="search-input">
+<div class="dashboard-container">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <h1 class="welcome-title">{{ welcomeMessage() }}</h1>
+    <p class="welcome-description">{{ description() }}</p>
   </div>
 
-  <div class="dashboard-grid">
-    <div class="overview-section">
-      <h2>Overview</h2>
-      <p>Quick insights and metrics for a glance at recent performance.</p>
-    </div>
-    
-    <div class="calendar-section">
-      <app-calendar></app-calendar>
-      <p>Stay on top of your schedule with our built-in calendar.</p>
-    </div>
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    @for (stat of statCards(); track stat.title) {
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-icon" [ngClass]="stat.color">
+            <i-lucide
+              [name]="stat.icon.name"
+              class="icon-white">
+            </i-lucide>
+          </div>
+          <div class="stat-info">
+            <p class="stat-title">{{ stat.title }}</p>
+            <p class="stat-value">{{ stat.value }}</p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
 
-    <div class="recent-activities">
-      <h2>Recent Activities</h2>
-      <ul>
-        <li>New user registration</li>
-        <li>Item added to inventory</li>
-        <li>Report generated</li>
-      </ul>
-    </div>
-
-    <div class="quick-access">
-      <h2>Quick Access</h2>
-      <button class="quick-button">Add New Record</button>
-      <button class="quick-button">Generate Report</button>
+  <!-- Chart Section -->
+  <div class="chart-section">
+    <h2 class="section-title">Activity Overview</h2>
+    <div class="chart-container">
+      <!-- Add your preferred charting library implementation here -->
+      <div class="chart-placeholder">
+        <!-- Placeholder for chart -->
+      </div>
     </div>
   </div>
-</section>
+
+  <!-- Recent Activities -->
+  <div class="activities-section">
+    <h2 class="section-title">Recent Activities</h2>
+    <div class="activities-list">
+      @for (activity of recentActivities(); track activity.title) {
+        <div class="activity-item">
+          <div class="activity-status" [ngClass]="activity.status"></div>
+          <div class="activity-content">
+            <p class="activity-title">{{ activity.title }}</p>
+            <p class="activity-time">{{ activity.time }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
