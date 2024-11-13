@@ -1,0 +1,33 @@
+<p>dashboard works!</p>
+// dashboard.component.html
+<section class="dashboard-container">
+  <header class="dashboard-header">
+    <h1>{{welcomeMessage}}</h1>
+    <p>{{description}}</p>
+  </header>
+
+  <div class="search-bar">
+    <input type="search" placeholder="Search..." class="search-input">
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="overview-section">
+      <h2>Overview</h2>
+      <!-- Add overview content -->
+    </div>
+    
+    <div class="calendar-section">
+      <app-calendar></app-calendar>
+    </div>
+
+    <div class="recent-activities">
+      <h2>Recent Activities</h2>
+      <!-- Add activities list -->
+    </div>
+
+    <div class="quick-access">
+      <h2>Quick Access</h2>
+      <!-- Add quick access buttons -->
+    </div>
+  </div>
+</section>
