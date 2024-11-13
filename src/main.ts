@@ -8,6 +8,7 @@ import { AMainPageComponent } from './features/a-main-page/a-main-page.component
 import { LoginComponent } from './features/login/login.component';
 import { SignupComponent } from './features/signup/signup.component';
 import { SupabaseService } from './app/services/supabase.service';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
 
 
 
@@ -16,6 +17,7 @@ const routes: Route[] = [
   { path: '', component: LoginComponent },
   { path: 'main', component: AMainPageComponent },
   { path: 'signup', component: SignupComponent },
+  { path: 'dashboard', component: DashboardComponent },
   // Add other routes here as needed
 ];
 

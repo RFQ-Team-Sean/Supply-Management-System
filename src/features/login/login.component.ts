@@ -48,7 +48,7 @@ export class LoginComponent {
 
       if (user && session) {
         // Successful login
-        this.router.navigate(['/main']);
+        this.router.navigate(['/dashboard']);
       } else {
         this.errorMessage = 'Login failed';
       }

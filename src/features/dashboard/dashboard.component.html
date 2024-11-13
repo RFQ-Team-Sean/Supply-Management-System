@@ -1,5 +1,3 @@
-<p>dashboard works!</p>
-// dashboard.component.html
 <section class="dashboard-container">
   <header class="dashboard-header">
     <h1>{{welcomeMessage}}</h1>
@@ -13,21 +11,27 @@
   <div class="dashboard-grid">
     <div class="overview-section">
       <h2>Overview</h2>
-      <!-- Add overview content -->
+      <p>Quick insights and metrics for a glance at recent performance.</p>
     </div>
     
     <div class="calendar-section">
       <app-calendar></app-calendar>
+      <p>Stay on top of your schedule with our built-in calendar.</p>
     </div>
 
     <div class="recent-activities">
       <h2>Recent Activities</h2>
-      <!-- Add activities list -->
+      <ul>
+        <li>New user registration</li>
+        <li>Item added to inventory</li>
+        <li>Report generated</li>
+      </ul>
     </div>
 
     <div class="quick-access">
       <h2>Quick Access</h2>
-      <!-- Add quick access buttons -->
+      <button class="quick-button">Add New Record</button>
+      <button class="quick-button">Generate Report</button>
     </div>
   </div>
 </section>
