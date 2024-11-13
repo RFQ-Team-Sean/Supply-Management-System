@@ -1,3 +1,5 @@
+//login.components
+
 // src/app/login/login.component.ts
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -17,19 +19,13 @@ export class LoginComponent {
   isLoading = false;
   errorMessage: string | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private supabaseService: SupabaseService
-  ) {
-    // Initialize the form with email and password fields
+  constructor(private fb: FormBuilder, private router: Router, private supabaseService: SupabaseService) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
-  // Getters for form controls
   get email() {
     return this.loginForm.get('email');
   }
@@ -38,7 +34,6 @@ export class LoginComponent {
     return this.loginForm.get('password');
   }
 
-  // Handle form submission
   async onSubmit() {
     if (this.loginForm.invalid) return;
 
@@ -52,8 +47,8 @@ export class LoginComponent {
       this.isLoading = false;
 
       if (user && session) {
-        // Navigate to the dashboard after successful login
-        this.router.navigate(['/dashboard']);
+        // Successful login
+        this.router.navigate(['/main']);
       } else {
         this.errorMessage = 'Login failed';
       }
