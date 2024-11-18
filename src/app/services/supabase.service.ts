@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
-import { InventoryItem } from '../../features/inventory/inventory.model';
+import { InventoryItem, ItemRequest } from '../../features/inventory/inventory.model';
 
 @Injectable({
   providedIn: 'root',
@@ -50,10 +50,9 @@ export class SupabaseService {
     }
 
     return data;  // Return the authentication data if needed
-
+  }
 
   // inventory side
-  }
   async getInventoryItems() {
     const { data, error } = await this.supabase
       .from('inventory')
@@ -85,7 +84,6 @@ export class SupabaseService {
     return data[0];
   }
   
-
   async deleteInventoryItem(itemId: number) {
     if (!itemId) {
       throw new Error('Item ID is required for deletion');
@@ -98,5 +96,16 @@ export class SupabaseService {
   
     if (error) throw new Error(`Error deleting item: ${error.message}`);
     return true;
+  }
+
+  // New method to submit an item request
+  async submitItemRequest(request: ItemRequest) {
+    const { data, error } = await this.supabase
+      .from('item_requests')
+      .insert([request])
+      .select();
+
+    if (error) throw new Error(`Error submitting request: ${error.message}`);
+    return data[0]; // Return the inserted request if successful
   }
 }

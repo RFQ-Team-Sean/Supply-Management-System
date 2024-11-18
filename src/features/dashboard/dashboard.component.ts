@@ -1,15 +1,13 @@
-// dashboard.component.ts
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { 
-  Users, Package, Activity, AlertCircle 
-} from 'lucide-angular';
+import { Users, Package, Activity, AlertCircle } from 'lucide-angular';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'; // Import CUSTOM_ELEMENTS_SCHEMA
 
 interface StatCard {
   title: string;
   value: string;
-  icon: any;
+  icon: string;
   color: string;
 }
 
@@ -32,18 +30,19 @@ interface ActivityItem {
     NgClass,
     LucideAngularModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA], // Add CUSTOM_ELEMENTS_SCHEMA here
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   welcomeMessage = signal('Welcome Admin!');
   description = signal('Manage your procurement, inventory, and property records efficiently.');
-  
+
   statCards = signal<StatCard[]>([
-    { title: 'Total Users', value: '2,543', icon: Users, color: 'bg-blue-500' },
-    { title: 'Active Items', value: '1,234', icon: Package, color: 'bg-green-500' },
-    { title: 'Daily Activities', value: '145', icon: Activity, color: 'bg-purple-500' },
-    { title: 'Pending Alerts', value: '5', icon: AlertCircle, color: 'bg-orange-500' }
+    { title: 'Total Users', value: '2,543', icon: 'Users', color: 'bg-blue-500' },
+    { title: 'Active Items', value: '1,234', icon: 'Package', color: 'bg-green-500' },
+    { title: 'Daily Activities', value: '145', icon: 'Activity', color: 'bg-purple-500' },
+    { title: 'Pending Alerts', value: '5', icon: 'AlertCircle', color: 'bg-orange-500' }
   ]);
 
   chartData = signal<ChartData[]>([

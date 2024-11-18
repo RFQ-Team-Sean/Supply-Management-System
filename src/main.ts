@@ -6,7 +6,12 @@ import { provideRouter, Route } from '@angular/router';
 
 // define lazy-loaded routes
 const routes: Route[] = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },  // Redirect from '' (root) to 'dashboard'
+  {
+    path: 'dashboard', 
+    loadComponent: () => import('./features/dashboard/dashboard.component')
+      .then(m => m.DashboardComponent)
+  },
   {
     path: 'main',
     loadComponent: () => import('./features/a-main-page/a-main-page.component')
@@ -16,11 +21,6 @@ const routes: Route[] = [
     path: 'signup',
     loadComponent: () => import('./features/signup/signup.component')
       .then(m => m.SignupComponent)
-  },
-  {
-    path: 'dashboard',
-    loadComponent: () => import('./features/dashboard/dashboard.component')
-      .then(m => m.DashboardComponent)
   },
   {
     path: 'users',
@@ -48,12 +48,12 @@ const routes: Route[] = [
       .then(m => m.NotificationsComponent)
   },
   {
-   path: 'inventory',
-   loadComponent: () => import('./features/inventory/inventory.component')
-   .then(m => m.InventoryComponent)
+    path: 'inventory',
+    loadComponent: () => import('./features/inventory/inventory.component')
+      .then(m => m.InventoryComponent)
   },
   {
-   path: 'report-problem',
+    path: 'report-problem',
     loadComponent: () => import('./features/report-problem/report-problem.component')
       .then(m => m.ReportProblemComponent)
   },
@@ -62,13 +62,13 @@ const routes: Route[] = [
     loadComponent: () => import('./features/login/login.component')
       .then(m => m.LoginComponent)
   },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: 'dashboard' }  // Wildcard route, to handle any unmatched paths
 ];
 
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [
     ...appConfig.providers,
-    provideRouter(routes)
+    provideRouter(routes)  // Inject the router with the defined routes
   ]
 }).catch(err => console.error(err));

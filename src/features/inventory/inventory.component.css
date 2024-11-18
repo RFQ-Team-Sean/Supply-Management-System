@@ -1,108 +1,81 @@
+/*
 .inventory-container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    @apply p-5 max-w-7xl mx-auto;
   }
   
   .form-section {
-    background: #f5f5f5;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 30px;
+    @apply bg-gray-50 p-6 rounded-lg mb-8 shadow-sm;
   }
   
   .item-form {
-    display: grid;
-    gap: 15px;
-    max-width: 600px;
+    @apply grid gap-4 max-w-2xl;
   }
   
   .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+    @apply flex flex-col gap-1;
   }
   
   label {
-    font-weight: bold;
+    @apply font-medium text-gray-700;
   }
   
-  input, textarea {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-  }
-  
-  textarea {
-    min-height: 100px;
-    resize: vertical;
+  input, select {
+    @apply p-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500;
   }
   
   .error {
-    color: #dc3545;
-    font-size: 12px;
-    margin-top: 4px;
+    @apply text-red-500 text-xs mt-1;
   }
   
   .button-group {
-    display: flex;
-    gap: 10px;
+    @apply flex gap-3 mt-4;
   }
   
   button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background: #007bff;
-    color: white;
-    font-weight: bold;
+    @apply px-4 py-2 rounded-md font-medium transition-colors;
   }
   
-  button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
+  button[type="submit"] {
+    @apply bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400;
   }
   
-  button.delete {
-    background: #dc3545;
+  button[type="button"] {
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
   }
   
   .inventory-list {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    @apply bg-white p-6 rounded-lg shadow;
+  }
+  
+  .filter-section {
+    @apply flex items-center mb-4;
   }
   
   table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+    @apply w-full border-collapse;
   }
   
   th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+    @apply p-3 text-left border-b border-gray-200;
   }
   
   th {
-    background: #f8f9fa;
-    font-weight: bold;
+    @apply bg-gray-50 font-medium text-gray-700;
+  }
+  
+  .edit-btn {
+    @apply bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600;
+  }
+  
+  .delete-btn {
+    @apply bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600;
   }
   
   .loading, .no-items {
-    text-align: center;
-    padding: 20px;
-    color: #666;
+    @apply text-center py-8 text-gray-500;
   }
   
   .error-message {
-    background: #fff3cd;
-    color: #856404;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
+    @apply bg-red-100 text-red-700 p-3 rounded mb-4;
   }
+    */
