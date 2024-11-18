@@ -1,7 +1,7 @@
 <div class="inventory-container">
     <div class="form-section">
       <h2>{{ isEditing ? 'Edit Item' : 'Add New Item' }}</h2>
-      
+  
       <form [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="item-form">
         <div class="form-group">
           <label for="item_name">Item Name:</label>
@@ -56,11 +56,11 @@
   
     <div class="inventory-list">
       <h2>Inventory Items</h2>
-      
+  
       <div class="error-message" *ngIf="error">{{ error }}</div>
-      
+  
       <div class="loading" *ngIf="loading">Loading...</div>
-      
+  
       <table *ngIf="!loading && inventoryItems.length > 0">
         <thead>
           <tr>
@@ -77,20 +77,21 @@
           <tr *ngFor="let item of inventoryItems">
             <td>{{ item.item_name }}</td>
             <td>{{ item.quantity }}</td>
-            <td>{{ item.unit_price | currency }}</td>
+            <td>{{ item.unit_price | currency: 'PHP' }}</td> <!-- Format as Peso -->
             <td>{{ item.location }}</td>
             <td>{{ item.reorder_level }}</td>
             <td>{{ item.created_at | date:'medium' }}</td>
             <td>
               <button (click)="editItem(item)">Edit</button>
-              <button (click)="deleteItem(item.id!)" class="delete">Delete</button>
+              <button (click)="deleteItem(item.item_id!)" class="delete">Delete</button>
             </td>
           </tr>
         </tbody>
       </table>
-      
+  
       <div class="no-items" *ngIf="!loading && inventoryItems.length === 0">
         No inventory items found
       </div>
     </div>
   </div>
+  

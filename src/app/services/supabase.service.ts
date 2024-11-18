@@ -78,12 +78,13 @@ export class SupabaseService {
     const { data, error } = await this.supabase
       .from('inventory')
       .update(item)
-      .eq('item_id', id)
+      .eq('item_id', id)  // Ensure to use item_id instead of id
       .select();
-
+  
     if (error) throw new Error(`Error updating item: ${error.message}`);
     return data[0];
   }
+  
 
   async deleteInventoryItem(itemId: number) {
     if (!itemId) {

@@ -9,7 +9,7 @@ import { InventoryItem } from '../../features/inventory/inventory.model';
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './inventory.component.html',
-  styleUrl: './inventory.component.css'
+  styleUrls: ['./inventory.component.css']
 })
 export class InventoryComponent implements OnInit {
   inventoryItems: InventoryItem[] = [];
@@ -29,7 +29,6 @@ export class InventoryComponent implements OnInit {
       unit_price: [0, [Validators.required, Validators.min(0)]],
       location: ['', Validators.required],
       reorder_level: [0, [Validators.required, Validators.min(0)]],
-      // Remove Validators.required and Validators.min(0) from created_at
       created_at: [null]
     });
   }
@@ -55,10 +54,9 @@ export class InventoryComponent implements OnInit {
     try {
       this.loading = true;
 
-      // Automatically set the created_at field if adding a new item
       const formData = { ...this.itemForm.value };
       if (!this.isEditing) {
-        formData.created_at = new Date().toISOString(); // Set created_at to the current date/time
+        formData.created_at = new Date().toISOString();
       }
 
       if (this.isEditing && this.currentItemId) {
@@ -77,16 +75,16 @@ export class InventoryComponent implements OnInit {
 
   editItem(item: InventoryItem) {
     this.isEditing = true;
-    this.currentItemId = item.id!;
+    this.currentItemId = item.item_id!;
     this.itemForm.patchValue(item);
   }
 
   async deleteItem(itemId: number) {
     if (!confirm('Are you sure you want to delete this item?')) return;
-  
+
     try {
       this.loading = true;
-      await this.supabase.deleteInventoryItem(itemId); // Pass itemId to Supabase service
+      await this.supabase.deleteInventoryItem(itemId);
       await this.loadInventoryItems();
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'An error occurred';
@@ -94,6 +92,7 @@ export class InventoryComponent implements OnInit {
       this.loading = false;
     }
   }
+
   resetForm() {
     this.isEditing = false;
     this.currentItemId = null;

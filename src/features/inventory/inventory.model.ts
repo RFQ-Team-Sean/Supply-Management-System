@@ -1,5 +1,5 @@
 export interface InventoryItem {
-    id?: number;
+    item_id?: number; // Changed id to item_id
     item_name: string;
     quantity: number;
     unit_price: number;
@@ -7,3 +7,4 @@ export interface InventoryItem {
     reorder_level: number;
     created_at?: Date;
   }
+  
