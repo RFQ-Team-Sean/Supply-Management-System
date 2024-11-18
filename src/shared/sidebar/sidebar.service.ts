@@ -13,6 +13,7 @@ export class SidebarService {
     { icon: 'settings', label: 'System Settings', route: '/settings' },
     { icon: 'file-text', label: 'Reports', route: '/reports' },
     { icon: 'bell', label: 'Notifications', route: '/notifications' },
+    { icon: 'box', label: 'Inventory', route: '/inventory' },
     { icon: 'alert-triangle', label: 'Report a Problem', route: '/report-problem' }
   ];
 

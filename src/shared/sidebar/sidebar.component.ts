@@ -1,11 +1,10 @@
-// sidebar.component.ts
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { 
   LayoutDashboard, Users, Activity, Settings, FileText, 
-  Bell, AlertTriangle, LogOut 
+  Bell, AlertTriangle, LogOut, Box // Import the 'Box' icon
 } from 'lucide-angular';
 
 interface SidebarItem {
@@ -45,6 +44,7 @@ export class SidebarComponent implements OnInit {
       { icon: Activity, label: 'Activities', route: '/activities' },
       { icon: FileText, label: 'Reports', route: '/reports' },
       { icon: Bell, label: 'Notifications', route: '/notifications' },
+      { icon: Box, label: 'Inventory', route: '/inventory' }, // Add Inventory item
       { icon: AlertTriangle, label: 'Alerts', route: '/alerts' },
       { icon: Settings, label: 'Settings', route: '/settings' }
     ]);

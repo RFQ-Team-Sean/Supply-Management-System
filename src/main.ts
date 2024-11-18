@@ -48,7 +48,12 @@ const routes: Route[] = [
       .then(m => m.NotificationsComponent)
   },
   {
-    path: 'report-problem',
+   path: 'inventory',
+   loadComponent: () => import('./features/inventory/inventory.component')
+   .then(m => m.InventoryComponent)
+  },
+  {
+   path: 'report-problem',
     loadComponent: () => import('./features/report-problem/report-problem.component')
       .then(m => m.ReportProblemComponent)
   },
