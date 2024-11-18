@@ -1,1 +1,96 @@
-<p>inventory works!</p>
+<div class="inventory-container">
+    <div class="form-section">
+      <h2>{{ isEditing ? 'Edit Item' : 'Add New Item' }}</h2>
+      
+      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="item-form">
+        <div class="form-group">
+          <label for="item_name">Item Name:</label>
+          <input id="item_name" type="text" formControlName="item_name" required>
+          <div class="error" *ngIf="itemForm.get('item_name')?.invalid && itemForm.get('item_name')?.touched">
+            Item name is required
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="quantity">Quantity:</label>
+          <input id="quantity" type="number" formControlName="quantity" required min="0">
+          <div class="error" *ngIf="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched">
+            Valid quantity is required
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="unit_price">Unit Price:</label>
+          <input id="unit_price" type="number" formControlName="unit_price" required min="0" step="0.01">
+          <div class="error" *ngIf="itemForm.get('unit_price')?.invalid && itemForm.get('unit_price')?.touched">
+            Valid unit price is required
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="location">Location:</label>
+          <input id="location" type="text" formControlName="location" required>
+          <div class="error" *ngIf="itemForm.get('location')?.invalid && itemForm.get('location')?.touched">
+            Location is required
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label for="reorder_level">Reorder Level:</label>
+          <input id="reorder_level" type="number" formControlName="reorder_level" required min="0">
+          <div class="error" *ngIf="itemForm.get('reorder_level')?.invalid && itemForm.get('reorder_level')?.touched">
+            Valid reorder level is required
+          </div>
+        </div>
+  
+        <div class="button-group">
+          <button type="submit" [disabled]="itemForm.invalid || loading">
+            {{ isEditing ? 'Update' : 'Add' }} Item
+          </button>
+          <button type="button" (click)="resetForm()" *ngIf="isEditing">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  
+    <div class="inventory-list">
+      <h2>Inventory Items</h2>
+      
+      <div class="error-message" *ngIf="error">{{ error }}</div>
+      
+      <div class="loading" *ngIf="loading">Loading...</div>
+      
+      <table *ngIf="!loading && inventoryItems.length > 0">
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Location</th>
+            <th>Reorder Level</th>
+            <th>Created At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of inventoryItems">
+            <td>{{ item.item_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unit_price | currency }}</td>
+            <td>{{ item.location }}</td>
+            <td>{{ item.reorder_level }}</td>
+            <td>{{ item.created_at | date:'medium' }}</td>
+            <td>
+              <button (click)="editItem(item)">Edit</button>
+              <button (click)="deleteItem(item.id!)" class="delete">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="no-items" *ngIf="!loading && inventoryItems.length === 0">
+        No inventory items found
+      </div>
+    </div>
+  </div>

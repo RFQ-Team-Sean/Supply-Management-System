@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
+import { InventoryItem } from '../../features/inventory/inventory.model';
 
 @Injectable({
   providedIn: 'root',
@@ -49,5 +50,52 @@ export class SupabaseService {
     }
 
     return data;  // Return the authentication data if needed
+
+
+  // inventory side
+  }
+  async getInventoryItems() {
+    const { data, error } = await this.supabase
+      .from('inventory')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(`Error fetching inventory: ${error.message}`);
+    return data;
+  }
+
+  async addInventoryItem(item: Omit<InventoryItem, 'id'>) {
+    const { data, error } = await this.supabase
+      .from('inventory')
+      .insert([item])
+      .select();
+
+    if (error) throw new Error(`Error adding item: ${error.message}`);
+    return data[0];
+  }
+
+  async updateInventoryItem(id: number, item: Partial<InventoryItem>) {
+    const { data, error } = await this.supabase
+      .from('inventory')
+      .update(item)
+      .eq('item_id', id)
+      .select();
+
+    if (error) throw new Error(`Error updating item: ${error.message}`);
+    return data[0];
+  }
+
+  async deleteInventoryItem(itemId: number) {
+    if (!itemId) {
+      throw new Error('Item ID is required for deletion');
+    }
+  
+    const { error } = await this.supabase
+      .from('inventory')
+      .delete()
+      .eq('item_id', itemId);
+  
+    if (error) throw new Error(`Error deleting item: ${error.message}`);
+    return true;
   }
 }
