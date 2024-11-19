@@ -1,0 +1,81 @@
+/*
+.inventory-container {
+    @apply p-5 max-w-7xl mx-auto;
+  }
+  
+  .form-section {
+    @apply bg-gray-50 p-6 rounded-lg mb-8 shadow-sm;
+  }
+  
+  .item-form {
+    @apply grid gap-4 max-w-2xl;
+  }
+  
+  .form-group {
+    @apply flex flex-col gap-1;
+  }
+  
+  label {
+    @apply font-medium text-gray-700;
+  }
+  
+  input, select {
+    @apply p-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500;
+  }
+  
+  .error {
+    @apply text-red-500 text-xs mt-1;
+  }
+  
+  .button-group {
+    @apply flex gap-3 mt-4;
+  }
+  
+  button {
+    @apply px-4 py-2 rounded-md font-medium transition-colors;
+  }
+  
+  button[type="submit"] {
+    @apply bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400;
+  }
+  
+  button[type="button"] {
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
+  }
+  
+  .inventory-list {
+    @apply bg-white p-6 rounded-lg shadow;
+  }
+  
+  .filter-section {
+    @apply flex items-center mb-4;
+  }
+  
+  table {
+    @apply w-full border-collapse;
+  }
+  
+  th, td {
+    @apply p-3 text-left border-b border-gray-200;
+  }
+  
+  th {
+    @apply bg-gray-50 font-medium text-gray-700;
+  }
+  
+  .edit-btn {
+    @apply bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600;
+  }
+  
+  .delete-btn {
+    @apply bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600;
+  }
+  
+  .loading, .no-items {
+    @apply text-center py-8 text-gray-500;
+  }
+  
+  .error-message {
+    @apply bg-red-100 text-red-700 p-3 rounded mb-4;
+  }
+    */

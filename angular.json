@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "eyepopil": {
+    "supply-management-system": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/airsupply",
+            "outputPath": "dist/supply-management-system",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -62,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "eyepopil:build:production"
+              "buildTarget": "supply-management-system:build:production"
             },
             "development": {
-              "buildTarget": "eyepopil:build:development"
+              "buildTarget": "supply-management-system:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -73,7 +73,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "eyepopil:build"
+            "buildTarget": "supply-management-system:build"
           }
         },
         "test": {
@@ -98,6 +98,6 @@
     }
   },
   "cli": {
-    "analytics": "559e1464-6120-4d78-a654-70b98b4fbe4c"
+    "analytics": "7f0616b5-b21e-4473-b8be-e92f3d4dc7fe"
   }
 }
