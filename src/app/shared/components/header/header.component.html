@@ -1,0 +1,66 @@
+<header class="flex flex-col w-full border-b border-gray-200 bg-white shadow-sm">
+  <div class="flex justify-between items-center px-6 py-3">
+    <!-- Left Side: Title -->
+    <div class="flex items-center">
+      <h1 class="text-2xl font-semibold text-gray-800">
+        {{ pageTitle }}
+      </h1>
+    </div>
+    
+    <!-- Right Side: Profile Section -->
+    <div class="flex items-center gap-4">
+      <!-- Notifications -->
+      <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-full relative">
+        <iconify-icon icon="mdi:bell-outline" class="text-xl"></iconify-icon>
+        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+      </button>
+
+      <!-- Profile Section -->
+      <div class="flex items-center gap-3">
+        <div class="flex flex-col text-right">
+          <span class="text-sm font-medium text-gray-900">{{ userName }}</span>
+          <span class="text-xs text-gray-500">{{ userRole }}</span>
+        </div>
+        <!-- Profile Dropdown -->
+        <div class="relative">
+          <button 
+            (click)="toggleProfileMenu()" 
+            class="flex items-center gap-2 focus:outline-none"
+          >
+            <img 
+              [src]="userProfileImage || 'assets/images/default-avatar.png'" 
+              alt="Profile" 
+              class="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+            >
+            <iconify-icon 
+              icon="mdi:chevron-down" 
+              class="text-gray-600"
+              [class.rotate-180]="isProfileMenuOpen"
+            ></iconify-icon>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div *ngIf="isProfileMenuOpen" 
+               class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              <iconify-icon icon="mdi:account-outline" class="mr-2"></iconify-icon>
+              View Profile
+            </a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              <iconify-icon icon="mdi:cog-outline" class="mr-2"></iconify-icon>
+              Settings
+            </a>
+            <div class="border-t border-gray-100"></div>
+            <button 
+              (click)="signOut()" 
+              class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+            >
+              <iconify-icon icon="mdi:logout" class="mr-2"></iconify-icon>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

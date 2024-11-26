@@ -1,0 +1,123 @@
+<section class="bg-white p-4 rounded-lg shadow-sm">
+  <!-- Header with Filter text -->
+  <div class="flex items-center gap-2 mb-4">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+    </svg>
+    <span class="font-medium">Filter</span>
+  </div>
+
+  <!-- Date Range -->
+  <div class="mb-4">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-sm text-gray-600">Date Range</span>
+      <button class="text-sm text-blue-500" (click)="resetDateRange()">Reset</button>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <div class="w-full sm:w-1/2">
+        <span class="text-xs text-gray-500 mb-1 block">From:</span>
+        <div class="relative">
+          <input 
+            type="date" 
+            [(ngModel)]="filters.dateFrom"
+            class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
+            style="max-width: 100%; min-height: 38px;"
+          >
+        </div>
+      </div>
+      <div class="w-full sm:w-1/2">
+        <span class="text-xs text-gray-500 mb-1 block">To:</span>
+        <div class="relative">
+          <input 
+            type="date" 
+            [(ngModel)]="filters.dateTo"
+            class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
+            style="max-width: 100%; min-height: 38px;"
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Department -->
+  <div class="mb-4">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-sm text-gray-600">Department</span>
+      <button class="text-sm text-blue-500" (click)="resetDepartment()">Reset</button>
+    </div>
+    <select 
+      [(ngModel)]="filters.department"
+      class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
+    >
+      <option value="">All Departments</option>
+      <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+    </select>
+  </div>
+
+  <!-- Status -->
+  <div class="mb-4">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-sm text-gray-600">Status</span>
+      <button class="text-sm text-blue-500" (click)="resetStatus()">Reset</button>
+    </div>
+    <select 
+      [(ngModel)]="filters.status"
+      class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-blue-500"
+    >
+      <option value="">All Status</option>
+      <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+    </select>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex gap-2 mt-6">
+    <button
+      (click)="resetFilters()"
+      class="flex-1 py-1.5 px-4 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+    >
+      Reset
+    </button>
+    <button
+      (click)="applyFilters()"
+      class="flex-1 py-1.5 px-4 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors"
+    >
+      Apply
+    </button>
+  </div>
+
+  <!-- PPMP Button -->
+  <div class="mt-6">
+    <button 
+      (click)="openPPMP()"
+      class="w-full flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+    >
+      <div class="flex items-center gap-3">
+        <!-- Checklist Icon -->
+        <div class="text-gray-600">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 12H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M9 12H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M9 16H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        
+        <!-- Text Content -->
+        <div class="flex-1 text-left">
+          <h3 class="text-base font-medium text-gray-900">Project Procurement Management Plan</h3>
+        </div>
+      </div>
+
+      <!-- Plus Icon -->
+      <div class="bg-blue-500 rounded-lg p-2">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+      </div>
+    </button>
+  </div>
+</section>
+  
+  

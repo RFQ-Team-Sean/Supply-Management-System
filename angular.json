@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "supply-management-system": {
+    "airsupply": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/supply-management-system",
+            "outputPath": "dist/airsupply",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -62,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "supply-management-system:build:production"
+              "buildTarget": "airsupply:build:production"
             },
             "development": {
-              "buildTarget": "supply-management-system:build:development"
+              "buildTarget": "airsupply:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -73,7 +73,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "supply-management-system:build"
+            "buildTarget": "airsupply:build"
           }
         },
         "test": {
@@ -98,6 +98,6 @@
     }
   },
   "cli": {
-    "analytics": "7f0616b5-b21e-4473-b8be-e92f3d4dc7fe"
+    "analytics": "559e1464-6120-4d78-a654-70b98b4fbe4c"
   }
 }
