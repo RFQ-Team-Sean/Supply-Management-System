@@ -1,0 +1,38 @@
+<main class="flex flex-col items-start px-2 bg-white max-w-[400px] mx-auto">
+  <form (ngSubmit)="createRole()" class="w-full">
+    <div class="space-y-1">
+      <div>
+        <label for="role" class="text-[10px] font-bold">Role Name</label>
+        <input 
+          type="text" 
+          id="role" 
+          [(ngModel)]="roles" 
+          name="role" 
+          class="w-full py-1 px-2 border border-zinc-300 rounded-lg text-xs" 
+          placeholder="Role Name" 
+          required
+        />
+      </div>
+
+      <div>
+        <label for="permission" class="text-[10px] font-bold">Permission</label>
+        <input 
+          type="text" 
+          id="permission" 
+          [(ngModel)]="permission" 
+          name="permission" 
+          class="w-full py-1 px-2 border border-zinc-300 rounded-lg text-xs" 
+          placeholder="Permission" 
+          required
+        />
+      </div>
+
+      <button 
+        type="submit" 
+        class="w-full py-1 bg-blue-600 text-white font-bold rounded-lg text-xs hover:bg-blue-700 mt-4"
+      >
+        Add Role
+      </button>
+    </div>
+  </form>
+</main>

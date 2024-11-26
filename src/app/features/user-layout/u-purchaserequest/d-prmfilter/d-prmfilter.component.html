@@ -1,0 +1,98 @@
+<div class="bg-white p-6 w-[300px]">
+  <div class="flex items-center gap-2 mb-6">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+    </svg>
+    <h2 class="text-lg font-semibold">Filter</h2>
+  </div>
+
+  <!-- Date Range -->
+  <div class="mb-6">
+    <div class="flex justify-between items-center mb-2">
+      <label class="text-gray-600">Date Range</label>
+      <button 
+        (click)="resetDates()" 
+        class="text-blue-500 text-sm hover:text-blue-700">
+        Reset
+      </button>
+    </div>
+    <div class="flex gap-2">
+      <div class="flex-1">
+        <label class="text-sm text-gray-500 mb-1 block">From:</label>
+        <input 
+          type="date" 
+          [(ngModel)]="dateFrom"
+          class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+      </div>
+      <div class="flex-1">
+        <label class="text-sm text-gray-500 mb-1 block">To:</label>
+        <input 
+          type="date" 
+          [(ngModel)]="dateTo"
+          class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Range -->
+  <div class="mb-6">
+    <div class="flex justify-between items-center mb-2">
+      <label class="text-gray-600">Cost Range</label>
+      <button 
+        (click)="resetCost()" 
+        class="text-blue-500 text-sm hover:text-blue-700">
+        Reset
+      </button>
+    </div>
+    <div class="px-2">
+      <input 
+        type="range" 
+        [(ngModel)]="costValue"
+        (input)="onCostChange($event)"
+        min="100" 
+        max="100000" 
+        step="100"
+        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+      >
+      <div class="flex justify-between mt-2">
+        <span class="text-sm text-gray-500">₱100</span>
+        <span class="text-sm text-gray-500">₱{{ costValue | number }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex gap-3 mb-6">
+    <button 
+      (click)="resetAll()" 
+      class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-300">
+      Reset
+    </button>
+    <button 
+      (click)="applyFilters()" 
+      class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
+      Apply
+    </button>
+  </div>
+
+  <!-- New Purchase Request Button -->
+  <button 
+    (click)="createPurchaseRequest()"
+    class="w-full flex items-center gap-3 p-4 bg-white border rounded-lg hover:bg-gray-50 transition duration-300">
+    <div class="flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+      </svg>
+      <span class="text-base font-medium">Purchase Request</span>
+    </div>
+    <div class="ml-auto">
+      <div class="bg-blue-600 rounded-lg p-2 text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </div>
+    </div>
+  </button>
+</div>
