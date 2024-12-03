@@ -1,0 +1,95 @@
+<main class="flex flex-col items-start px-4 py-2 bg-white max-w-[450px] mx-auto">
+  <form (ngSubmit)="onSubmit()" class="w-full" *ngIf="user">
+    <!-- Image Upload Section -->
+    <div class="flex flex-col items-center mb-3">
+      <div class="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+        <img 
+          *ngIf="imagePreview || (user && user.image)" 
+          [src]="imagePreview || user.image" 
+          class="w-full h-full object-cover" 
+          alt="Profile preview"
+        >
+        <span *ngIf="!imagePreview && (!user || !user.image)" class="text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </span>
+      </div>
+      <input
+        type="file"
+        id="image"
+        (change)="onImageSelected($event)"
+        accept="image/*"
+        class="hidden"
+        #fileInput
+      />
+      <button 
+        type="button"
+        (click)="fileInput.click()"
+        class="text-xs text-blue-600 hover:text-blue-700 mt-1"
+      >
+        Upload Photo
+      </button>
+    </div>
+
+    <div class="space-y-3">
+      <div>
+        <label for="username" class="text-xs font-bold">Name</label>
+        <input
+          type="text"
+          id="username"
+          [(ngModel)]="user.name"
+          name="name"
+          class="w-full py-2 px-3 border border-zinc-300 rounded-lg text-sm"
+          placeholder="Username"
+        />
+      </div>
+
+      <div>
+        <label for="email" class="text-xs font-bold">Email</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="user.email"
+          name="email"
+          class="w-full py-2 px-3 border border-zinc-300 rounded-lg text-sm"
+          placeholder="sample@gmail.com"
+        />
+      </div>
+
+      <!-- Role and Status side by side -->
+      <div class="flex gap-3">
+        <div class="flex-1">
+          <label for="role" class="text-xs font-bold">Role</label>
+          <select
+            id="role"
+            [(ngModel)]="user.role"
+            name="role"
+            class="w-full py-2 px-3 border border-zinc-300 rounded-lg text-sm"
+          >
+            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+          </select>
+        </div>
+
+        <div class="flex-1">
+          <label for="status" class="text-xs font-bold">Status</label>
+          <select
+            id="status"
+            [(ngModel)]="user.account_status"
+            name="status"
+            class="w-full py-2 px-3 border border-zinc-300 rounded-lg text-sm"
+          >
+            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+          </select>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="w-full py-2 bg-blue-600 text-white font-bold rounded-lg text-sm hover:bg-blue-700 mt-8"
+      >
+        Update Profile
+      </button>
+    </div>
+  </form>
+</main>

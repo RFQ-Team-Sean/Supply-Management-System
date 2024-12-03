@@ -1,0 +1,126 @@
+<div class="flex justify-between items-center mb-4 mt-1">
+    <h1 class="text-3xl font-bold text-gray-800">Purchase Request Management</h1>
+  </div>
+  
+  <!-- Main Content Container with Flex -->
+  <div class="max-w-8xl mx-auto">
+    <div class="flex gap-6">
+      <!-- Left Side: Filters -->
+      <div class="w-[300px] flex-shrink-0">
+        <app-d-prmfilter (filterChange)="onFilterChange($event)"></app-d-prmfilter>
+      </div>
+  
+      <!-- Right Side: Tables -->
+      <div class="flex-1">
+        <!-- Option Buttons -->
+        <div class="flex gap-4 mb-4 border-b border-gray-200">
+          <button 
+            (click)="switchView('pending')" 
+            [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'pending', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'pending'}"
+            class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
+          >
+            Pending Purchase Request
+          </button>
+          <button 
+            (click)="switchView('approved')" 
+            [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'approved', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'approved'}"
+            class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
+          >
+            Approved Purchase Request
+          </button>
+          <button 
+            (click)="switchView('rejected')" 
+            [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'rejected', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'rejected'}"
+            class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
+          >
+            Rejected Purchase Request
+          </button>
+        </div>
+  
+        <!-- Users Table -->
+        <div *ngIf="currentView === 'pending'" class="bg-white rounded-lg shadow-lg p-4">
+          <div class="flex mb-4">
+            <div class="flex-grow flex items-center border rounded-lg px-2 bg-white">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+              <input 
+                type="text" 
+                placeholder="Search users by name, email or role" 
+                class="w-full p-2 focus:outline-none"
+                (input)="searchRoles($event)"
+              />
+            </div>
+          </div>
+  
+          <table class="min-w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PR ID</th>
+                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Requested Items</th>
+                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Ammount</th>
+                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date Submitted </th>
+                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr *ngFor="let prm of displayedPRMs" class="hover:bg-gray-50 transition duration-300">
+                <td class="py-4 px-6 text-center text-sm text-gray-900">{{ prm.pr_id }}</td>
+                <td class="py-4 px-6 text-center text-sm text-gray-500">{{ prm.requested_item }}</td>
+                <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ prm.total_amount | number:'1.2-2' }}</td>
+                <td class="py-4 px-6 text-center text-sm text-gray-500">{{ prm.date_submitted }}</td>
+                <td class="py-4 px-6 text-center text-sm font-medium" 
+                    [ngClass]="{
+                      'text-yellow-600': prm.status === 'Pending'
+                    }">
+                  {{ prm.status }}
+                </td>
+                <td class="py-4 px-6 text-center text-sm font-medium relative">
+                  <button (click)="toggleActions(prm)" class="flex justify-center items-center h-full w-full">
+                    <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
+                  </button>
+                  <div *ngIf="currentOpenActionId === prm.pr_id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+                    <div class="flex flex-col">
+                      <button (click)="viewPrm(prm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">View</button>
+                      <button (click)="editPrm(prm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Edit</button>
+                      <button (click)="submitPrm(prm)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Submit</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+  
+          <!-- Pagination -->
+          <div class="flex items-center justify-between mt-4">
+            <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+              Previous
+            </button>
+  
+            <div class="flex space-x-2">
+              <span *ngFor="let page of [].constructor(totalPages); let i = index" (click)="changePage(i + 1)" [ngClass]="{'bg-blue-500 text-white': currentPage === i + 1, 'bg-gray-200 text-gray-700': currentPage !== i + 1}" class="px-3 py-1 rounded-lg cursor-pointer">
+                {{ i + 1 }}
+              </span>
+            </div>
+  
+            <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+              Next
+            </button>
+          </div>
+        </div>
+  
+        <!-- Approved Table -->
+        <div *ngIf="currentView === 'approved'" class="bg-white rounded-lg shadow-lg p-4">
+            <app-d-prmapprovedrequest></app-d-prmapprovedrequest>
+        </div>
+  
+        <!-- Rejected Table -->
+        <div *ngIf="currentView === 'rejected'" class="bg-white rounded-lg shadow-lg p-4">
+            <app-d-prmrejectrequest></app-d-prmrejectrequest>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <router-outlet></router-outlet>
