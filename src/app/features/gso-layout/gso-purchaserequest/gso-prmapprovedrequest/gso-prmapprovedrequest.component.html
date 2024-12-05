@@ -20,30 +20,32 @@
       <table class="min-w-full">
         <thead class="bg-gray-50">
             <tr>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Project Name</th>
+              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PR ID</th>
+              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
               <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Requested Items</th>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Budget</th>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date Rejected</th>
+              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date Delivered</th>
               <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
         <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let ppmp of displayedPpmps" class="hover:bg-gray-50 transition duration-300">
-            <td class="py-4 px-6 text-center text-sm text-gray-900">{{ ppmp.project_name }}</td>
-            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items }}</td>
-            <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ ppmp.total_budget | number:'1.2-2' }}</td>
-            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_rejected }}</td>
-            <td class="py-4 px-6 text-center text-sm font-medium text-red-600">{{ ppmp.status }}</td>
+          <tr *ngFor="let prm of displayedPRMs" class="hover:bg-gray-50 transition duration-300">
+            <td class="py-4 px-6 text-center text-sm text-gray-900">{{ prm.pr_id }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ prm.department }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-900">{{ prm.requested_item }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ prm.total_amount | number:'1.2-2' }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ prm.supplier }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ prm.date_delivered }}</td>
+            <td class="py-4 px-6 text-center text-sm font-medium text-green-600">{{ prm.status }}</td>
             <td class="py-4 px-6 text-center text-sm font-medium relative">
-              <button (click)="toggleActions(ppmp)" class="flex justify-center items-center h-full w-full">
+              <button (click)="toggleActions(prm)" class="flex justify-center items-center h-full w-full">
                 <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
               </button>
-              <div *ngIf="currentOpenActionId === ppmp.project_id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+              <div *ngIf="currentOpenActionId === prm.id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
                 <div class="flex flex-col">
-                  <button (click)="viewPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">View</button>
-                  <button (click)="editPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Edit</button>
-                  <button (click)="resubmitPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Resubmit</button>
+                  <button (click)="viewPrm(prm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">View</button>
                 </div>
               </div>
             </td>

@@ -16,7 +16,7 @@
       </button>
 
       <!-- Profile Section -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 profile-dropdown relative">
         <div class="flex flex-col text-right">
           <span class="text-sm font-medium text-gray-900">{{ userName }}</span>
           <span class="text-xs text-gray-500">{{ userRole }}</span>
@@ -24,11 +24,11 @@
         <!-- Profile Dropdown -->
         <div class="relative">
           <button 
-            (click)="toggleProfileMenu()" 
+            (click)="toggleProfileMenu($event)" 
             class="flex items-center gap-2 focus:outline-none"
           >
             <img 
-              [src]="userProfileImage || 'assets/images/default-avatar.png'" 
+              [src]="userProfileImage || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userName)" 
               alt="Profile" 
               class="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
             >
@@ -42,10 +42,11 @@
           <!-- Dropdown Menu -->
           <div *ngIf="isProfileMenuOpen" 
                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <button (click)="navigateToProfile()" 
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
               <iconify-icon icon="mdi:account-outline" class="mr-2"></iconify-icon>
               View Profile
-            </a>
+            </button>
             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
               <iconify-icon icon="mdi:cog-outline" class="mr-2"></iconify-icon>
               Settings
