@@ -29,6 +29,22 @@ interface AppUser extends SupabaseUser {
   email: string; 
 }
 
+interface PPMPManagementData {
+  project_id: number;
+  date_created: string;
+  project_name: string;
+  requested_items: string;
+  total_budget: number;
+  status: string;  // Assuming status is a string, adjust if it's a custom type
+  date_approved: string | null;
+  date_rejected: string | null;
+  fiscal_year: number | null;
+  department: string;  // Adjust according to your department type
+  estimated_department_budget: number | null;
+  remaining_department_budget: number | null;
+}
+
+
 
 @Injectable({
   providedIn: 'root',
@@ -44,50 +60,76 @@ export class SupabaseService {
   client: any;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-    // this.supabaseInitPromise = this.initializeSupabase(); // Commenting out Supabase initialization
-    // this.initializeSupabase().then(() => {
-    // }).catch(error => {
-    //   console.error('Error during Supabase initialization:', error);
-    // });
-    // this.checkSession(); // Commenting out session check
+    // Only initialize if we're in a browser context
+    if (isPlatformBrowser(this.platformId)) {
+      this.supabaseInitPromise = this.initializeSupabase().catch(error => {
+        console.error('Error during Supabase initialization:', error);
+      });
+      // Move checkSession to after initialization
+      this.supabaseInitPromise.then(() => {
+        this.checkSession();
+      });
+    }
   }
 
-  // Commenting out the checkSession method
-  // private checkSession(): void {
-  //   if (!this.supabase) {
-  //       console.error('Supabase client not initialized.');
-  //       return;
-  //   }
-  //   this.supabase.auth.getSession().then(({ data: { session }, error }) => {
-  //       if (error) {
-  //           console.error('Error fetching session:', error.message);
-  //       } else if (session) {
-  //       } else {
-  //           console.error('No active session.');
-  //       }
-  //   });
-  // }
+  private async checkSession(): Promise<void> {
+    await this.ensureSupabaseInitialized();
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return;
+    }
+    try {
+      const { data: { session }, error } = await this.supabase.auth.getSession();
+      if (error) {
+        console.error('Error fetching session:', error.message);
+      } else if (session) {
+        // Handle active session
+        console.log('Active session found');
+      } else {
+        console.log('No active session');
+      }
+    } catch (error) {
+      console.error('Error checking session:', error);
+    }
+  }
 
   // Commenting out the signIn method
-  async signIn(email: string, password: string): Promise<{ data: any, error: any }> {
-    // if (!this.supabase) {
-    //   console.error('Supabase client not initialized.');
-    //   return { data: null, error: 'Supabase client not initialized' };
-    // }
-    // try {
-    //   const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
-    //   if (error) {
-    //     console.error('Sign-in error:', (error as Error).message);
-    //     return { data: null, error };
-    //   }
-    //   return { data, error: null };
-    // } catch (error) {
-    //   console.error('Error during sign-in:', (error as Error).message);
-    //   return { data: null, error: 'Error during sign-in' };
-    // }
+  async signIn(email: string, password: string) {
+    if (!this.supabase) {
+      throw new Error('Supabase client not initialized.');
+    }
 
-    // Dummy implementation for testing
-    return { data: { user: { email } }, error: null }; // Simulate successful sign-in
+    try {
+      const { data: authData, error: authError } = await this.supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      // Fetch user details including role from the account table
+      const { data: userData, error: userError } = await this.supabase
+        .from('account')
+        .select('*')
+        .eq('id', authData.user?.id)
+        .single();
+
+      if (userError) throw userError;
+
+      // Store user data
+      this.currentUser = userData;
+      
+      // Store session
+      if (authData.session) {
+        localStorage.setItem('supabase.auth.token', authData.session.access_token);
+        localStorage.setItem('userRole', userData.role);
+      }
+
+      return { data: { ...authData, userData }, error: null };
+    } catch (error) {
+      console.error('Sign-in error:', error);
+      return { data: null, error };
+    }
   }
 
   async getCurrentUserId(): Promise<string | null> {
@@ -130,19 +172,18 @@ export class SupabaseService {
       console.error('Supabase client not initialized.');
       return null;
     }
+
     try {
       const { data, error } = await this.supabase
         .from('account')
-        .select('*')
+        .select('role')
         .eq('email', email)
         .single();
-      if (error) {
-        console.error('Error fetching user role:', (error as PostgrestError).message);
-        return null;
-      }
-      return data?.role ?? null;
+
+      if (error) throw error;
+      return data?.role || null;
     } catch (error) {
-      console.error('Error fetching user role:', (error as Error).message);
+      console.error('Error fetching user role:', error);
       return null;
     }
   }
@@ -265,5 +306,57 @@ export class SupabaseService {
       return null;
     }
   }
+
+  async createUser(email: string, password: string, userData: any) {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+    
+    try {
+      const { data, error } = await this.supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userData
+        }
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      return null;
+    }
+  }
+
+  async getPPMPManagementData(statusFilter: string) {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+  
+    const { data, error } = await this.supabase
+      .rpc('get_ppmp_management_data'); //custom sql function call
+  
+    if (error) {
+      console.error('Error fetching data:', error);
+      return [];
+    }
+
+    const typedData = data as PPMPManagementData[];
+  
+    if (statusFilter === 'Pending'){
+      return typedData?.filter(item => item.status === 'Pending') || [];
+    } else if (statusFilter === 'Approved'){
+      return typedData?.filter(item => item.status === 'Approved') || [];
+    } else if (statusFilter === 'Rejected'){
+      return typedData?.filter(item => item.status === 'Rejected') || [];
+    } else {
+      return [];
+    }
+  }
+  
+  
 
 }

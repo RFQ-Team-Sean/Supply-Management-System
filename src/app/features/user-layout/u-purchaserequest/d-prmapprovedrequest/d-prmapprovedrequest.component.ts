@@ -138,7 +138,7 @@ export class DPrmapprovedrequestComponent implements OnInit {
 
   displayedPRMs: PRM[] = [];
   currentPage: number = 1;
-  itemsPerPage: number = 8;
+  itemsPerPage: number = 5;
   totalPages: number = 0;
   searchTerm: string = '';
   currentOpenActionId: number | null = null;
