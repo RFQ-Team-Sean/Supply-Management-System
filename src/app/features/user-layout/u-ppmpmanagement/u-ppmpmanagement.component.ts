@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { APpmpfilterComponent } from "./a-ppmpfilter/a-ppmpfilter.component";
 import { DPpmprejectedprocurementComponent } from "./d-ppmprejectedprocurement/d-ppmprejectedprocurement.component";
 import { DPpmpapprovedprocurementComponent } from "./d-ppmpapprovedprocurement/d-ppmpapprovedprocurement.component";
+import { SupabaseService } from '../../../core/services/supabase.service';
 
 interface PPMP {
   id: number;
   project_name: string;
-  requested_items: string[];
+  requested_items: string;
   total_budget: number;
   date_created: string;
   status: string;
@@ -38,82 +39,97 @@ export class UPpmpmanagement implements OnInit {
   currentOpenActionId: number | null = null;
   currentView: 'pending' | 'approved' | 'rejected' = 'pending';
 
-  constructor(private router: Router) {}
+  // booleans
+  isLoading: boolean = true;
+
+  constructor(private router: Router, private supabaseService: SupabaseService) {}
 
   ngOnInit(): void {
-    this.initializeDummyData();
+    // this.initializeDummyData();
+    this.loadPpmpRecords();
+  }
+
+  // initializeDummyData(): void {
+  //   this.ppmpData = [
+  //     { 
+  //       id: 1, 
+  //       project_name: 'IT Equipment Procurement', 
+  //       requested_items: ['Desktop Computers'],
+  //       total_budget: 250000.22, 
+  //       date_created: '2024-01-15', 
+  //       status: 'Pending' 
+  //     },
+  //     { 
+  //       id: 2, 
+  //       project_name: 'Office Supplies', 
+  //       requested_items: ['Bond Papers', 'Ballpens'],
+  //       total_budget: 180000.00, 
+  //       date_created: '2024-02-10', 
+  //       status: 'Draft' 
+  //     },
+  //     { 
+  //       id: 3, 
+  //       project_name: 'Laboratory Equipment', 
+  //       requested_items: ['Microscopes', 'Test Tubes'],
+  //       total_budget: 350000.00, 
+  //       date_created: '2024-03-05', 
+  //       status: 'Pending' 
+  //     },
+  //     { 
+  //       id: 4, 
+  //       project_name: 'Classroom Furniture', 
+  //       requested_items: ['Student Chairs', 'Teachers Tables'],
+  //       total_budget: 420000.00, 
+  //       date_created: '2024-03-20', 
+  //       status: 'Draft' 
+  //     },
+  //     { 
+  //       id: 5, 
+  //       project_name: 'Sports Equipment', 
+  //       requested_items: ['Basketballs', 'Volleyballs'],
+  //       total_budget: 550000.00, 
+  //       date_created: '2024-04-15', 
+  //       status: 'Pending' 
+  //     },
+  //     { 
+  //       id: 6, 
+  //       project_name: 'Library Books', 
+  //       requested_items: ['Science Textbooks'],
+  //       total_budget: 280000.00, 
+  //       date_created: '2024-05-01', 
+  //       status: 'Draft' 
+  //     },
+  //     { 
+  //       id: 7, 
+  //       project_name: 'Security System Upgrade', 
+  //       requested_items: ['CCTV Cameras', 'DVR System'],
+  //       total_budget: 150000.00, 
+  //       date_created: '2024-06-18', 
+  //       status: 'Pending' 
+  //     },
+  //     { 
+  //       id: 8, 
+  //       project_name: 'Cafeteria Equipment', 
+  //       requested_items: ['Industrial Stove'],
+  //       total_budget: 200000.00, 
+  //       date_created: '2024-07-25', 
+  //       status: 'Draft' 
+  //     }
+  //   ];
+  //   this.totalPages = Math.ceil(this.ppmpData.length / this.itemsPerPage);
+  // }
+
+  async loadPpmpRecords() {
+    this.isLoading = true;
+    const data = await this.supabaseService.getPPMPManagementData();
+    if (data) {
+      this.ppmpData = data;
+    }
+    this.isLoading = false;
+    this.totalPages = Math.ceil(this.ppmpData.length / this.itemsPerPage);
     this.updateDisplayedPpmp();
   }
 
-  initializeDummyData(): void {
-    this.ppmpData = [
-      { 
-        id: 1, 
-        project_name: 'IT Equipment Procurement', 
-        requested_items: ['Desktop Computers'],
-        total_budget: 250000.00, 
-        date_created: '2024-01-15', 
-        status: 'Pending' 
-      },
-      { 
-        id: 2, 
-        project_name: 'Office Supplies', 
-        requested_items: ['Bond Papers', 'Ballpens'],
-        total_budget: 180000.00, 
-        date_created: '2024-02-10', 
-        status: 'Draft' 
-      },
-      { 
-        id: 3, 
-        project_name: 'Laboratory Equipment', 
-        requested_items: ['Microscopes', 'Test Tubes'],
-        total_budget: 350000.00, 
-        date_created: '2024-03-05', 
-        status: 'Pending' 
-      },
-      { 
-        id: 4, 
-        project_name: 'Classroom Furniture', 
-        requested_items: ['Student Chairs', 'Teachers Tables'],
-        total_budget: 420000.00, 
-        date_created: '2024-03-20', 
-        status: 'Draft' 
-      },
-      { 
-        id: 5, 
-        project_name: 'Sports Equipment', 
-        requested_items: ['Basketballs', 'Volleyballs'],
-        total_budget: 550000.00, 
-        date_created: '2024-04-15', 
-        status: 'Pending' 
-      },
-      { 
-        id: 6, 
-        project_name: 'Library Books', 
-        requested_items: ['Science Textbooks'],
-        total_budget: 280000.00, 
-        date_created: '2024-05-01', 
-        status: 'Draft' 
-      },
-      { 
-        id: 7, 
-        project_name: 'Security System Upgrade', 
-        requested_items: ['CCTV Cameras', 'DVR System'],
-        total_budget: 150000.00, 
-        date_created: '2024-06-18', 
-        status: 'Pending' 
-      },
-      { 
-        id: 8, 
-        project_name: 'Cafeteria Equipment', 
-        requested_items: ['Industrial Stove'],
-        total_budget: 200000.00, 
-        date_created: '2024-07-25', 
-        status: 'Draft' 
-      }
-    ];
-    this.totalPages = Math.ceil(this.ppmpData.length / this.itemsPerPage);
-  }
 
   updateDisplayedPpmp(): void {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
@@ -154,8 +170,7 @@ export class UPpmpmanagement implements OnInit {
   searchRoles(event: Event): void {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
     this.displayedPpmp = this.ppmpData.filter(ppmp => 
-      ppmp.project_name.toLowerCase().includes(searchTerm) ||
-      ppmp.requested_items.some(item => item.toLowerCase().includes(searchTerm))
+      ppmp.project_name.toLowerCase().includes(searchTerm)
     );
     this.currentPage = 1;
     this.updateDisplayedPpmp();
@@ -190,4 +205,6 @@ export class UPpmpmanagement implements OnInit {
   handlePPMPClick() {
     this.router.navigate(['/user/u-ppmpmanagement/create']);
   }
+
+  
 }

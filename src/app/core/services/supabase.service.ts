@@ -314,4 +314,20 @@ export class SupabaseService {
     }
   }
 
+  async getPPMPManagementData() {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+    const { data, error } = await this.supabase
+      .rpc('get_ppmp_management_data');  // Call the custom SQL function
+  
+    if (error) {
+      console.error('Error fetching data:', error);
+      return [];
+    }
+    return data;
+  }
+  
+
 }

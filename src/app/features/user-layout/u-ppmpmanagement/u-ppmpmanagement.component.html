@@ -38,7 +38,7 @@
         </button>
       </div>
 
-      <!-- Users Table -->
+      <!-- Projects Table -->
       <div *ngIf="currentView === 'pending'" class="bg-white rounded-lg shadow-lg p-4">
         <div class="flex mb-4">
           <div class="flex-grow flex items-center border rounded-lg px-2 bg-white">
@@ -47,7 +47,7 @@
             </svg>
             <input 
               type="text" 
-              placeholder="Search users by name, email or role" 
+              placeholder="Search project" 
               class="w-full p-2 focus:outline-none"
               (input)="searchRoles($event)"
             />
@@ -68,9 +68,10 @@
           <tbody class="divide-y divide-gray-200">
             <tr *ngFor="let ppmp of displayedPpmp" class="hover:bg-gray-50 transition duration-300">
               <td class="py-4 px-6 text-center text-sm text-gray-900">{{ ppmp.project_name }}</td>
-              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items.join(', ') }}</td>
+              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items }}</td>
+              <!-- <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items.join(', ') }}</td> -->
               <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ ppmp.total_budget | number:'1.2-2' }}</td>
-              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_created }}</td>
+              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_created | date: 'dd-MM-yyyy' }} </td>
               <td class="py-4 px-6 text-center text-sm font-medium" 
                   [ngClass]="{
                     'text-yellow-600': ppmp.status === 'Pending',
