@@ -8,7 +8,7 @@ import { DPpmpapprovedprocurementComponent } from "./d-ppmpapprovedprocurement/d
 import { SupabaseService } from '../../../core/services/supabase.service';
 
 interface PPMP {
-  id: number;
+  project_id: number;
   project_name: string;
   requested_items: string;
   total_budget: number;
@@ -45,83 +45,12 @@ export class UPpmpmanagement implements OnInit {
   constructor(private router: Router, private supabaseService: SupabaseService) {}
 
   ngOnInit(): void {
-    // this.initializeDummyData();
     this.loadPpmpRecords();
   }
 
-  // initializeDummyData(): void {
-  //   this.ppmpData = [
-  //     { 
-  //       id: 1, 
-  //       project_name: 'IT Equipment Procurement', 
-  //       requested_items: ['Desktop Computers'],
-  //       total_budget: 250000.22, 
-  //       date_created: '2024-01-15', 
-  //       status: 'Pending' 
-  //     },
-  //     { 
-  //       id: 2, 
-  //       project_name: 'Office Supplies', 
-  //       requested_items: ['Bond Papers', 'Ballpens'],
-  //       total_budget: 180000.00, 
-  //       date_created: '2024-02-10', 
-  //       status: 'Draft' 
-  //     },
-  //     { 
-  //       id: 3, 
-  //       project_name: 'Laboratory Equipment', 
-  //       requested_items: ['Microscopes', 'Test Tubes'],
-  //       total_budget: 350000.00, 
-  //       date_created: '2024-03-05', 
-  //       status: 'Pending' 
-  //     },
-  //     { 
-  //       id: 4, 
-  //       project_name: 'Classroom Furniture', 
-  //       requested_items: ['Student Chairs', 'Teachers Tables'],
-  //       total_budget: 420000.00, 
-  //       date_created: '2024-03-20', 
-  //       status: 'Draft' 
-  //     },
-  //     { 
-  //       id: 5, 
-  //       project_name: 'Sports Equipment', 
-  //       requested_items: ['Basketballs', 'Volleyballs'],
-  //       total_budget: 550000.00, 
-  //       date_created: '2024-04-15', 
-  //       status: 'Pending' 
-  //     },
-  //     { 
-  //       id: 6, 
-  //       project_name: 'Library Books', 
-  //       requested_items: ['Science Textbooks'],
-  //       total_budget: 280000.00, 
-  //       date_created: '2024-05-01', 
-  //       status: 'Draft' 
-  //     },
-  //     { 
-  //       id: 7, 
-  //       project_name: 'Security System Upgrade', 
-  //       requested_items: ['CCTV Cameras', 'DVR System'],
-  //       total_budget: 150000.00, 
-  //       date_created: '2024-06-18', 
-  //       status: 'Pending' 
-  //     },
-  //     { 
-  //       id: 8, 
-  //       project_name: 'Cafeteria Equipment', 
-  //       requested_items: ['Industrial Stove'],
-  //       total_budget: 200000.00, 
-  //       date_created: '2024-07-25', 
-  //       status: 'Draft' 
-  //     }
-  //   ];
-  //   this.totalPages = Math.ceil(this.ppmpData.length / this.itemsPerPage);
-  // }
-
   async loadPpmpRecords() {
     this.isLoading = true;
-    const data = await this.supabaseService.getPPMPManagementData();
+    const data = await this.supabaseService.getPPMPManagementData('Pending');
     if (data) {
       this.ppmpData = data;
     }
@@ -144,7 +73,7 @@ export class UPpmpmanagement implements OnInit {
   }
 
   toggleActions(ppmp: PPMP): void {
-    this.currentOpenActionId = this.currentOpenActionId === ppmp.id ? null : ppmp.id;
+    this.currentOpenActionId = this.currentOpenActionId === ppmp.project_id ? null : ppmp.project_id;
   }
 
   switchView(view: 'pending' | 'approved' | 'rejected'): void {
@@ -154,11 +83,11 @@ export class UPpmpmanagement implements OnInit {
   }
 
   viewPpmp(ppmp: PPMP): void {
-    this.router.navigate(['/user/u-ppmpviewdetails', ppmp.id]);
+    this.router.navigate(['/user/u-ppmpviewdetails', ppmp.project_id]);
   }
 
   editPpmp(ppmp: PPMP): void {
-    this.router.navigate(['/user/u-ppmpedit', ppmp.id]);
+    this.router.navigate(['/user/u-ppmpedit', ppmp.project_id]);
   }
 
   submitPpmp(ppmp: PPMP): void {

@@ -29,6 +29,22 @@ interface AppUser extends SupabaseUser {
   email: string; 
 }
 
+interface PPMPManagementData {
+  project_id: number;
+  date_created: string;
+  project_name: string;
+  requested_items: string;
+  total_budget: number;
+  status: string;  // Assuming status is a string, adjust if it's a custom type
+  date_approved: string | null;
+  date_rejected: string | null;
+  fiscal_year: number | null;
+  department: string;  // Adjust according to your department type
+  estimated_department_budget: number | null;
+  remaining_department_budget: number | null;
+}
+
+
 
 @Injectable({
   providedIn: 'root',
@@ -314,20 +330,33 @@ export class SupabaseService {
     }
   }
 
-  async getPPMPManagementData() {
+  async getPPMPManagementData(statusFilter: string) {
     if (!this.supabase) {
       console.error('Supabase client not initialized.');
       return null;
     }
+  
     const { data, error } = await this.supabase
-      .rpc('get_ppmp_management_data');  // Call the custom SQL function
+      .rpc('get_ppmp_management_data'); //custom sql function call
   
     if (error) {
       console.error('Error fetching data:', error);
       return [];
     }
-    return data;
+
+    const typedData = data as PPMPManagementData[];
+  
+    if (statusFilter === 'Pending'){
+      return typedData?.filter(item => item.status === 'Pending') || [];
+    } else if (statusFilter === 'Approved'){
+      return typedData?.filter(item => item.status === 'Approved') || [];
+    } else if (statusFilter === 'Rejected'){
+      return typedData?.filter(item => item.status === 'Rejected') || [];
+    } else {
+      return [];
+    }
   }
+  
   
 
 }
