@@ -109,10 +109,6 @@ export class SideBarComponent implements OnInit {
       icon: 'ic:sharp-dashboard',
       route: '/gso/dashboard',
     },
-    { label: 'PPMP Entry', 
-      icon: 'mdi:basket-plus', 
-      route: '/gso/gso-ppmpentry' 
-    },
     { label: 'Purchase Request Management', 
       icon: 'mdi:basket-plus', 
       route: '/gso/gso-purchaserequest' 
@@ -123,19 +119,14 @@ export class SideBarComponent implements OnInit {
       route: '/gso/gso-inventorymanagement',
     },
     {
-      label: 'Supplier Management',
-      icon: 'ri:archive-drawer-line',
-      route: '/gso/gso-suppliermanagement',
-    },
-    {
-      label: 'Bidding Management',
-      icon: 'ri:archive-drawer-line',
-      route: '/gso/gso-biddingmanagement',
-    },
-    {
       label: 'Reports',
       icon: 'ic:baseline-list-alt',
       route: '/gso/gso-reports',
+    },
+    {
+      label: 'Notifications',
+      icon: 'mingcute:notification-fill',
+      route: '/gso/gso-notifications',
     },
     {
       label: 'System Settings',
@@ -161,38 +152,6 @@ export class SideBarComponent implements OnInit {
     },
   ];
 
-  BacMenu: MenuItem[] = [
-    {
-      label: 'Dashboard',
-      icon: 'ic:sharp-dashboard',
-      route: '/bac/dashboard',
-    },
-    {
-      label: 'PPMP Management',
-      icon: 'ic:outline-school',
-      route: '/bac/bac-ppmpmanagement',
-    },
-    { label: 'Purchase Request Management', 
-      icon: 'mdi:basket-plus', 
-      route: '/bac/bac-purchasemanagement' 
-    },
-    {
-      label: 'Inventory Management',
-      icon: 'ri:archive-drawer-line',
-      route: '/bac/bac-inventorymanagement',
-    },
-    {
-      label: 'Reports',
-      icon: 'ic:baseline-list-alt',
-      route: '/bac/bac-reports',
-    },
-    {
-      label: 'Notifications',
-      icon: 'mingcute:notification-fill',
-      route: '/bac/bac-notification',
-    },
-  ];
-
   generalMenu: MenuItem[] = [
     { label: 'Report a Problem', icon: 'ic:baseline-report-problem', route: '/report' }
   ];
@@ -203,12 +162,7 @@ export class SideBarComponent implements OnInit {
   constructor(private router: Router, private sidebarService: SidebarServiceService) {}
 
   ngOnInit() {
-    const userRole = localStorage.getItem('userRole');
-    if (userRole) {
-      this.setMenuByRole(userRole);
-    } else {
-      console.error('No user role found in localStorage');
-    }
+    this.setMenuByRole();
     this.sidebarService.isCollapsed$.subscribe(
       isCollapsed => {
         this.isCollapsed = isCollapsed;
@@ -221,12 +175,11 @@ export class SideBarComponent implements OnInit {
     this.isDropdownOpen[label] = !this.isDropdownOpen[label];
   }
 
-  setMenuByRole(role: string) {
-    // Convert role to lowercase for consistent comparison
-    const normalizedRole = role?.toLowerCase();
-    
-    switch (normalizedRole) {
-      case 'department':
+  setMenuByRole() {
+    const userRole = localStorage.getItem('userRole') as 'user' | 'admin' | 'gso';
+    console.log('User Role:', userRole);
+    switch (userRole) {
+      case 'user':
         this.currentMenu = [...this.DepartmentuserMenu];
         this.title = 'Department Staff Portal'; // Set title for user menu
         break;
@@ -237,15 +190,10 @@ export class SideBarComponent implements OnInit {
       case 'gso':
         this.currentMenu = [...this.GsoMenu];
         this.title = 'GSO Portal'; 
-        break; 
-      case 'bac':
-        this.currentMenu = [...this.BacMenu];
-        this.title = 'BAC Portal'; 
-        break;    
+        break;     
       default:
-        console.error('Invalid role:', role);
-        // Set a default menu or empty array
-        this.currentMenu = [];
+        console.error('Invalid role');
+        this.router.navigate(['/login']);
     }
     this.othersMenu = [...this.generalMenu];
   }

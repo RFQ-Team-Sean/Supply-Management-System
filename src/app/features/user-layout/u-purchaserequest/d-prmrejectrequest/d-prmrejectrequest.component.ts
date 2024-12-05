@@ -149,7 +149,7 @@ export class DPrmrejectrequestComponent implements OnInit {
 
   displayedPRMs: PRM[] = [];
   currentPage: number = 1;
-  itemsPerPage: number = 5;
+  itemsPerPage: number = 8;
   totalPages: number = 0;
   searchTerm: string = '';
   currentOpenActionId: number | null = null;
