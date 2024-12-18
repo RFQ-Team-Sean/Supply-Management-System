@@ -1,18 +1,39 @@
-<div class="w-dvw h-dvh bg-cover bg-center relative bg-gray-100">
+<div class="w-dvw h-dvh bg-sky-100 relative overflow-hidden">
+    <!-- Background Shapes -->
+    <div class="absolute w-32 h-32 bg-navy-blue rounded-full -left-10 bottom-20" style="will-change: transform;"></div>
+    <div class="absolute w-96 h-96 bg-navy-blue -right-20 -top-20 transform rotate-45" style="will-change: transform;"></div>
+    <div class="absolute w-8 h-8 bg-navy-blue transform rotate-45 right-32 bottom-32" style="will-change: transform;"></div>
+    <div class="absolute w-4 h-4 bg-navy-blue rounded-full right-52 bottom-52" style="will-change: transform;"></div>
+    <div class="absolute w-8 h-8 bg-navy-blue transform rotate-45 right-80 top-32" style="will-change: transform;"></div>
+
+    <!-- Main Content -->
     <section class="w-full h-full flex justify-center items-center relative">
-        <!-- Right Image -->
-        <img loading="lazy" src="assets/logo/logo.png"
-            class="absolute right-10 top-[40%] transform -translate-y-1/2 object-contain w-[550px]" />
+        <div class="w-full max-w-[1200px] h-[700px] bg-white rounded-2xl shadow-lg flex relative overflow-hidden auth-container">
+            <!-- Sliding Panel -->
+            <div class="sliding-panel" [class.right]="isLogin" [class.left]="!isLogin">
+                <div class="w-full h-full flex flex-col justify-center items-center text-white p-12 panel-content"
+                     [class.fade-out]="isAnimating">
+                    <img src="assets/logo/Logos.png" class="w-52 h-52 mb-6" alt="Logo" />
+                    <h2 class="text-3xl font-bold mb-4">{{ isLogin ? 'Hello, Quanby!' : 'Welcome Back!' }}</h2>
+                    <p class="text-center mb-8">
+                        {{ isLogin ? 'To keep connected with us please login with your personal info' : 'To keep connected with us please register with your personal info' }}
+                    </p>
+                    <button (click)="toggleForm()" 
+                            class="px-8 py-2 border-2 border-white rounded-full hover:bg-white hover:text-[#30B2E1] transition-button">
+                        {{ isLogin ? 'SIGN UP' : 'SIGN IN' }}
+                    </button>
+                </div>
+            </div>
 
-        <!-- Login Form Positioned to the Left and Upper -->
-        <div class="absolute top-[15%] left-[28%]">
-            <app-login-form></app-login-form>
-        </div>
+            <!-- Form Container -->
+            <div class="w-1/2 p-12" [ngClass]="isLogin ? 'order-first' : 'order-last'">
+                <app-register-form *ngIf="!isLogin"></app-register-form>
+            </div>
 
-        <!-- Bottom Right Text -->
-        <div class="absolute bottom-10 right-10 text-right">
-            <h1 class="text-5xl font-bold text-amber-500 max-md:text-4xl">Quanby</h1>
-            <h2 class="text-5xl font-medium text-black max-md:text-4xl">Supply Management System</h2>
+            <!-- Right Side (Empty Space) -->
+            <div class="w-1/2">
+                <app-login-form *ngIf="isLogin"></app-login-form>
+            </div>
         </div>
     </section>
 </div>

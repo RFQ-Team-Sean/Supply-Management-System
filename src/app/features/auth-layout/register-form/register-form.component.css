@@ -1,0 +1,132 @@
+/* Form entrance animation */
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Individual element entrance */
+@keyframes elementFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Title special animation */
+@keyframes titleReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px);
+        letter-spacing: 4px;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        letter-spacing: normal;
+    }
+}
+
+/* Staggered form elements animation */
+.form-element {
+    opacity: 0;
+    animation: elementFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.form-element:nth-child(1) { animation-delay: 0.9s; }  /* Title */
+.form-element:nth-child(2) { animation-delay: 1.1s; }  /* Name */
+.form-element:nth-child(3) { animation-delay: 1.3s; }  /* Email */
+.form-element:nth-child(4) { animation-delay: 1.5s; }  /* Password */
+.form-element:nth-child(5) { animation-delay: 1.7s; }  /* Confirm Password */
+.form-element:nth-child(6) { animation-delay: 1.9s; }  /* Button */
+
+/* Input field animations */
+input, select {
+    background: white;
+    border: 1px solid #E8E8E8;
+    color: #333 !important;
+    -webkit-text-fill-color: #333 !important;
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect (only when empty) */
+input:placeholder-shown:hover, 
+select:not(:has(option:checked)):hover {
+    border-color: #30B2E1;
+}
+
+/* Focus effect */
+input:focus, select:focus {
+    outline: none;
+    border-color: #30B2E1;
+    box-shadow: 0 0 0 3px rgba(48, 178, 225, 0.2);
+}
+
+/* Filled state */
+input:not(:placeholder-shown),
+select:has(option:checked) {
+    border-color: #30B2E1;
+    background-color: white !important;
+}
+
+/* Smooth transition for input fields */
+input, select {
+    transition: all 0.3s ease;
+}
+
+/* Password field style */
+input[type="password"] {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    letter-spacing: 0.1em;
+}
+
+/* Autofill style */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #333 !important;
+}
+
+/* Button hover effect */
+button {
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background: #2AA0CF;
+    transform: translateY(-2px);
+}
+
+/* Animation for form elements */
+.form-element {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Staggered entrance for form elements */
+.form-element:nth-child(1) { animation-delay: 0.3s; }
+.form-element:nth-child(2) { animation-delay: 0.4s; }
+.form-element:nth-child(3) { animation-delay: 0.5s; }
+.form-element:nth-child(4) { animation-delay: 0.6s; }
+.form-element:nth-child(5) { animation-delay: 0.7s; }
+.form-element:nth-child(6) { animation-delay: 0.8s; }
