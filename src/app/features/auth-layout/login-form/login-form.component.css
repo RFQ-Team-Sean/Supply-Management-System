@@ -1,0 +1,247 @@
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-70px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes titleReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+        letter-spacing: 8px;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        letter-spacing: normal;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animate-slide-in {
+    animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+h1 {
+    animation: titleReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.form-element {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: elementEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes elementEntrance {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-element:nth-child(1) {
+    animation-delay: 1s;
+}
+
+.form-element:nth-child(2) {
+    animation-delay: 1.2s;
+}
+
+.form-element:nth-child(3) {
+    animation-delay: 1.4s;
+}
+
+.form-element:nth-child(4) {
+    animation-delay: 1.6s;
+}
+
+.form-element:nth-child(5) {
+    animation-delay: 1.8s;
+}
+
+.form-container {
+    opacity: 0;
+    animation: formContainerEntrance 0.5s ease-out forwards;
+    animation-delay: 0.8s;
+}
+
+@keyframes formContainerEntrance {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+input {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+input:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(48, 178, 225, 0.08);
+}
+
+input:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(48, 178, 225, 0.12);
+    border-color: #30B2E1;
+}
+
+button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: linear-gradient(90deg, #30B2E1, #2AA0CF, #30B2E1);
+    background-size: 200% 100%;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(48, 178, 225, 0.25);
+    animation: gradientFlow 3s linear infinite;
+}
+
+button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(48, 178, 225, 0.2);
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+                height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:active::after {
+    width: 300%;
+    height: 300%;
+}
+
+a {
+    position: relative;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+a::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #30B2E1;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+a:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+.error {
+    animation: shake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes focusRing {
+    0% { box-shadow: 0 0 0 0 rgba(48, 178, 225, 0.4); }
+    100% { box-shadow: 0 0 0 8px rgba(48, 178, 225, 0); }
+}
+
+input:focus {
+    animation: focusRing 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-1px); }
+    20%, 40%, 60%, 80% { transform: translateX(1px); }
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out forwards, shake 0.5s ease-in-out;
+}
+
+.error-notification-exit {
+    animation: slideOutRight 0.3s ease-in forwards;
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
