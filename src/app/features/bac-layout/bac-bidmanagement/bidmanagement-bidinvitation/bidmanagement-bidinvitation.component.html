@@ -20,29 +20,36 @@
       <table class="min-w-full">
         <thead class="bg-gray-50">
             <tr>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Project Name</th>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Requested Items</th>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Budget</th>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date Approved</th>
+              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier Name</th>
+              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Send Date</th>
               <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
         <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let ppmp of displayedPpmps" class="hover:bg-gray-50 transition duration-300">
-            <td class="py-4 px-6 text-center text-sm text-gray-900">{{ ppmp.project_name }}</td>
-            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items.join(', ') }}</td>
-            <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ ppmp.total_budget | number:'1.2-2' }}</td>
-            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.approved_date }}</td>
-            <td class="py-4 px-6 text-center text-sm font-medium text-green-600">{{ ppmp.status }}</td>
+          <tr *ngFor="let bidm of displayedBidms" class="hover:bg-gray-50 transition duration-300">
+            <td class="py-4 px-6 text-center text-sm text-gray-900">{{ bidm.number }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ bidm.supplier_name }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-900">{{ bidm.send_date }}</td>
+            <td class="py-4 px-6 text-center text-sm">
+              <span [ngClass]="{
+                'text-yellow-600': bidm.invitation_status === 'Pending Response',
+                'text-green-600': bidm.invitation_status === 'Accepted',
+                'text-red-600': bidm.invitation_status === 'Declined',
+                'text-gray-500': bidm.invitation_status === 'Not Sent'
+              }">
+                {{ bidm.invitation_status }}
+              </span>
+            </td>
             <td class="py-4 px-6 text-center text-sm font-medium relative">
-              <button (click)="toggleActions(ppmp)" class="flex justify-center items-center h-full w-full">
+              <button (click)="toggleActions(bidm)" class="flex justify-center items-center h-full w-full">
                 <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
               </button>
-              <div *ngIf="currentOpenActionId === ppmp.id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+              <div *ngIf="currentOpenActionId === bidm.id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
                 <div class="flex flex-col">
-                  <button (click)="viewPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">View</button>
-                  <button (click)="printPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Print</button>
+                  <button (click)="viewBidm(bidm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">More Details</button>
+                  <button (click)="sendInvitation(bidm)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Send Invitation</button>
                 </div>
               </div>
             </td>

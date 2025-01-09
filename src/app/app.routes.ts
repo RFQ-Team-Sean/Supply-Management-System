@@ -43,6 +43,7 @@ import { GsoBiddingmanagementComponent } from './features/gso-layout/gso-bidding
 import { BacDashboardComponent } from './features/bac-layout/bac-dashboard/bac-dashboard.component';
 import { BacLayoutComponent } from './features/bac-layout/bac-layout.component';
 import { GsoLayoutComponent } from './features/gso-layout/gso-layout.component';
+import { BacBidmanagementComponent } from './features/bac-layout/bac-bidmanagement/bac-bidmanagement.component';
 
 export const routes: Routes = [
   {
@@ -120,6 +121,7 @@ export const routes: Routes = [
     children: [
         { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
         { path: 'dashboard', component: BacDashboardComponent },
+        { path: 'bac-bidmanagement', component: BacBidmanagementComponent },
     ],
   },
   {
