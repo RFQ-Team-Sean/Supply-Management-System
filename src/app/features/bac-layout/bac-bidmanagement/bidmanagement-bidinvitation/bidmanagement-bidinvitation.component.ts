@@ -6,7 +6,7 @@ interface BIDM {
   number: string;
   supplier_name: string;
   send_date: string;
-  status: string;
+  status: 'Accept' | 'Reject' | 'Pending';
   invitation_status: string;
 }
 
@@ -24,31 +24,31 @@ export class BidmanagementBidinvitationComponent implements OnInit {
       number: 'SUP-001',
       supplier_name: 'ABC Computer Solutions',
       send_date: '2024-03-15',
-      status: 'Sent',
-      invitation_status: 'Pending Response'
+      status: 'Pending',
+      invitation_status: 'Pending'
     },
     {
       id: 2,
       supplier_name: 'Office Plus Supplies',
       number: 'SUP-002',
       send_date: '2024-03-14',
-      status: 'Sent',
-      invitation_status: 'Accepted'
+      status: 'Accept',
+      invitation_status: 'Accept'
     },
     {
       id: 3,
       supplier_name: 'Lab Equipment Co.',
       number: 'SUP-003',
       send_date: '2024-03-13',
-      status: 'Sent',
-      invitation_status: 'Declined'
+      status: 'Reject',
+      invitation_status: 'Reject'
     },
     {
       id: 4,
       supplier_name: 'School Furniture Inc.',
       number: 'SUP-004',
       send_date: '2024-03-12',
-      status: 'Draft',
+      status: 'Pending',
       invitation_status: 'Not Sent'
     },
     {
@@ -56,8 +56,48 @@ export class BidmanagementBidinvitationComponent implements OnInit {
       supplier_name: 'Sports Equipment Plus',
       number: 'SUP-005',
       send_date: '2024-03-11',
-      status: 'Sent',
+      status: 'Accept',
       invitation_status: 'Pending Response'
+    },
+    {
+      id: 6,
+      supplier_name: 'Tech Innovations Ltd',
+      number: 'SUP-006',
+      send_date: '2024-03-10',
+      status: 'Accept',
+      invitation_status: 'Accept'
+    },
+    {
+      id: 7,
+      supplier_name: 'Global Office Supplies',
+      number: 'SUP-007',
+      send_date: '2024-03-09',
+      status: 'Reject',
+      invitation_status: 'Reject'
+    },
+    {
+      id: 8,
+      supplier_name: 'Educational Materials Co',
+      number: 'SUP-008',
+      send_date: '2024-03-08',
+      status: 'Pending',
+      invitation_status: 'Pending'
+    },
+    {
+      id: 9,
+      supplier_name: 'Laboratory Essentials',
+      number: 'SUP-009',
+      send_date: '2024-03-07',
+      status: 'Accept',
+      invitation_status: 'Accept'
+    },
+    {
+      id: 10,
+      supplier_name: 'School Supplies Direct',
+      number: 'SUP-010',
+      send_date: '2024-03-06',
+      status: 'Reject',
+      invitation_status: 'Reject'
     }
   ];
 

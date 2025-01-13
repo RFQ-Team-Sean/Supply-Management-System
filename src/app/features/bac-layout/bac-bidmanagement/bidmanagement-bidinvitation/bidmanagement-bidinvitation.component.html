@@ -9,65 +9,79 @@
           </svg>
           <input 
             type="text" 
-            placeholder="Search by department or fiscal year" 
+            placeholder="Search by supply number, supplier name or status" 
             class="w-full p-2 focus:outline-none"
             (input)="searchLogs($event)"
           />
         </div>
       </div>
   
-      <!-- Roles Table -->
-      <table class="min-w-full">
-        <thead class="bg-gray-50">
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full table-fixed">
+          <thead class="bg-gray-50">
             <tr>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier Name</th>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Send Date</th>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th class="w-[10%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Supply Number</th>
+              <th class="w-[30%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Supplier Name</th>
+              <th class="w-[20%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Send Date</th>
+              <th class="w-[20%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th class="w-[10%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let bidm of displayedBidms" class="hover:bg-gray-50 transition duration-300">
-            <td class="py-4 px-6 text-center text-sm text-gray-900">{{ bidm.number }}</td>
-            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ bidm.supplier_name }}</td>
-            <td class="py-4 px-6 text-center text-sm text-gray-900">{{ bidm.send_date }}</td>
-            <td class="py-4 px-6 text-center text-sm">
-              <span [ngClass]="{
-                'text-yellow-600': bidm.invitation_status === 'Pending Response',
-                'text-green-600': bidm.invitation_status === 'Accepted',
-                'text-red-600': bidm.invitation_status === 'Declined',
-                'text-gray-500': bidm.invitation_status === 'Not Sent'
-              }">
-                {{ bidm.invitation_status }}
-              </span>
-            </td>
-            <td class="py-4 px-6 text-center text-sm font-medium relative">
-              <button (click)="toggleActions(bidm)" class="flex justify-center items-center h-full w-full">
-                <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
-              </button>
-              <div *ngIf="currentOpenActionId === bidm.id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
-                <div class="flex flex-col">
-                  <button (click)="viewBidm(bidm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">More Details</button>
-                  <button (click)="sendInvitation(bidm)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Send Invitation</button>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let bidm of displayedBidms" class="hover:bg-gray-50">
+              <td class="px-2 py-4 text-sm text-gray-900 text-center">{{ bidm.number }}</td>
+              <td class="px-2 py-4 text-sm text-gray-500 break-words">{{ bidm.supplier_name }}</td>
+              <td class="px-2 py-4 text-sm text-gray-900 text-center">{{ bidm.send_date }}</td>
+              <td class="px-2 py-4 text-center">
+                <span [ngClass]="{
+                  'text-yellow-600': bidm.status === 'Pending',
+                  'text-green-600': bidm.status === 'Accept',
+                  'text-red-600': bidm.status === 'Reject'
+                }" class="text-sm font-medium whitespace-normal">
+                  {{ bidm.status }}
+                </span>
+              </td>
+              <td class="px-2 py-4 text-sm font-medium relative text-center">
+                <button (click)="toggleActions(bidm)" class="flex justify-center items-center h-full w-full">
+                  <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
+                </button>
+                <div *ngIf="currentOpenActionId === bidm.id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+                  <div class="flex flex-col">
+                    <button (click)="viewBidm(bidm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">More Details</button>
+                    <button (click)="sendInvitation(bidm)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Send Invitation</button>
+                  </div>
                 </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
   
       <!-- Pagination -->
       <div class="flex items-center justify-between mt-4">
-        <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+        <button 
+          (click)="changePage(currentPage - 1)" 
+          [disabled]="currentPage === 1" 
+          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Previous
         </button>
         <div class="flex space-x-2">
-          <span *ngFor="let page of [].constructor(totalPages); let i = index" (click)="changePage(i + 1)" [ngClass]="{'bg-blue-500 text-white': currentPage === i + 1, 'bg-gray-200 text-gray-700': currentPage !== i + 1}" class="px-3 py-1 rounded-lg cursor-pointer">
+          <span 
+            *ngFor="let page of [].constructor(totalPages); let i = index" 
+            (click)="changePage(i + 1)" 
+            [ngClass]="{'bg-blue-500 text-white': currentPage === i + 1, 'bg-gray-200 text-gray-700': currentPage !== i + 1}" 
+            class="px-3 py-1 rounded-lg cursor-pointer"
+          >
             {{ i + 1 }}
           </span>
         </div>
-        <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+        <button 
+          (click)="changePage(currentPage + 1)" 
+          [disabled]="currentPage === totalPages" 
+          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Next
         </button>
       </div>

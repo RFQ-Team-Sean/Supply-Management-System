@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -19,16 +19,24 @@ interface FilterOptions {
 })
 export class BidmanagmentFilterComponent {
   @Output() filterChanged = new EventEmitter<FilterOptions>();
+  @Input() currentView: 'active' | 'invitation' | 'canvas' = 'active';
 
   constructor(private router: Router) {}
 
-  statuses: string[] = [
-    'Pending',
-    'Draft',
-    'On-Going',
-    'Accept',
-    'Decline'
-  ];
+  get showStatusFilter(): boolean {
+    return this.currentView !== 'canvas';
+  }
+
+  get statuses(): string[] {
+    switch (this.currentView) {
+      case 'active':
+        return ['On-Going'];
+      case 'invitation':
+        return ['Accept', 'Reject', 'Pending'];
+      default:
+        return [];
+    }
+  }
 
   filters: FilterOptions = {
     dateFrom: '',

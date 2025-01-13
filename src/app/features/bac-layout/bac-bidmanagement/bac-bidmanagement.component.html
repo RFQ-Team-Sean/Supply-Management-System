@@ -7,7 +7,9 @@
     <div class="flex gap-6">
       <!-- Left Side: Filters -->
       <div class="w-[300px] flex-shrink-0">
-        <app-bidmanagment-filter (filterChanged)="handleFilterChange($event)">
+        <app-bidmanagment-filter 
+          [currentView]="currentView"
+          (filterChanged)="handleFilterChange($event)">
         </app-bidmanagment-filter>
       </div>
   
@@ -43,6 +45,7 @@
   
         <!-- Users Table -->
         <div *ngIf="currentView === 'active'" class="bg-white rounded-lg shadow-lg p-4">
+          <!-- Search Bar -->
           <div class="flex mb-4">
             <div class="flex-grow flex items-center border rounded-lg px-2 bg-white">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -50,52 +53,54 @@
               </svg>
               <input 
                 type="text" 
-                placeholder="Search users by name, email or role" 
+                placeholder="Search bids by bid number, bidders or status" 
                 class="w-full p-2 focus:outline-none"
                 (input)="searchRoles($event)"
               />
             </div>
           </div>
   
-          <table class="min-w-full">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Purchase Request Item</th>
-                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Bidders</th>
-                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Start</th>
-                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">End</th>
-                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr *ngFor="let bidm of displayedBidm" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ bidm.number }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ bidm.requested_items.join(', ') }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ bidm.bidders }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ bidm.start }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ bidm.end }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span [ngClass]="{
-                    'text-blue-600': bidm.status === 'On-Going',
-                  }" class="text-sm font-medium">
-                    {{ bidm.status }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium relative">
-                  <button (click)="toggleActions(bidm)" class="flex justify-center items-center h-full w-full">
-                    <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
-                  </button>
-                  <div *ngIf="currentOpenActionId === bidm.id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
-                    <div class="flex flex-col">
-                      <button (click)="reviewBids(bidm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Review Bids</button>
+          <div class="overflow-x-auto">
+            <table class="w-full table-fixed">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="w-[8%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Bid Number</th>
+                  <th class="w-[30%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Purchase Request Item</th>
+                  <th class="w-[12%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Bidders</th>
+                  <th class="w-[15%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Start</th>
+                  <th class="w-[15%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">End</th>
+                  <th class="w-[12%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th class="w-[8%] py-3 px-2 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr *ngFor="let bidm of displayedBidm" class="hover:bg-gray-50">
+                  <td class="px-2 py-4 text-sm text-gray-500 text-center">{{ bidm.number }}</td>
+                  <td class="px-2 py-4 text-sm text-gray-500 break-words">{{ bidm.requested_items.join(', ') }}</td>
+                  <td class="px-2 py-4 text-sm text-gray-500 text-center">{{ bidm.bidders }}</td>
+                  <td class="px-2 py-4 text-sm text-gray-500 text-center">{{ bidm.start }}</td>
+                  <td class="px-2 py-4 text-sm text-gray-500 text-center">{{ bidm.end }}</td>
+                  <td class="px-2 py-4 text-center">
+                    <span [ngClass]="{
+                      'text-blue-600': bidm.status === 'On-Going',
+                    }" class="text-sm font-medium whitespace-normal">
+                      {{ bidm.status }}
+                    </span>
+                  </td>
+                  <td class="px-2 py-4 text-sm font-medium relative text-center">
+                    <button (click)="toggleActions(bidm)" class="flex justify-center items-center h-full w-full">
+                      <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
+                    </button>
+                    <div *ngIf="currentOpenActionId === bidm.id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+                      <div class="flex flex-col">
+                        <button (click)="reviewBids(bidm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Review Bids</button>
+                      </div>
                     </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
   
           <!-- Pagination -->
           <div class="flex items-center justify-between mt-4">
