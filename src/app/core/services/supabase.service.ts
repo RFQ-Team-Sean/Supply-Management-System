@@ -5,10 +5,8 @@ import { environment } from '../../environments/environment';
 import { PLATFORM_ID, Inject } from '@angular/core';
 
 
-
-
 export interface User {
-  account_id: number;
+  id: string;
   name: string;
   username: string;
   email: string;
@@ -202,6 +200,7 @@ export class SupabaseService {
       console.error('Error fetching users:', error);
       return [];
     }
+    console.log(data[0].account_id);
     return data as User[];
   }
 

@@ -7,14 +7,16 @@ import { RolesandpermissionComponent } from './rolesandpermission/rolesandpermis
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { UActivitylogsComponent } from './u-activitylogs/u-activitylogs.component';
 import { EditRolesandpermissionComponent } from './rolesandpermission/edit-rolesandpermission/edit-rolesandpermission.component';
+import { SupabaseService } from '../../../core/services/supabase.service';
 
 interface User {
-  account_id: number;
+  id: string;
   name: string;
+  username?: string;
   email: string;
-  role: string;
   account_status: string;
-  showActions?: boolean;
+  role: string;
+  profile_image?: string;
 }
 
 interface RolesAndPermission {
@@ -53,7 +55,7 @@ export class UserManagementComponent implements OnInit {
   currentPage: number = 1;
   itemsPerPage: number = 8;
   totalPages: number = 0;
-  currentOpenActionId: number | null = null;
+  currentOpenActionId: string | null = null;
   isCreatingUser: boolean = false;
   isCreateButtonSelected = false;
   username: string = '';
@@ -69,27 +71,18 @@ export class UserManagementComponent implements OnInit {
   // Add this property to store filtered users
   filteredUsers: User[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private SupabaseService: SupabaseService) {}
 
   ngOnInit(): void {
-    this.initializeDummyData();
-    this.filteredUsers = [...this.users];
-    this.updateDisplayedUsers();
+    this.getUserData();
   }
 
-  initializeDummyData(): void {
-    this.users = [
-      { account_id: 1, name: 'John Doe', email: 'johndoe@example.com', role: 'GSO Officer', account_status: 'Active' },
-      { account_id: 2, name: 'Jane Smith', email: 'janesmith@example.com', role: 'Department Staff', account_status: 'Inactive' },
-      { account_id: 3, name: 'Alice Johnson', email: 'alicejohnson@example.com', role: 'BAC Staff', account_status: 'Active' },
-      { account_id: 4, name: 'Bob Brown', email: 'bobbrown@example.com', role: 'Property Officer', account_status: 'Inactive' },
-      { account_id: 5, name: 'Carlos White', email: 'carloswhite@example.com', role: 'GSO Officer', account_status: 'Active' },
-      { account_id: 6, name: 'Diana Prince', email: 'dianaprince@example.com', role: 'Department Staff', account_status: 'Active' },
-      { account_id: 7, name: 'Clark Kent', email: 'clarkkent@example.com', role: 'Property Officer', account_status: 'Inactive' },
-      { account_id: 8, name: 'Bruce Wayne', email: 'brucewayne@example.com', role: 'BAC Staff', account_status: 'Active' },
-      { account_id: 9, name: 'Peter Parker', email: 'peterparker@example.com', role: 'GSO Officer', account_status: 'Inactive' },
-      { account_id: 10, name: 'Natasha Romanoff', email: 'natasharomanoff@example.com', role: 'Department Staff', account_status: 'Active' }
-    ];
+  async getUserData(){
+    this.users = await this.SupabaseService.getUsers();
+    this.filteredUsers = [...this.users];
+    this.updateDisplayedUsers();
+    console.log(this.users[0].id)
+    console.log(this.users[0].name)
   }
 
   toggleRoleSelection(role: string): void {
@@ -138,11 +131,11 @@ export class UserManagementComponent implements OnInit {
   }
 
   toggleActions(user: User): void {
-    this.currentOpenActionId = this.currentOpenActionId === user.account_id ? null : user.account_id;
+    this.currentOpenActionId = this.currentOpenActionId === user.id ? null : user.id;
   }
 
   deleteUser(user: User): void {
-    this.users = this.users.filter(u => u.account_id !== user.account_id);
+    this.users = this.users.filter(u => u.id !== user.id);
     this.totalPages = Math.ceil(this.users.length / this.itemsPerPage);
     if (this.currentPage > this.totalPages) {
       this.currentPage = this.totalPages;
@@ -177,24 +170,26 @@ export class UserManagementComponent implements OnInit {
     this.showRoleEdit = false;
   }
 
-  addUser(userData: { name: string; email: string; role: string; status: string }): void {
-    const user: User = {
-      account_id: this.users.length + 1,
-      name: userData.name,
-      email: userData.email,
-      role: userData.role,
-      account_status: userData.status
-    };
+  // Commented since admin will not add new account
+  // addUser(userData: { name: string; username: string; email: string; role: string; account_status: string;}): void {
+  //   const user: User = {
+  //     account_id: this.users.length + 1,
+  //     name: userData.name,
+  //     username: userData.username,
+  //     email: userData.email,
+  //     role: userData.role,
+  //     account_status: userData.account_status,
+  //   };
 
-    this.users.push(user);
-    this.totalPages = Math.ceil(this.users.length / this.itemsPerPage);
-    this.updateDisplayedUsers();
-  }
+  //   this.users.push(user);
+  //   this.totalPages = Math.ceil(this.users.length / this.itemsPerPage);
+  //   this.updateDisplayedUsers();
+  // }
 
-  onSubmit() {
-    console.log('Form submitted');
-    // Handle your form submission logic here
-  }
+  // onSubmit() {
+  //   console.log('Form submitted');
+  //   // Handle your form submission logic here
+  // }
 
   switchView(view: 'users' | 'roles' | 'logs') {
     this.currentView = view;
@@ -212,11 +207,11 @@ export class UserManagementComponent implements OnInit {
   }
 
   updateUserProfile(updatedUser: User): void {
-    const index = this.users.findIndex(u => u.account_id === updatedUser.account_id);
+    const index = this.users.findIndex(u => u.id === updatedUser.id);
     if (index !== -1) {
       this.users[index] = updatedUser;
       this.filteredUsers = this.filteredUsers.map(u => 
-        u.account_id === updatedUser.account_id ? updatedUser : u
+        u.id === updatedUser.id ? updatedUser : u
       );
       this.updateDisplayedUsers();
       this.showUserProfile = false;

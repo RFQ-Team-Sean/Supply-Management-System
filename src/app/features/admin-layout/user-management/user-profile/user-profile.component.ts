@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 interface User {
-  account_id: number;
+  id: string;
   name: string;
   email: string;
   role: string;
