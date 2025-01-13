@@ -1,39 +1,81 @@
-<section class="flex flex-col max-w-[450px]">
-  <h1 class="text-2xl font-bold text-center" style="color: var(--color-primary);">Login</h1>
-  <form (ngSubmit)="onSubmit()" class="flex flex-col p-4 mt-6 w-full bg-white rounded-lg border border-solid border-zinc-300 min-w-[330px]">
-    <!-- Email Field -->
-    <label for="email" class="sr-only">Email</label>
-    <div class="flex flex-col w-full">
-      <span class="leading-snug opacity-80 text-sm" style="color: var(--color-primary);">Email</span>
-      <input type="email" id="email" [(ngModel)]="email" name="email" class="flex overflow-hidden items-center px-3 py-2 mt-1 w-full leading-none bg-white rounded-lg border border-solid border-zinc-300 min-w-[200px] text-gray-600 text-sm" aria-label="Enter your email" />
+<!-- Add loading overlay -->
+<div *ngIf="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-lg shadow-lg flex flex-col items-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#30B2E1] mb-4"></div>
+        <p class="text-gray-700">Signing in...</p>
     </div>
-    
-    <!-- Password Field -->
-    <label for="password" class="sr-only mt-4">Password</label>
-    <div class="flex flex-col mt-4 w-full">
-      <span class="leading-snug opacity-80 text-sm" style="color: var(--color-primary);">Password</span>
-      <input type="password" id="password" [(ngModel)]="password" name="password" class="flex overflow-hidden items-center px-3 py-2 mt-1 w-full leading-none bg-white rounded-lg border border-solid border-zinc-300 min-w-[200px] text-gray-600 text-sm" aria-label="Enter your password" />
-    </div>
-    
-    <!-- Sign In Button -->
-    <button type="submit" class="flex gap-2 items-center mt-4 w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-secondary);">
-      Sign in
-    </button>
+</div>
 
-    <!-- Automatic Sign-in Buttons -->
-    <div class="flex flex-col mt-4 w-full">
-      <button type="button" (click)="autoSignInUser()" class="flex gap-2 items-center w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-primary);">
-        Sign in as Department Staff
-      </button>
-      <button type="button" (click)="autoSignInAdmin()" class="flex gap-2 items-center mt-2 w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-primary);">
-        Sign in as Admin
-      </button>
-      <button type="button" (click)="autoSignInGso()" class="flex gap-2 items-center mt-2 w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-primary);">
-        Sign in as General Service Office
-      </button>
-      <button type="button" (click)="autoSignInBac()" class="flex gap-2 items-center mt-2 w-full leading-none text-white font-medium text-sm rounded-lg px-3 py-3 min-h-[40px] justify-center" style="background-color: var(--color-primary);">
-        Sign in as BAC Staff
-      </button>
+<!-- Error Notification -->
+<div *ngIf="showError" 
+     class="fixed top-4 right-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg animate-slide-in-right">
+    <div class="flex items-center">
+        <!-- Error Icon -->
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+        </div>
+        <!-- Error Message -->
+        <div class="ml-3">
+            <p class="text-sm">{{ errorMessage }}</p>
+        </div>
+        <!-- Close Button -->
+        <div class="ml-auto pl-3">
+            <button (click)="showError = false" class="text-red-500 hover:text-red-600">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
     </div>
-  </form>
-</section>
+</div>
+
+<!-- Existing form -->
+<div class="flex flex-col w-full max-w-[500px] mx-auto animate-slide-in mt-16 px-16 pt-12">
+    <h1 class="text-4xl font-normal mb-24 text-[#30B2E1]">Sign in to SMS</h1>
+    
+    <form (ngSubmit)="onSubmit()" class="w-full space-y-8">
+        <!-- Username Field -->
+        <div class="relative">
+            <input 
+                type="email" 
+                id="email"
+                [(ngModel)]="email" 
+                name="email" 
+                placeholder="Email"
+                class="w-full px-6 py-4 rounded-full border border-[#E8E8E8] focus:border-[#30B2E1] focus:outline-none text-base bg-white placeholder-gray-400"
+            />
+        </div>
+
+        <!-- Password Field -->
+        <div class="relative">
+            <input 
+                type="password" 
+                id="password"
+                [(ngModel)]="password" 
+                name="password" 
+                placeholder="Password"
+                class="w-full px-6 py-4 rounded-full border border-[#E8E8E8] focus:border-[#30B2E1] focus:outline-none text-base bg-white placeholder-gray-400"
+            />
+        </div>
+
+        <!-- Forgot Password -->
+        <div class="text-center">
+            <a href="#" class="text-[#30B2E1] text-sm font-light hover:underline">
+                Forgot Password?
+            </a>
+        </div>
+
+        <!-- Sign In Button -->
+        <div class="pt-8">
+            <button 
+                type="submit" 
+                class="w-full bg-[#30B2E1] text-white py-4 rounded-full hover:bg-[#2AA0CF] transition-colors text-base font-normal disabled:opacity-50"
+                [disabled]="isLoading"
+            >
+                {{ isLoading ? 'SIGNING IN...' : 'SIGN IN' }}
+            </button>
+        </div>
+    </form>
+</div>

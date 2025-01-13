@@ -14,21 +14,25 @@ export class AuthGuard implements CanActivate {
       const requiredRole = route.data['role'];
 
       if (!userRole) {
-        this.router.navigate(['/login']); // Redirect to login if not logged in
+        this.router.navigate(['/login']);
         return false;
       }
 
-      // Check if the user has the required role
-      if (requiredRole && (userRole === requiredRole || requiredRole === 'user')) {
+      // Map 'user' route role to 'department' database role
+      if (requiredRole === 'user' && userRole === 'department') {
+        return true;
+      }
+
+      // Direct match for other roles (admin, gso, bac)
+      if (userRole === requiredRole) {
         return true;
       }
 
       // If the role does not match, redirect to unauthorized page or login
-      this.router.navigate(['/unauthorized']);
+      this.router.navigate(['/login']);
       return false;
     }
 
-    // If not in browser, deny access
     return false;
   }
 }

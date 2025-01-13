@@ -144,7 +144,7 @@ export class UPurchaserequestComponent implements OnInit {
   displayedPRMs: PRM[] = [];
   searchTerm: string = '';
   currentPage: number = 1;
-  itemsPerPage: number = 8;
+  itemsPerPage: number = 5;
   totalPages: number = 0;
   currentOpenActionId: number | null = null;
   currentView: string = 'pending';
@@ -170,9 +170,6 @@ export class UPurchaserequestComponent implements OnInit {
         break;
       case 'Print':
         this.printPRM(prm); // Call print method
-        break;
-      case 'Cancel':
-        this.cancelPRM(prm); // Call cancel method
         break;
       case 'Edit':
         this.router.navigate(['/user/u-prmpedit', prm.pr_id]); // Ensure routing to edit
@@ -237,8 +234,6 @@ export class UPurchaserequestComponent implements OnInit {
         return 'red';
       case 'Pending':
         return '#000054';
-      case 'Canceled':
-        return 'gray'; 
       default:
         return 'black';
     }
@@ -269,15 +264,15 @@ export class UPurchaserequestComponent implements OnInit {
     this.filterPRMs();
   }
 
-  viewPpmp(prm: PRM): void {
+  viewPrm(prm: PRM): void {
     this.router.navigate(['/user/u-prmviewdetails', prm.pr_id]);
   }
 
-  editPpmp(prm: PRM): void {
+  editPrm(prm: PRM): void {
     this.router.navigate(['/user/u-prmpedit', prm.pr_id]);
   }
 
-  submitPpmp(prm: PRM): void {
+  submitPrm(prm: PRM): void {
     if (confirm(`Are you sure you want to submit PR ID: ${prm.pr_id}?`)) {
       const index = this.prmData.findIndex(p => p.pr_id === prm.pr_id);
       if (index !== -1) {

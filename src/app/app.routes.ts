@@ -30,28 +30,19 @@ import { GsoInventorymanagementComponent } from './features/gso-layout/gso-inven
 import { GsoReportsComponent } from './features/gso-layout/gso-reports/gso-reports.component';
 import { GsoNotificationsComponent } from './features/gso-layout/gso-notifications/gso-notifications.component';
 import { GsoSystemsettingsComponent } from './features/gso-layout/gso-systemsettings/gso-systemsettings.component';
-import { GsoSuppliermanagementComponent } from './features/gso-layout/gso-suppliermanagement/gso-suppliermanagement.component';
-import { GsoAssetmanagementlandComponent } from './features/gso-layout/gso-assetmanagementland/gso-assetmanagementland.component';
-import { GsoAssetmanagementbuildingComponent } from './features/gso-layout/gso-assetmanagementbuilding/gso-assetmanagementbuilding.component';
-import { GsoAssetmanagementmachineryComponent } from './features/gso-layout/gso-assetmanagementmachinery/gso-assetmanagementmachinery.component';
-import { GsoAssetmanagementequipmentComponent } from './features/gso-layout/gso-assetmanagementequipment/gso-assetmanagementequipment.component';
-import { GsoAssetmanagementvechilesComponent } from './features/gso-layout/gso-assetmanagementvechiles/gso-assetmanagementvechiles.component';
-import { GsoNewrequestComponent } from './features/gso-layout/gso-purchaserequest/gso-newrequest/gso-newrequest.component';
 import { GsoNewitemComponent } from './features/gso-layout/gso-inventorymanagement/gso-newitem/gso-newitem.component';
-import { GsoNewassetlandComponent } from './features/gso-layout/gso-assetmanagementland/gso-newassetland/gso-newassetland.component';
-import { GsoNewassetbuildingComponent } from './features/gso-layout/gso-assetmanagementbuilding/gso-newassetbuilding/gso-newassetbuilding.component';
-import { GsoNewassetmachineryComponent } from './features/gso-layout/gso-assetmanagementmachinery/gso-newassetmachinery/gso-newassetmachinery.component';
-import { GsoNewassetequipmentComponent } from './features/gso-layout/gso-assetmanagementequipment/gso-newassetequipment/gso-newassetequipment.component';
-import { GsoNewassetvihiclesComponent } from './features/gso-layout/gso-assetmanagementvehicles/gso-newassetvihicles/gso-newassetvihicles.component';
-import { GsoViewdetailsComponent } from './features/gso-layout/gso-purchaserequest/gso-viewdetails/gso-viewdetails.component';
 import { GsoInventoryeditComponent } from './features/gso-layout/gso-inventorymanagement/gso-inventoryedit/gso-inventoryedit.component';
-import { GsoSuppliereditComponent } from './features/gso-layout/gso-suppliermanagement/gso-supplieredit/gso-supplieredit.component';
-import { GsoAssetlandeditComponent } from './features/gso-layout/gso-assetmanagementland/gso-assetlandedit/gso-assetlandedit.component';
-import { GsoAssetlandviewComponent } from './features/gso-layout/gso-assetmanagementland/gso-assetlandview/gso-assetlandview.component';
 import { AReportsdetailsComponent } from './features/admin-layout/a-reports/a-reportsdetails/a-reportsdetails.component';
+import { GsoSuppliermanagemnetComponent } from './features/gso-layout/gso-suppliermanagemnet/gso-suppliermanagemnet.component';
 import { UCreateprmComponent } from './features/user-layout/u-purchaserequest/u-createprm/u-createprm.component';
 import { DCreateppmpComponent } from './features/user-layout/u-ppmpmanagement/d-createppmp/d-createppmp.component';
+import { GsoPpmpentryComponent } from './features/gso-layout/gso-ppmpentry/gso-ppmpentry.component';
+import { GsoBiddingmanagementComponent } from './features/gso-layout/gso-biddingmanagement/gso-biddingmanagement.component';
 
+//BAC
+import { BacDashboardComponent } from './features/bac-layout/bac-dashboard/bac-dashboard.component';
+import { BacLayoutComponent } from './features/bac-layout/bac-layout.component';
+import { GsoLayoutComponent } from './features/gso-layout/gso-layout.component';
 
 export const routes: Routes = [
   {
@@ -102,46 +93,33 @@ export const routes: Routes = [
   },
   {
     path: 'gso',
-    component: AdminLayoutComponent,
+    component: GsoLayoutComponent,
     canActivate: [AuthGuard],
     data: { role: 'gso' },
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: GsoDashboardComponent },
+      { path: 'gso-ppmpentry', component: GsoPpmpentryComponent },
+      { path: 'gso-biddingmanagement', component: GsoBiddingmanagementComponent },
       { path: 'gso-purchaserequest', component: GsoPurchaserequestComponent },
       { path: 'gso-inventorymanagement', component: GsoInventorymanagementComponent },
+      { path: 'gso-suppliermanagement', component: GsoSuppliermanagemnetComponent },
       { path: 'gso-reports', component: GsoReportsComponent },
       { path: 'gso-notifications', component: GsoNotificationsComponent },
       { path: 'gso-systemsettings', component: GsoSystemsettingsComponent },
-      { path: 'gso-suppliermanagement', component: GsoSuppliermanagementComponent },
-      { path: 'gso-assetmanagementland', component: GsoAssetmanagementlandComponent },
-      { path: 'gso-assetmanagementbuilding', component: GsoAssetmanagementbuildingComponent },
-      { path: 'gso-assetmanagementmachinery', component: GsoAssetmanagementmachineryComponent },
-      { path: 'gso-assetmanagementlandequipment', component: GsoAssetmanagementequipmentComponent },
-      { path: 'gso-assetmanagementlandvehicles', component: GsoAssetmanagementvechilesComponent },
-      { path: 'gso-newrequest', component: GsoNewrequestComponent },
       { path: 'gso-newitem', component: GsoNewitemComponent },
-      { path: 'gso-newassetland', component: GsoNewassetlandComponent },
-      { path: 'gso-newassetbuilding', component: GsoNewassetbuildingComponent },
-      { path: 'gso-newassetmachinery', component: GsoNewassetmachineryComponent },
-      { path: 'gso-newassetequipment', component: GsoNewassetequipmentComponent },
-      { path: 'gso-newassetvihicles', component: GsoNewassetvihiclesComponent },
-      { path: 'gso-viewdetails/:documentCode', component: GsoViewdetailsComponent },
       { path: 'gso-inventoryvedit/:id', component: GsoInventoryeditComponent },
-      { path: 'gso-supplieredit/:id', component: GsoSuppliereditComponent },
-      { path: 'gso-assetlandedit/:id', component: GsoAssetlandeditComponent },
-
-      { path: 'gso-assetlandview/:id', component: GsoAssetlandviewComponent },
       { path: 'a-profile', component: AProfileComponent },    
     ],
   },
   {
     path: 'bac',
-    component: AdminLayoutComponent,
+    component: BacLayoutComponent,
     canActivate: [AuthGuard],
     data: { role: 'bac' },
     children: [
         { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+        { path: 'dashboard', component: BacDashboardComponent },
     ],
   },
   {
