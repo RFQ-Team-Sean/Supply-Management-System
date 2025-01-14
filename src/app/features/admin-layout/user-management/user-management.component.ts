@@ -21,8 +21,8 @@ interface User {
 
 interface RolesAndPermission {
   id: number;
-  roles: string;
-  number_of_users: number;
+  role: string;
+  num_of_users: number;
   permission: string;
   last_modified: string;
 }
@@ -83,6 +83,7 @@ export class UserManagementComponent implements OnInit {
     this.users = await this.SupabaseService.getUsers();
     this.filteredUsers = [...this.users];
     this.updateDisplayedUsers();
+    this.rolesandpermissions = await this.SupabaseService.fetchRolesAndPermissions();
   }
 
   toggleRoleSelection(role: string): void {
@@ -203,7 +204,7 @@ export class UserManagementComponent implements OnInit {
 
     // If switching to roles, ensure the roles component is initialized
     if (view === 'roles') {
-      this.rolesComponent.initializeDummyData(); // Optional: Initialize data if needed
+      this.rolesComponent.initializeData(); // Optional: Initialize data if needed
     }
   }
 
@@ -281,9 +282,9 @@ export class UserManagementComponent implements OnInit {
   addNewRole(roleForm: { roles: string; permission: string }): void {
     const newRole: RolesAndPermission = {
       id: this.rolesandpermissions.length + 1,
-      roles: roleForm.roles,
+      role: roleForm.roles,
       permission: roleForm.permission,
-      number_of_users: 0,
+      num_of_users: 0,
       last_modified: new Date().toISOString().split('T')[0]
     };
 

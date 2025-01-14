@@ -268,6 +268,25 @@ export class SupabaseService {
     return data;
   }
 
+  async fetchRolesAndPermissions(): Promise<any[]> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return [];
+    }
+    
+    const { data, error } = await this.supabase
+      .from('roles_and_permissions')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching roles and permissions:', error);
+      throw error;
+    }
+
+    return data || [];
+  }
+
   async getCurrentUser(): Promise<User | null> {
     if (!this.supabase) {
       console.error('Supabase client not initialized.');

@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 
 interface RolesAndPermission {
   id: number;
-  roles: string;
-  number_of_users: number;
+  role: string;
+  num_of_users: number;
   permission: string;
   last_modified: string;
 }
