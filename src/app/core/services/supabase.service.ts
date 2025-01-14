@@ -273,7 +273,7 @@ export class SupabaseService {
       console.error('Supabase client not initialized.');
       return [];
     }
-    
+
     const { data, error } = await this.supabase
       .from('roles_and_permissions')
       .select('*')
@@ -398,6 +398,17 @@ export class SupabaseService {
 
     if (error) {
       throw new Error(`Failed to update user: ${error.message}`);
+    }
+  }
+
+  async updateRoleAndPermission(id: number, updates: any): Promise<void> {
+    const { error } = await this.supabase!
+      .from('roles_and_permissions')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to update role and permission: ${error.message}`);
     }
   }
 

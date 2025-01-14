@@ -270,6 +270,7 @@ export class UserManagementComponent implements OnInit {
   updateRole(updatedRole: RolesAndPermission): void {
     if (this.rolesComponent) {
       this.rolesComponent.updateRole(updatedRole);
+      
     }
     this.backToTable();
   }
