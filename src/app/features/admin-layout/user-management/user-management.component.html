@@ -38,6 +38,7 @@
           </div>
           <app-user-profile
             [user]="selectedUser"
+            (imageSelected)="onImageSelected($event)"
             (profileUpdated)="updateUserProfile($event)"
           ></app-user-profile>
         </div>

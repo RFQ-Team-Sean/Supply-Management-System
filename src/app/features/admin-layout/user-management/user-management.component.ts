@@ -67,6 +67,8 @@ export class UserManagementComponent implements OnInit {
   showRoleEdit: boolean = false;
   rolesandpermissions: RolesAndPermission[] = [];
   isCreatingRole: boolean = false;
+  imagePreview: string | ArrayBuffer | null = null;
+  selectedImage: File | null = null;
 
   // Add this property to store filtered users
   filteredUsers: User[] = [];
@@ -81,8 +83,6 @@ export class UserManagementComponent implements OnInit {
     this.users = await this.SupabaseService.getUsers();
     this.filteredUsers = [...this.users];
     this.updateDisplayedUsers();
-    console.log(this.users[0].id)
-    console.log(this.users[0].name)
   }
 
   toggleRoleSelection(role: string): void {
@@ -206,6 +206,11 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
+  onImageSelected(file: File | null): void {
+    this.selectedImage = file;
+    console.log('File received from child:', this.selectedImage);
+  }
+
   updateUserProfile(updatedUser: User): void {
     const index = this.users.findIndex(u => u.id === updatedUser.id);
     if (index !== -1) {
@@ -213,11 +218,43 @@ export class UserManagementComponent implements OnInit {
       this.filteredUsers = this.filteredUsers.map(u => 
         u.id === updatedUser.id ? updatedUser : u
       );
-      this.updateDisplayedUsers();
-      this.showUserProfile = false;
-      this.selectedUser = null;
     }
+    this.updateUserInDB(updatedUser.id, updatedUser)
   }
+
+ async updateUserInDB(updatedUser_id: string, updatedUser: User) {
+  if (!updatedUser_id) {
+    console.error('User ID is required');
+    return;
+  }
+
+  try {
+    let imagePath: string | null = null;
+
+    if (this.selectedImage) {
+      console.log(this.selectedImage)
+      imagePath = await this.SupabaseService.uploadProfileImage(this.selectedImage, updatedUser_id);
+    }
+
+    await this.SupabaseService.updateUser(updatedUser_id, {
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      account_status: updatedUser.account_status,
+      profile_image: imagePath || updatedUser.profile_image, // Update only if a new image is uploaded
+    });
+
+    alert('Profile updated successfully!');
+
+    this.updateDisplayedUsers();
+    this.showUserProfile = false;
+    this.selectedUser = null;
+
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    alert('Failed to update profile');
+  }
+ }
 
   onRoleEdit(role: RolesAndPermission): void {
     this.selectedRole = { ...role };

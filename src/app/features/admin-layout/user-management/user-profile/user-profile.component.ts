@@ -21,6 +21,7 @@ interface User {
 export class UserProfileComponent {
   @Input() user: User | null = null;
   @Output() profileUpdated = new EventEmitter<User>();
+  @Output() imageSelected = new EventEmitter<File | null>();
 
   roles = ['GSO Officer', 'Department Staff', 'BAC Staff', 'Property Officer'];
   statuses = ['Active', 'Inactive'];
@@ -31,6 +32,7 @@ export class UserProfileComponent {
     const file = event.target.files[0];
     if (file) {
       this.selectedFile = file;
+      this.imageSelected.emit(this.selectedFile);
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imagePreview = e.target.result;

@@ -329,6 +329,42 @@ export class SupabaseService {
     }
   }
 
+  async uploadProfileImage(file: File, userId: string): Promise<string | null> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+
+    try {
+      const { data, error } = await this.supabase.storage
+        .from('profile_images')
+        .upload(`profiles/${userId}/${file.name}`, file, {
+          upsert: true,
+        });
+      console.log("works");
+      if (error) {
+        console.error('Image upload failed:', error.message);
+        return null;
+      }
+
+      return data?.path ? `profiles/${userId}/${file.name}` : null;
+    } catch (error) {
+      console.error('Unexpected error during image upload:', error);
+      return null;
+    }
+  }
+
+  async updateUser(userId: string, updates: any): Promise<void> {
+    const { error } = await this.supabase!
+      .from('account')
+      .update(updates)
+      .eq('id', userId);
+
+    if (error) {
+      throw new Error(`Failed to update user: ${error.message}`);
+    }
+  }
+
   async getPPMPManagementData(statusFilter: string) {
     if (!this.supabase) {
       console.error('Supabase client not initialized.');
