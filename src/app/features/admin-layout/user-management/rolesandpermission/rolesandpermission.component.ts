@@ -85,9 +85,10 @@ export class RolesandpermissionComponent implements OnInit {
     this.selectedRole = null;
   }
 
-  deleteRole(role: RolesAndPermission): void {
+  async deleteRole(role: RolesAndPermission) {
     this.rolesandpermissions = this.rolesandpermissions.filter(r => r.id !== role.id);
     this.totalPages = Math.ceil(this.rolesandpermissions.length / this.itemsPerPage);
+    await this.SupabaseService.deleteRoleAndPermission(role.id)
     this.updateDisplayedLogs();
   }
 

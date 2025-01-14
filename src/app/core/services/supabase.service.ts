@@ -429,6 +429,16 @@ export class SupabaseService {
     }
   }
 
+  async deleteRoleAndPermission(roleId: number): Promise<void> {
+    const { error } = await this.supabase!
+      .from('roles_and_permissions')
+      .delete()
+      .eq('id', roleId);
+    if (error) {
+      throw new Error(`Failed to delete role: ${error.message}`);
+    }
+  }
+
   async getPPMPManagementData(statusFilter: string) {
     if (!this.supabase) {
       console.error('Supabase client not initialized.');
