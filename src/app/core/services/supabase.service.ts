@@ -412,6 +412,23 @@ export class SupabaseService {
     }
   }
 
+  async addRoleAndPermission(role: string, permission: string): Promise<void> {
+    const { error } = await this.supabase!
+      .from('roles_and_permissions')
+      .insert([
+        {
+          role,
+          permission,
+          num_of_users: 0,
+          created_at: new Date(),
+        }
+      ]);
+
+    if (error) {
+      throw new Error(`Failed to add role and permission: ${error.message}`);
+    }
+  }
+
   async getPPMPManagementData(statusFilter: string) {
     if (!this.supabase) {
       console.error('Supabase client not initialized.');
