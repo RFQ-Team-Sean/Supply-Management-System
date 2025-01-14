@@ -16,7 +16,7 @@ interface User {
   email: string;
   account_status: string;
   role: string;
-  profile_image?: string;
+  profile_image: string | null;
 }
 
 interface RolesAndPermission {
@@ -132,6 +132,7 @@ export class UserManagementComponent implements OnInit {
 
   toggleActions(user: User): void {
     this.currentOpenActionId = this.currentOpenActionId === user.id ? null : user.id;
+    this.showUserProfile = false;
   }
 
   deleteUser(user: User): void {
@@ -210,6 +211,7 @@ export class UserManagementComponent implements OnInit {
     this.selectedImage = file;
     console.log('File received from child:', this.selectedImage);
   }
+  
 
   updateUserProfile(updatedUser: User): void {
     const index = this.users.findIndex(u => u.id === updatedUser.id);
@@ -220,6 +222,7 @@ export class UserManagementComponent implements OnInit {
       );
     }
     this.updateUserInDB(updatedUser.id, updatedUser)
+    this.updateDisplayedUsers();
   }
 
  async updateUserInDB(updatedUser_id: string, updatedUser: User) {

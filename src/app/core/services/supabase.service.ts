@@ -338,7 +338,7 @@ export class SupabaseService {
     try {
       const { data, error } = await this.supabase.storage
         .from('profile_images')
-        .upload(`profiles/${userId}/${file.name}`, file, {
+        .upload(`profiles/${userId}/profileimage`, file, {
           upsert: true,
         });
       console.log("works");
@@ -353,6 +353,23 @@ export class SupabaseService {
       return null;
     }
   }
+
+  async getPublicImageUrl(path: string): Promise<string | null> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+  
+    try {
+      const { data } = this.supabase.storage.from('profile_images').getPublicUrl(path);
+      console.log(data)
+      return data.publicUrl || null;
+    } catch (error) {
+      console.error('Error generating public URL:', error);
+      return null;
+    }
+  }
+  
 
   async updateUser(userId: string, updates: any): Promise<void> {
     const { error } = await this.supabase!
