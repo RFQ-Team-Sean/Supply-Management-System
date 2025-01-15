@@ -38,12 +38,13 @@ export class HeaderComponent implements OnInit {
       if (user) {
         this.userName = user.name;
         this.userRole = this.formatRole(user.role);
-        this.userProfileImage = user.profile_image || '';
+        this.userProfileImage = await this.supabase.getPublicImageUrl(user.profile_image) || '';
       }
     } catch (error) {
       console.error('Error loading profile:', error);
     }
   }
+
 
   toggleProfileMenu(event?: Event) {
     if (event) {
