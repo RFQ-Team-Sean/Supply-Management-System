@@ -5,10 +5,8 @@ import { environment } from '../../environments/environment';
 import { PLATFORM_ID, Inject } from '@angular/core';
 
 
-
-
 export interface User {
-  account_id: number;
+  id: string;
   name: string;
   username: string;
   email: string;
@@ -28,6 +26,22 @@ interface AppUser extends SupabaseUser {
   created_at: string;
   email: string;
 }
+
+interface PPMPManagementData {
+  project_id: number;
+  date_created: string;
+  project_name: string;
+  requested_items: string;
+  total_budget: number;
+  status: string;  // Assuming status is a string, adjust if it's a custom type
+  date_approved: string | null;
+  date_rejected: string | null;
+  fiscal_year: number | null;
+  department: string;  // Adjust according to your department type
+  estimated_department_budget: number | null;
+  remaining_department_budget: number | null;
+}
+
 
 
 @Injectable({
@@ -186,6 +200,7 @@ export class SupabaseService {
       console.error('Error fetching users:', error);
       return [];
     }
+    console.log(data[0].account_id);
     return data as User[];
   }
 
@@ -251,6 +266,25 @@ export class SupabaseService {
     }
     console.log('Account successfully inserted:', data);
     return data;
+  }
+
+  async fetchRolesAndPermissions(): Promise<any[]> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return [];
+    }
+
+    const { data, error } = await this.supabase
+      .from('roles_and_permissions')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching roles and permissions:', error);
+      throw error;
+    }
+
+    return data || [];
   }
 
   async getCurrentUser(): Promise<User | null> {
@@ -340,5 +374,124 @@ export class SupabaseService {
     }
   }
 
+  async uploadProfileImage(file: File, userId: string): Promise<string | null> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+
+    try {
+      const { data, error } = await this.supabase.storage
+        .from('profile_images')
+        .upload(`profiles/${userId}/profileimage`, file, {
+          upsert: true,
+        });
+      console.log("works");
+      if (error) {
+        console.error('Image upload failed:', error.message);
+        return null;
+      }
+
+      return data?.path ? `profiles/${userId}/profileimage` : null;
+    } catch (error) {
+      console.error('Unexpected error during image upload:', error);
+      return null;
+    }
+  }
+
+  async getPublicImageUrl(path: string): Promise<string | null> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+  
+    try {
+      const { data } = this.supabase.storage.from('profile_images').getPublicUrl(path);
+      console.log(data)
+      return data.publicUrl || null;
+    } catch (error) {
+      console.error('Error generating public URL:', error);
+      return null;
+    }
+  }
+  
+
+  async updateUser(userId: string, updates: any): Promise<void> {
+    const { error } = await this.supabase!
+      .from('account')
+      .update(updates)
+      .eq('id', userId);
+
+    if (error) {
+      throw new Error(`Failed to update user: ${error.message}`);
+    }
+  }
+
+  async updateRoleAndPermission(id: number, updates: any): Promise<void> {
+    const { error } = await this.supabase!
+      .from('roles_and_permissions')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to update role and permission: ${error.message}`);
+    }
+  }
+
+  async addRoleAndPermission(role: string, permission: string): Promise<void> {
+    const { error } = await this.supabase!
+      .from('roles_and_permissions')
+      .insert([
+        {
+          role,
+          permission,
+          num_of_users: 0,
+          created_at: new Date(),
+        }
+      ]);
+
+    if (error) {
+      throw new Error(`Failed to add role and permission: ${error.message}`);
+    }
+  }
+
+  async deleteRoleAndPermission(roleId: number): Promise<void> {
+    const { error } = await this.supabase!
+      .from('roles_and_permissions')
+      .delete()
+      .eq('id', roleId);
+    if (error) {
+      throw new Error(`Failed to delete role: ${error.message}`);
+    }
+  }
+
+  async getPPMPManagementData(statusFilter: string) {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+  
+    const { data, error } = await this.supabase
+      .rpc('get_ppmp_management_data'); //custom sql function call
+  
+    if (error) {
+      console.error('Error fetching data:', error);
+      return [];
+    }
+
+    const typedData = data as PPMPManagementData[];
+  
+    if (statusFilter === 'Pending'){
+      return typedData?.filter(item => item.status === 'Pending') || [];
+    } else if (statusFilter === 'Approved'){
+      return typedData?.filter(item => item.status === 'Approved') || [];
+    } else if (statusFilter === 'Rejected'){
+      return typedData?.filter(item => item.status === 'Rejected') || [];
+    } else {
+      return [];
+    }
+  }
+  
+  
 
 }
