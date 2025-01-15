@@ -366,7 +366,7 @@ export class SupabaseService {
         return null;
       }
 
-      return data?.path ? `profiles/${userId}/${file.name}` : null;
+      return data?.path ? `profiles/${userId}/profileimage` : null;
     } catch (error) {
       console.error('Unexpected error during image upload:', error);
       return null;
