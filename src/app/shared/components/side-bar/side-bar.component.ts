@@ -226,7 +226,7 @@ export class SideBarComponent implements OnInit {
     const normalizedRole = role?.toLowerCase();
     
     switch (normalizedRole) {
-      case 'department staff':
+      case 'department':
         this.currentMenu = [...this.DepartmentuserMenu];
         this.title = 'Department Staff Portal'; // Set title for user menu
         break;
@@ -234,11 +234,11 @@ export class SideBarComponent implements OnInit {
         this.currentMenu = [...this.AdminMenu];
         this.title = 'Administrator Portal'; 
         break;
-      case 'gso officer':
+      case 'gso':
         this.currentMenu = [...this.GsoMenu];
         this.title = 'GSO Portal'; 
         break; 
-      case 'bac staff':
+      case 'bac':
         this.currentMenu = [...this.BacMenu];
         this.title = 'BAC Portal'; 
         break;    
