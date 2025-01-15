@@ -104,3 +104,8 @@
       </button>
     </div>
   </section>  
+
+  <app-bidmanagement-create
+    *ngIf="showCreateModal"
+    (closeModal)="closeCreateModal()"
+  ></app-bidmanagement-create>  
