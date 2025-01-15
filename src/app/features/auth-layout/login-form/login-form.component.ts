@@ -53,7 +53,7 @@ export class LoginFormComponent {
           console.log('Normalized role:', normalizedRole);
           localStorage.setItem('userRole', normalizedRole);
           
-          if (normalizedRole === 'department') {
+          if (normalizedRole === 'department staff') {
             await this.router.navigate(['/user/dashboard']);
           } else {
             await this.router.navigate([`/${normalizedRole}/dashboard`]);

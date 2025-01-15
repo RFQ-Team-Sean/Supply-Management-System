@@ -19,7 +19,7 @@ export class AuthGuard implements CanActivate {
       }
 
       // Map 'user' route role to 'department' database role
-      if (requiredRole === 'user' && userRole === 'department') {
+      if (requiredRole === 'user' && userRole === 'department staff') {
         return true;
       }
 
