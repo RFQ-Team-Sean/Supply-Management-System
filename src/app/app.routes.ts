@@ -92,10 +92,10 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'gso officer',
+    path: 'gso',
     component: GsoLayoutComponent,
     canActivate: [AuthGuard],
-    data: { role: 'gso officer' },
+    data: { role: 'gso' },
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: GsoDashboardComponent },
@@ -113,10 +113,10 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'bac staff',
+    path: 'bac',
     component: BacLayoutComponent,
     canActivate: [AuthGuard],
-    data: { role: 'bac staff' },
+    data: { role: 'bac' },
     children: [
         { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
         { path: 'dashboard', component: BacDashboardComponent },
