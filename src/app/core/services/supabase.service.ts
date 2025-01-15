@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { createClient, PostgrestError, SupabaseClient, User as SupabaseUser, AuthError } from '@supabase/supabase-js';
+import { createClient, PostgrestError, SupabaseClient, User as SupabaseUser, AuthError, AuthResponse as SupabaseAuthResponse } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { PLATFORM_ID, Inject } from '@angular/core';
 
@@ -26,7 +26,7 @@ interface AppUser extends SupabaseUser {
   user_metadata: any;
   aud: string;
   created_at: string;
-  email: string; 
+  email: string;
 }
 
 
@@ -102,7 +102,7 @@ export class SupabaseService {
 
       // Store user data
       this.currentUser = userData;
-      
+
       // Store session
       if (authData.session) {
         localStorage.setItem('supabase.auth.token', authData.session.access_token);
@@ -177,7 +177,7 @@ export class SupabaseService {
       console.error('Supabase client not initialized.');
       return [];
     }
-    
+
     const { data, error } = await this.supabase
     .from('account')
     .select('*');
@@ -296,7 +296,7 @@ export class SupabaseService {
       console.error('Supabase client not initialized.');
       return null;
     }
-    
+
     try {
       const { data, error } = await this.supabase.auth.signUp({
         email,
@@ -313,5 +313,32 @@ export class SupabaseService {
       return null;
     }
   }
+
+  // Client Registration with Email and Email Confirmation
+  async registerUser(email: string, password: string, userData: any): Promise<{ data: any; error: AuthError | null }> {
+    await this.ensureSupabaseInitialized();
+
+    try {
+      const { data, error }: SupabaseAuthResponse = await this.supabase!.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userData,
+          emailRedirectTo: `${window.location.origin}/auth-confirmation`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Registration successful:', data);
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error during registration:', error);
+      return { data: null, error: error as AuthError };
+    }
+  }
+
 
 }

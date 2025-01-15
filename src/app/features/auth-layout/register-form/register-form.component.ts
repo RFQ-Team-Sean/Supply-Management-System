@@ -1,6 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Component({
   selector: 'app-register-form',
@@ -13,6 +14,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './register-form.component.css'
 })
 export class RegisterFormComponent {
+  private supabase: SupabaseClient;
   @ViewChild('fileInput') fileInput!: ElementRef;
 
   firstName: string = '';
@@ -26,6 +28,11 @@ export class RegisterFormComponent {
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
 
+
+  constructor() {
+    this.supabase = createClient('https://rewloptzuoxkrhpxrwnf.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJld2xvcHR6dW94a3JocHhyd25mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMxOTkyMDMsImV4cCI6MjA0ODc3NTIwM30.NuQab__PhiQ3bsd1nzoFkwHR814bTAUOofRsFRcBC34');
+  }
+
   triggerFileInput() {
     this.fileInput.nativeElement.click();
   }
@@ -33,7 +40,6 @@ export class RegisterFormComponent {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      // Create a preview URL for the selected image
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.profileImageUrl = e.target.result;
@@ -50,17 +56,40 @@ export class RegisterFormComponent {
     }
   }
 
-  onSubmit() {
-    // Add your registration logic here
-    console.log('Form submitted', {
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      username: this.username,
-      department: this.department,
-      password: this.password,
-      confirmPassword: this.confirmPassword,
-      profileImage: this.profileImageUrl
-    });
+  async onSubmit() {
+    if (this.password !== this.confirmPassword) {
+      alert('Passwords do not match.');
+      return;
+    }
+
+    try {
+      const { data, error } = await this.supabase.auth.signUp({
+        email: this.email,
+        password: this.password,
+        options: {
+          data: {
+            firstName: this.firstName,
+            lastName: this.lastName,
+            username: this.username,
+            department: this.department,
+            profileImageUrl: this.profileImageUrl
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Registration error:', error.message);
+        // Provide user feedback
+        alert(`Registration failed: ${error.message}`);
+        return;
+      }
+
+      console.log('User registered successfully:', data);
+      alert('Registration successful! Please check your email for confirmation.');
+
+    } catch (err) {
+      console.error('Unexpected error during registration:', err);
+      alert('An unexpected error occurred. Please try again later.');
+    }
   }
 }
