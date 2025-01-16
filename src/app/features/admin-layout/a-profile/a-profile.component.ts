@@ -1,23 +1,49 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { SupabaseService } from '../../../core/services/supabase.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+interface User {
+  id: string | null;
+  name: string;
+  username: string;
+  email: string;
+  account_status: string;
+  role: string;
+  profile_image: string | null;
+}
 
 @Component({
   selector: 'app-a-profile',
   templateUrl: './a-profile.component.html',
   styleUrls: ['./a-profile.component.css'],
   standalone: true,
-  imports: []
+  imports: [CommonModule, FormsModule]
 })
 export class AProfileComponent implements OnInit {
+  @ViewChild('fileInput') fileInput!: ElementRef;
+  view: 'profile' | 'edit' | 'changePassword' = 'profile';
   userName: string = 'Loading...';
-  userRole: string = 'Loading...';
-  userEmail: string = 'Loading...';
+  userUsername: string = '';
+  userRole: string = '';
+  userEmail: string = '';
   userProfileImage: string = '';
   isProfileMenuOpen: boolean = false;
-  
+  isImageLoading: boolean = true;
+  selectedImage: File | null = null;
+  isEmailUpdating: boolean = false; // New loading state for email update
+  oldEmail: string | null = '';
+
+  passwords = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  };
+
   constructor(
-      private supabase: SupabaseService
-    ) {}
+    private router: Router,
+    private supabase: SupabaseService) {}
 
   async ngOnInit() {
     await this.loadProfileData();
@@ -26,7 +52,6 @@ export class AProfileComponent implements OnInit {
         this.isProfileMenuOpen = false;
       }
     });
-    console.log('initialized');
   }
 
   async loadProfileData() {
@@ -35,16 +60,185 @@ export class AProfileComponent implements OnInit {
       if (user) {
         this.userName = user.name;
         this.userEmail = user.email;
-        this.userRole = this.formatRole(user.role);
-        this.userProfileImage = await this.supabase.getPublicImageUrl(user.profile_image) || '';
-        console.log(this.userEmail);
+        this.userUsername = user.username;
+        this.oldEmail = user.email;
+        this.userRole = user.role;
+
+        this.isImageLoading = true;
+        const imageUrl = await this.supabase.getPublicImageUrl(user.profile_image);
+        if (imageUrl) {
+          const cacheBustedUrl = `${imageUrl}?t=${new Date().getTime()}`;
+          const image = new Image();
+          image.src = imageUrl;
+
+          image.onload = () => {
+            this.userProfileImage = cacheBustedUrl;
+            this.isImageLoading = false;
+          };
+
+          image.onerror = () => {
+            console.error('Failed to load profile image');
+            this.isImageLoading = false;
+          };
+        } else {
+          this.isImageLoading = false;
+        }
       }
     } catch (error) {
       console.error('Error loading profile:', error);
+      this.isImageLoading = false;
     }
   }
 
-  private formatRole(role: string): string {
-    return role?.charAt(0).toUpperCase() + role?.slice(1) || '';
+  async onEditProfile(event: Event) {
+    event.preventDefault();
+
+    console.log('the new username is ', this.userUsername);
+
+    // Prepare user data
+    const updatedUser: User = {
+      id: await this.supabase.getCurrentUserId(),
+      name: this.userName,
+      email: this.userEmail,
+      username: this.userUsername,
+      role: this.userRole,
+      account_status: 'active', // Example, replace with your logic
+      profile_image: this.userProfileImage,
+    };
+
+    // Call the update function
+    await this.updateUserInDB(updatedUser.id, updatedUser);
+    this.changeView('profile');
+  }
+
+  async updateUserInDB(updatedUserId: string | null, updatedUser: User) {
+    if (!updatedUserId) {
+      console.error('User ID is required');
+      return;
+    }
+    
+    try {
+      let imagePath: string | null = null;
+
+      if (this.selectedImage) {
+        console.log(this.selectedImage);
+        imagePath = await this.supabase.uploadProfileImage(this.selectedImage, updatedUserId);
+      }
+
+      // switch (updatedUser.role) {
+      //   case 'Department Staff':
+      //     updatedUser.role = 'department';
+      //     break;
+      //   case 'BAC Staff':
+      //     updatedUser.role = 'bac';
+      //     break;
+      //   case 'Admin':
+      //     updatedUser.role = 'admin';
+      //     break;
+      //   case 'GSO Officer':
+      //     updatedUser.role = 'gso';
+      //     break;
+      //   default:
+      //     updatedUser.role = '';
+      // }
+
+      // Update email in Supabase auth
+      if (updatedUser.email && updatedUser.email !== this.oldEmail) {
+        this.isEmailUpdating = true; 
+        try {
+          // Attempt to update the email
+          await this.supabase.updateEmail(updatedUser.email);
+        } catch (emailError) {
+          console.error('Error updating email:', emailError);
+          alert('Failed to update email. Please try again.');
+          return; // Exit if email update fails
+        }
+      }
+
+      await this.supabase.updateUser(updatedUserId, {
+        name: updatedUser.name,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        role: updatedUser.role,
+        account_status: updatedUser.account_status,
+        profile_image: imagePath || updatedUser.profile_image,
+      });
+
+      // If a new image was uploaded, update the displayed image with a cache-busting URL
+      if (imagePath) {
+        this.userProfileImage = `${imagePath}?t=${new Date().getTime()}`;
+      }
+
+      alert('Profile updated successfully!');
+      if (updatedUser.email !== this.oldEmail){
+        this.isEmailUpdating = false;
+        this.signOut()
+      }
+      await this.loadProfileData(); // Reload the updated profile data
+      
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile');
+    } finally {
+      
+      this.isEmailUpdating = false; // Reset loading state when done
+    }
+  }
+
+  async signOut() {
+    try {
+      if (this.supabase.client) {
+        await this.supabase.client.auth.signOut();
+      }
+      localStorage.clear();
+      await this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      localStorage.clear();
+      await this.router.navigate(['/login']);
+    }
+  }
+
+  onProfilePictureChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.selectedImage = file;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.userProfileImage = reader.result as string; // Preview the new image
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  triggerFileInput() {
+    this.fileInput.nativeElement.click();
+  }
+
+  roleDisplayMapping: { [key: string]: string } = {
+    gso: 'GSO Officer',
+    admin: 'Admin',
+    bac: 'BAC Staff',
+    department: 'IT Department',
+    //property: 'Property Officer'
+  };
+
+  getRoleDisplay(role: string): string {
+    return this.roleDisplayMapping[role] || role;
+  }
+
+  onChangePassword(event: Event) {
+    event.preventDefault();
+    if (this.passwords.newPassword !== this.passwords.confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+    this.changeView('profile');
+  }
+
+  changeView(newView: 'profile' | 'edit' | 'changePassword') {
+    this.view = newView;
   }
 }
