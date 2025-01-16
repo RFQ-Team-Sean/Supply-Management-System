@@ -39,3 +39,12 @@
   button:hover {
     background-color: #0056b3;
   }
+
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 1;
+  }
+  
+  .group:hover .transition-opacity {
+    transition: opacity 0.3s ease;
+  }
+  

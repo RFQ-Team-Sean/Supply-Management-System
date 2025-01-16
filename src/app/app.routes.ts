@@ -44,6 +44,7 @@ import { BacDashboardComponent } from './features/bac-layout/bac-dashboard/bac-d
 import { BacLayoutComponent } from './features/bac-layout/bac-layout.component';
 import { GsoLayoutComponent } from './features/gso-layout/gso-layout.component';
 import { BacBidmanagementComponent } from './features/bac-layout/bac-bidmanagement/bac-bidmanagement.component';
+import { GsoProfileComponent } from './features/gso-layout/gso-profile/gso-profile.component';
 
 export const routes: Routes = [
   {
@@ -110,7 +111,7 @@ export const routes: Routes = [
       { path: 'gso-systemsettings', component: GsoSystemsettingsComponent },
       { path: 'gso-newitem', component: GsoNewitemComponent },
       { path: 'gso-inventoryvedit/:id', component: GsoInventoryeditComponent },
-      { path: 'a-profile', component: AProfileComponent },    
+      { path: 'gso-profile', component: GsoProfileComponent },    
     ],
   },
   {

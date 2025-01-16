@@ -10,8 +10,8 @@ import { SupabaseService } from '../../../core/services/supabase.service';
 })
 export class AProfileComponent implements OnInit {
   userName: string = 'Loading...';
-  userRole: string = '';
-  userEmail: string = '';
+  userRole: string = 'Loading...';
+  userEmail: string = 'Loading...';
   userProfileImage: string = '';
   isProfileMenuOpen: boolean = false;
   
