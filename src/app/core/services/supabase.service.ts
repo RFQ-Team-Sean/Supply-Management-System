@@ -400,6 +400,23 @@ export class SupabaseService {
     }
   }
 
+  async updateEmail(newEmail: string) {
+    try {
+      if (this.supabase) {
+        const { error } = await this.supabase.auth.updateUser({ email: newEmail });
+        if (error) {
+          console.error('Error updating email:', error.message);
+          alert('Failed to update email. Please try again.');
+        } else {
+          alert('Email updated successfully! Please check your inbox to confirm the change.');
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert('An unexpected error occurred. Please try again.');
+    }
+  }
+
   async updateRoleAndPermission(id: number, updates: any): Promise<void> {
     const { error } = await this.supabase!
       .from('roles_and_permissions')

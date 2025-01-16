@@ -141,12 +141,14 @@
             name="email"
             class="border rounded w-full p-2"
             required
+            [disabled]="isEmailUpdating"
           />
         </div>
         <div class="col-span-2 space-x-4">
           <button
             type="submit"
             class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            [disabled]="isEmailUpdating"
           >
             Save
           </button>
@@ -159,6 +161,11 @@
           </button>
         </div>
       </form>
+      <!-- Loading Indicator (optional, displayed during email update) -->
+      <div *ngIf="isEmailUpdating" class="flex justify-center items-center mt-4">
+        <p class="text-red-600"> Awaiting Email Confirmation </p>
+        <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
     </div>    
     
     <!-- Change Password View -->

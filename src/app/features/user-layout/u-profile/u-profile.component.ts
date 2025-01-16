@@ -2,11 +2,12 @@ import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 interface User {
   id: string | null;
   name: string;
-  username?: string;
+  username: string;
   email: string;
   account_status: string;
   role: string;
@@ -32,6 +33,8 @@ export class UProfileComponent implements OnInit {
   isProfileMenuOpen: boolean = false;
   isImageLoading: boolean = true;
   selectedImage: File | null = null;
+  isEmailUpdating: boolean = false; // New loading state for email update
+  oldEmail: string | null = '';
 
   passwords = {
     currentPassword: '',
@@ -39,7 +42,9 @@ export class UProfileComponent implements OnInit {
     confirmPassword: '',
   };
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(
+    private router: Router,
+    private supabase: SupabaseService) {}
 
   async ngOnInit() {
     await this.loadProfileData();
@@ -57,6 +62,7 @@ export class UProfileComponent implements OnInit {
         this.userName = user.name;
         this.userEmail = user.email;
         this.userUsername = user.username;
+        this.oldEmail = user.email;
         this.userRole = user.role;
 
         this.isImageLoading = true;
@@ -88,6 +94,8 @@ export class UProfileComponent implements OnInit {
   async onEditProfile(event: Event) {
     event.preventDefault();
 
+    console.log('the new username is ', this.userUsername);
+
     // Prepare user data
     const updatedUser: User = {
       id: await this.supabase.getCurrentUserId(),
@@ -109,7 +117,7 @@ export class UProfileComponent implements OnInit {
       console.error('User ID is required');
       return;
     }
-
+    
     try {
       let imagePath: string | null = null;
 
@@ -135,9 +143,23 @@ export class UProfileComponent implements OnInit {
       //     updatedUser.role = '';
       // }
 
+      // Update email in Supabase auth
+      if (updatedUser.email && updatedUser.email !== this.oldEmail) {
+        this.isEmailUpdating = true; 
+        try {
+          // Attempt to update the email
+          await this.supabase.updateEmail(updatedUser.email);
+        } catch (emailError) {
+          console.error('Error updating email:', emailError);
+          alert('Failed to update email. Please try again.');
+          return; // Exit if email update fails
+        }
+      }
+
       await this.supabase.updateUser(updatedUserId, {
         name: updatedUser.name,
         email: updatedUser.email,
+        username: updatedUser.username,
         role: updatedUser.role,
         account_status: updatedUser.account_status,
         profile_image: imagePath || updatedUser.profile_image,
@@ -149,11 +171,32 @@ export class UProfileComponent implements OnInit {
       }
 
       alert('Profile updated successfully!');
+      if (updatedUser.email !== this.oldEmail){
+        this.isEmailUpdating = false;
+        this.signOut()
+      }
       await this.loadProfileData(); // Reload the updated profile data
       
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile');
+    } finally {
+      
+      this.isEmailUpdating = false; // Reset loading state when done
+    }
+  }
+
+  async signOut() {
+    try {
+      if (this.supabase.client) {
+        await this.supabase.client.auth.signOut();
+      }
+      localStorage.clear();
+      await this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      localStorage.clear();
+      await this.router.navigate(['/login']);
     }
   }
 

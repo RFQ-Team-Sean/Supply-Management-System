@@ -46,6 +46,7 @@ export class LoginFormComponent {
 
       if (data?.user) {
         const role = await this.supabaseService.getUserRole(this.email);
+        console.log(this.email)
         console.log('Retrieved role:', role);
         
         if (role) {
