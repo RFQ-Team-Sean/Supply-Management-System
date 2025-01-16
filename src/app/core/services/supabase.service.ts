@@ -404,7 +404,7 @@ export class SupabaseService {
       console.error('Supabase client not initialized.');
       return null;
     }
-  
+
     try {
       const { data } = this.supabase.storage.from('profile_images').getPublicUrl(path);
       console.log(data)
@@ -414,7 +414,7 @@ export class SupabaseService {
       return null;
     }
   }
-  
+
 
   async updateUser(userId: string, updates: any): Promise<void> {
     const { error } = await this.supabase!
@@ -470,17 +470,17 @@ export class SupabaseService {
       console.error('Supabase client not initialized.');
       return null;
     }
-  
+
     const { data, error } = await this.supabase
       .rpc('get_ppmp_management_data'); //custom sql function call
-  
+
     if (error) {
       console.error('Error fetching data:', error);
       return [];
     }
 
     const typedData = data as PPMPManagementData[];
-  
+
     if (statusFilter === 'Pending'){
       return typedData?.filter(item => item.status === 'Pending') || [];
     } else if (statusFilter === 'Approved'){
@@ -491,7 +491,7 @@ export class SupabaseService {
       return [];
     }
   }
-  
-  
+
+
 
 }

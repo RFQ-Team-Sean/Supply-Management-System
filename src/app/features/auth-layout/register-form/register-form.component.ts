@@ -11,7 +11,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
     CommonModule
   ],
   templateUrl: './register-form.component.html',
-  styleUrl: './register-form.component.css'
+  styleUrls: ['./register-form.component.css']
 })
 export class RegisterFormComponent {
   private supabase: SupabaseClient;
@@ -27,6 +27,14 @@ export class RegisterFormComponent {
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
 
+  validDepartments: string[] = [
+    'academic_department',
+    'administrative_department',
+    'IT_deparment',
+    'financial_department',
+    'operation_department',
+    'humanresource_department',
+  ];
 
   constructor() {
     this.supabase = createClient('https://rewloptzuoxkrhpxrwnf.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJld2xvcHR6dW94a3JocHhyd25mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMxOTkyMDMsImV4cCI6MjA0ODc3NTIwM30.NuQab__PhiQ3bsd1nzoFkwHR814bTAUOofRsFRcBC34');
@@ -55,36 +63,77 @@ export class RegisterFormComponent {
     }
   }
 
+  validatePassword(password: string): boolean {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+  }
+
   async onSubmit() {
     if (this.password !== this.confirmPassword) {
       alert('Passwords do not match.');
       return;
     }
 
+    if (!this.validatePassword(this.password)) {
+      alert('Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.');
+      return;
+    }
+
+    // Validate the department value against the valid department types
+    if (!this.validDepartments.includes(this.department)) {
+      alert('Please select a valid department.');
+      return;
+    }
+
     try {
-      const { data, error } = await this.supabase.auth.signUp({
+      // Step 1: Register the user with email and password
+      const { data: user, error: userError } = await this.supabase.auth.signUp({
         email: this.email,
         password: this.password,
         options: {
           data: {
-            fullNameL: this.fullName,
+            fullName: this.fullName,
             username: this.username,
             department: this.department,
-            profileImageUrl: this.profileImageUrl
-          }
-        }
+            profileImageUrl: this.profileImageUrl,
+          },
+        },
       });
 
-      if (error) {
-        console.error('Registration error:', error.message);
-        // Provide user feedback
-        alert(`Registration failed: ${error.message}`);
+      if (userError) {
+        console.error('Registration error:', userError.message);
+        alert(`Registration failed: ${userError.message}`);
         return;
       }
 
-      console.log('User registered successfully:', data);
-      alert('Registration successful! Please check your email for confirmation.');
+      // Step 2: Insert user details into the public.account table
+      const { data: account, error: accountError } = await this.supabase
+        .from('account')
+        .insert([{
+          id: user.user?.id ?? '',  // Use the Supabase Auth user ID
+          name: this.fullName,
+          username: this.username,
+          department: this.department,
+          role: 'department', // Set a default role (can be adjusted based on your business logic)
+          profile_image: this.profileImageUrl,
+          account_status: 'active', // Default value
+          created_at: new Date(),
+          updated_at: new Date(),
+        }]);
 
+      if (accountError) {
+        console.error('Error inserting into account:', accountError.message);
+        alert(`Error: ${accountError.message}`);
+        return;
+      }
+
+      console.log('User registered and account inserted successfully:', account);
+      alert('Registration successful! Please check your email for confirmation.');
     } catch (err) {
       console.error('Unexpected error during registration:', err);
       alert('An unexpected error occurred. Please try again later.');
