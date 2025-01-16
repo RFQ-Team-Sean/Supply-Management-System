@@ -24,18 +24,11 @@
         <p class="text-sm text-gray-500 mb-2 form-element">Personal Information</p>
         <div class="grid grid-cols-3 gap-8 mb-6">
             <input
-                type="text"
-                [(ngModel)]="firstName"
-                name="firstName"
-                placeholder="First Name"
-                class="px-6 py-3.5 rounded-full border border-gray-300 focus:border-[#30B2E1] focus:outline-none text-base w-full form-element"
-            />
-            <input
-                type="text"
-                [(ngModel)]="lastName"
-                name="lastName"
-                placeholder="Last Name"
-                class="px-6 py-3.5 rounded-full border border-gray-300 focus:border-[#30B2E1] focus:outline-none text-base w-full form-element"
+              type="text"
+              [(ngModel)]="fullName"
+              name="fullName"
+              placeholder="Full Name"
+              class="px-6 py-3.5 rounded-full border border-gray-300 focus:border-[#30B2E1] focus:outline-none text-base w-full form-element"
             />
             <input
                 type="email"

@@ -17,8 +17,7 @@ export class RegisterFormComponent {
   private supabase: SupabaseClient;
   @ViewChild('fileInput') fileInput!: ElementRef;
 
-  firstName: string = '';
-  lastName: string = '';
+  fullName: string = '';
   email: string = '';
   username: string = '';
   department: string = '';
@@ -68,8 +67,7 @@ export class RegisterFormComponent {
         password: this.password,
         options: {
           data: {
-            firstName: this.firstName,
-            lastName: this.lastName,
+            fullNameL: this.fullName,
             username: this.username,
             department: this.department,
             profileImageUrl: this.profileImageUrl
