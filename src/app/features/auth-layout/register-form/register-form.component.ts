@@ -73,6 +73,10 @@ export class RegisterFormComponent {
     return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
   }
 
+  passwordsMatch(): boolean {
+    return this.password === this.confirmPassword;
+  }
+
   async onSubmit() {
     if (this.password !== this.confirmPassword) {
       alert('Passwords do not match.');

@@ -97,6 +97,17 @@
             </div>
         </div>
 
+        <!-- Warning message for password mismatch -->
+        <div *ngIf="!passwordsMatch()" class="text-red-500 mb-4 form-element">
+            Passwords do not match.
+        </div>
+
+        <!-- Show Password Checkbox -->
+        <div class="flex items-center mb-4 form-element">
+            <input type="checkbox" id="showPasswordCheckbox" (change)="togglePassword('password'); togglePassword('confirm')" class="mr-2">
+            <label for="showPasswordCheckbox" class="text-gray-500">Show Password</label>
+        </div>
+
         <!-- Sign Up Button -->
         <button
             type="submit"
