@@ -28,6 +28,18 @@ interface BIDM {
 export class BidmanagementReviewbidsComponent {
   @Output() closeModal = new EventEmitter<void>();
   @Input() selectedBid!: BIDM;
+  
+  // Add this property for the dummy file
+  attachedFile = {
+    name: 'bid_details.pdf',
+    type: 'pdf'
+  };
+
+  // Add this method to handle view click
+  viewFile() {
+    // Implement file viewing logic here
+    console.log('Viewing file:', this.attachedFile.name);
+  }
 
   resetDates() {
     // Add reset functionality if needed

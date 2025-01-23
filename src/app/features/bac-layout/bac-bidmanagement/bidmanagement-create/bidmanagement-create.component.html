@@ -35,7 +35,24 @@
         <label class="text-sm text-gray-600">Bid Details</label>
         <button class="text-sm text-blue-500" (click)="resetBidDetails()">Reset</button>
       </div>
-      <textarea [(ngModel)]="bidDetails" class="w-full border rounded-md p-2 text-sm h-24"></textarea>
+      <textarea [(ngModel)]="bidDetails" placeholder="Enter bid title" class="w-full border rounded-md p-2 text-sm h-24 mb-2"></textarea>
+      <div class="flex gap-2 items-center">
+        <button 
+          (click)="bidFileInput.click()" 
+          class="text-sm px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+        >
+          Attach bid file
+        </button>
+        <input
+          type="file"
+          #bidFileInput
+          (change)="onBidFileSelected($event)"
+          class="hidden"
+        >
+        <span class="text-sm text-gray-500">
+          {{ bidFileName || 'No file chosen' }}
+        </span>
+      </div>
     </div>
 
     <!-- Purchase Item Request -->

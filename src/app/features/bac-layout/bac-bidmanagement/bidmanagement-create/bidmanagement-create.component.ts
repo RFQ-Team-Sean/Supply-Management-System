@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -31,6 +31,8 @@ export class BidmanagementCreateComponent {
   dateTo: string = '';
   bidDetails: string = '';
   purchaseRequest: string = '';
+  bidFileName: string = '';
+  @ViewChild('bidFileInput') bidFileInput!: ElementRef;
 
   resetDates() {
     this.dateFrom = '';
@@ -64,5 +66,12 @@ export class BidmanagementCreateComponent {
   apply() {
     // Implement your apply logic here
     this.closeModal.emit();
+  }
+
+  onBidFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.bidFileName = file.name;
+    }
   }
 }
