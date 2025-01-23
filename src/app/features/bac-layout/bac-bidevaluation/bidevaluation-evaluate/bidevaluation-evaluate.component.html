@@ -1,0 +1,92 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg w-full max-w-xl mx-auto relative flex flex-col max-h-[90vh]">
+    <!-- Fixed Header -->
+    <div class="p-6 border-b">
+      <button 
+        (click)="closeModal.emit()" 
+        class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <h2 class="text-xl font-semibold">Bid Evaluation Form</h2>
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <!-- Bidder Info -->
+      <div class="mb-6 space-y-4">
+        <div>
+          <label class="text-sm text-gray-600 block mb-1">Bidder</label>
+          <input type="text" [value]="bide?.supplier" class="w-full border rounded-md p-2 text-sm" readonly>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600 block mb-1">Bid Amount</label>
+          <input type="text" [value]="'₱' + bide?.amount_submitted" class="w-full border rounded-md p-2 text-sm" readonly>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600 block mb-1">Bid Item</label>
+          <input type="text" [value]="bide?.requested_items?.join(', ')" class="w-full border rounded-md p-2 text-sm" readonly>
+        </div>
+      </div>
+
+      <!-- Evaluation Criteria -->
+      <div class="mb-6">
+        <h3 class="text-lg font-medium mb-4">Evaluation Criteria</h3>
+        <div class="space-y-4">
+          <div *ngFor="let criteria of evaluationCriteria" class="border rounded-lg p-4">
+            <label class="text-base font-medium text-gray-700 block mb-3">{{ criteria.title }}</label>
+            <div class="space-y-2">
+              <div *ngFor="let option of criteria.options" class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <input 
+                    type="radio" 
+                    [name]="criteria.title"
+                    [value]="option"
+                    [(ngModel)]="criteria.selected"
+                    class="mr-2"
+                  >
+                  <label class="text-sm text-gray-600">{{ option }}</label>
+                </div>
+                <div class="text-sm text-gray-400">{{ getPoints(option) }}</div>
+              </div>
+            </div>
+            <div class="flex gap-2 mt-3">
+              <button class="px-3 py-1 text-xs border rounded-md hover:bg-gray-50">Edit criteria</button>
+              <button class="px-3 py-1 text-xs border rounded-md hover:bg-gray-50">Add criteria</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Comments -->
+      <div class="mb-6">
+        <label class="text-sm text-gray-600 block mb-2">Additional Comments</label>
+        <textarea 
+          [(ngModel)]="additionalComments"
+          class="w-full border rounded-md p-2 text-sm h-24"
+          placeholder="(Optional)"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Fixed Footer -->
+    <div class="p-6 border-t">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-medium text-gray-700">Total Score:</span>
+          <span class="text-lg font-bold text-blue-600">
+            {{ calculateTotalScore() }}/{{ getMaxPossibleScore() }}
+          </span>
+        </div>
+        <button 
+          (click)="confirm()" 
+          class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

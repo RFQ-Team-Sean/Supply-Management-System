@@ -174,7 +174,7 @@ export class SideBarComponent implements OnInit {
     },
     { label: 'BID Evaluation', 
       icon: 'mdi:basket-plus', 
-      route: '/bac/bac-purchasemanagement' 
+      route: '/bac/bac-bidevaluation' 
     },
     {
       label: 'Supplier Management',
