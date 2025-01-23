@@ -179,7 +179,7 @@ export class SideBarComponent implements OnInit {
     {
       label: 'Supplier Management',
       icon: 'ri:archive-drawer-line',
-      route: '/bac/bac-inventorymanagement',
+      route: '/bac/bac-suppliermanagement',
     },
     {
       label: 'Reports',

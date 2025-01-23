@@ -45,6 +45,7 @@ import { BacLayoutComponent } from './features/bac-layout/bac-layout.component';
 import { GsoLayoutComponent } from './features/gso-layout/gso-layout.component';
 import { BacBidmanagementComponent } from './features/bac-layout/bac-bidmanagement/bac-bidmanagement.component';
 import { BacBidevaluationComponent } from './features/bac-layout/bac-bidevaluation/bac-bidevaluation.component';
+import { BacSuppliermanagementComponent } from './features/bac-layout/bac-suppliermanagement/bac-suppliermanagement.component';
 
 export const routes: Routes = [
   {
@@ -124,6 +125,7 @@ export const routes: Routes = [
         { path: 'dashboard', component: BacDashboardComponent },
         { path: 'bac-bidevaluation', component: BacBidevaluationComponent},
         { path: 'bac-bidmanagement', component: BacBidmanagementComponent },
+        { path: 'bac-suppliermanagement', component: BacSuppliermanagementComponent },
     ],
   },
   {
