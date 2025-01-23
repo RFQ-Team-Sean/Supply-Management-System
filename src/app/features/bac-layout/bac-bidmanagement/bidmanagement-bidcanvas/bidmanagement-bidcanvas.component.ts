@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BidcanvasViewquotationComponent } from './bidcanvas-viewquotation/bidcanvas-viewquotation.component';
+import { BidcanvasPrintComponent } from './bidcanvas-print/bidcanvas-print.component';
 
 interface BIDM {
   id: number;
@@ -13,7 +15,7 @@ interface BIDM {
 @Component({
   selector: 'app-bidmanagement-bidcanvas',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BidcanvasViewquotationComponent, BidcanvasPrintComponent],
   templateUrl: './bidmanagement-bidcanvas.component.html',
   styleUrl: './bidmanagement-bidcanvas.component.css'
 })
@@ -66,6 +68,9 @@ export class BidmanagementBidcanvasComponent implements OnInit {
   itemsPerPage = 5;
   totalPages = 0;
   currentOpenActionId: number | null = null;
+  showQuotationModal = false;
+  selectedBidm: BIDM | null = null;
+  showPrintModal = false;
 
   ngOnInit() {
     this.updateDisplayedBidms();
@@ -99,13 +104,25 @@ export class BidmanagementBidcanvasComponent implements OnInit {
     this.currentOpenActionId = this.currentOpenActionId === bidm.id ? null : bidm.id;
   }
 
-  viewBidm(bidm: BIDM) {
-    console.log('Viewing Quotation:', bidm);
+  viewQuotationBidm(bidm: BIDM) {
+    this.selectedBidm = bidm;
+    this.showQuotationModal = true;
     this.currentOpenActionId = null;
   }
 
-  editBidm(bidm: BIDM) {
-    console.log('Editing Bid:', bidm);
+  closeQuotationModal() {
+    this.showQuotationModal = false;
+    this.selectedBidm = null;
+  }
+
+  printBidm(bidm: BIDM) {
+    this.selectedBidm = bidm;
+    this.showPrintModal = true;
     this.currentOpenActionId = null;
+  }
+
+  closePrintModal() {
+    this.showPrintModal = false;
+    this.selectedBidm = null;
   }
 }

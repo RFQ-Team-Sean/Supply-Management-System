@@ -1,0 +1,105 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-md relative">
+    <button 
+      (click)="closeModal.emit()" 
+      class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <h2 class="text-xl font-semibold mb-4">Create new Bidding</h2>
+
+    <!-- Date Range -->
+    <div class="mb-4">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Date Range</label>
+        <button class="text-sm text-blue-500" (click)="resetDates()">Reset</button>
+      </div>
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <label class="text-xs text-gray-500 block">From:</label>
+          <input type="date" [(ngModel)]="dateFrom" class="w-full border rounded-md p-2 text-sm">
+        </div>
+        <div class="flex-1">
+          <label class="text-xs text-gray-500 block">To:</label>
+          <input type="date" [(ngModel)]="dateTo" class="w-full border rounded-md p-2 text-sm">
+        </div>
+      </div>
+    </div>
+
+    <!-- Bid Details -->
+    <div class="mb-4">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Bid Details</label>
+        <button class="text-sm text-blue-500" (click)="resetBidDetails()">Reset</button>
+      </div>
+      <textarea [(ngModel)]="bidDetails" placeholder="Enter bid title" class="w-full border rounded-md p-2 text-sm h-24 mb-2"></textarea>
+      <div class="flex gap-2 items-center">
+        <button 
+          (click)="bidFileInput.click()" 
+          class="text-sm px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+        >
+          Attach bid file
+        </button>
+        <input
+          type="file"
+          #bidFileInput
+          (change)="onBidFileSelected($event)"
+          class="hidden"
+        >
+        <span class="text-sm text-gray-500">
+          {{ bidFileName || 'No file chosen' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Purchase Item Request -->
+    <div class="mb-4">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Purchase Item Request</label>
+        <button class="text-sm text-blue-500" (click)="resetPurchaseRequest()">Reset</button>
+      </div>
+      <textarea [(ngModel)]="purchaseRequest" class="w-full border rounded-md p-2 text-sm h-24"></textarea>
+    </div>
+
+    <!-- Invite Bidders -->
+    <div class="mb-4">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Invite Bidders</label>
+        <div class="flex gap-2">
+          <button class="text-sm text-blue-500" (click)="selectAll()">Select All</button>
+          <button class="text-sm text-blue-500" (click)="resetBidders()">Reset</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div *ngFor="let bidder of bidders" class="flex items-center">
+          <input 
+            type="checkbox" 
+            [id]="'bidder' + bidder.id"
+            [(ngModel)]="bidder.selected"
+            class="w-4 h-4 mr-2"
+          >
+          <label [for]="'bidder' + bidder.id" class="text-sm">{{ bidder.name }}</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-between gap-4 mt-6">
+      <button 
+        (click)="reset()" 
+        class="flex-1 py-2 px-4 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+      >
+        Reset
+      </button>
+      <button 
+        (click)="apply()" 
+        class="flex-1 py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Apply
+      </button>
+    </div>
+  </div>
+</div>

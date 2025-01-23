@@ -1,0 +1,80 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-auto relative">
+    <!-- Close Icon -->
+    <button 
+      (click)="closeModal.emit()" 
+      class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <h2 class="text-xl font-semibold mb-4">Review Bids</h2>
+
+    <!-- Date Range -->
+    <div class="mb-4">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Date Range</label>
+      </div>
+      <div class="flex gap-4">
+        <div class="flex-1">
+          <label class="text-xs text-gray-500 block">From:</label>
+          <input type="text" [value]="dateFrom" class="w-full border rounded-md p-2 text-sm" readonly>
+        </div>
+        <div class="flex-1">
+          <label class="text-xs text-gray-500 block">To:</label>
+          <input type="text" [value]="dateTo" class="w-full border rounded-md p-2 text-sm" readonly>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bid Details -->
+    <div class="mb-4">
+      <label class="text-sm text-gray-600 block mb-2">Bid Details</label>
+      <div class="w-full border rounded-md p-2 text-sm bg-gray-50 whitespace-pre-line">
+        {{ bidDetails }}
+      </div>
+      <div class="mt-4 flex items-center justify-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+        <span class="text-base text-gray-600">{{ attachedFile.name }}</span>
+        <button 
+          (click)="viewFile()" 
+          class="text-base text-blue-500 hover:text-blue-600 font-medium"
+        >
+          view
+        </button>
+      </div>
+    </div>
+
+    <!-- Purchase Item Request -->
+    <div class="mb-4">
+      <label class="text-sm text-gray-600 block mb-2">Purchase Item Request</label>
+      <div class="w-full border rounded-md p-2 text-sm bg-gray-50">
+        {{ purchaseRequest }}
+      </div>
+    </div>
+
+    <!-- Active Bidders -->
+    <div class="mb-4">
+      <label class="text-sm text-gray-600 block mb-2">Active Bidders</label>
+      <div class="border rounded-md divide-y">
+        <div *ngFor="let bidder of activeBidders" class="p-2 text-sm">
+          {{ bidder.name }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Button -->
+    <div class="flex justify-end mt-6">
+      <button 
+        (click)="confirm()" 
+        class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>
