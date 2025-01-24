@@ -1,0 +1,58 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 w-[500px]">
+    <h2 class="text-xl font-bold mb-6">Bidder Performance</h2>
+
+    <!-- Profile Image -->
+    <div class="flex justify-center mb-6">
+      <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-navy-blue" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Bidder Details -->
+    <div class="space-y-4">
+      <div class="flex justify-between">
+        <span class="text-gray-600">Bidder:</span>
+        <span class="font-semibold">{{ spm.supplier }}</span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-600">Performance Rating:</span>
+        <span class="font-semibold">{{ spm.performance_rating }}</span>
+      </div>
+
+      <div>
+        <span class="text-gray-600">Bidder Details</span>
+        <p class="font-semibold mt-1">Computer Hardware supply and services</p>
+      </div>
+
+      <div class="flex justify-between">
+        <div>
+          <span class="text-gray-600">Total Contracts completed:</span>
+          <p class="font-semibold mt-1">{{ spm.total_contracts }}</p>
+        </div>
+        <div>
+          <span class="text-gray-600">Total Contracts ongoing</span>
+          <p class="font-semibold mt-1">{{ spm.total_contracts }}</p>
+        </div>
+      </div>
+
+      <div>
+        <span class="text-gray-600">Total Value</span>
+        <p class="font-semibold mt-1">{{ spm.total_value }}</p>
+      </div>
+    </div>
+
+    <!-- Confirm Button -->
+    <div class="mt-6 flex justify-end">
+      <button
+        (click)="onConfirm()"
+        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+      >
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>

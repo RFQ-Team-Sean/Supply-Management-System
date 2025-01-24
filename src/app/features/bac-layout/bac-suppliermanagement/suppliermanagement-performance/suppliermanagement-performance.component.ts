@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { PerformanceViewreportComponent } from './performance-viewreport/performance-viewreport.component';
 
 interface SPM {
   id: number;
@@ -13,7 +14,7 @@ interface SPM {
 @Component({
   selector: 'app-suppliermanagement-performance',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PerformanceViewreportComponent],
   templateUrl: './suppliermanagement-performance.component.html',
   styleUrl: './suppliermanagement-performance.component.css'
 })
@@ -106,6 +107,7 @@ export class SuppliermanagementPerformanceComponent implements OnInit {
   itemsPerPage = 5;
   totalPages = 0;
   currentOpenActionId: number | null = null;
+  selectedSpm: SPM | null = null;
 
   ngOnInit() {
     this.updateDisplayedSpm();
@@ -140,7 +142,11 @@ export class SuppliermanagementPerformanceComponent implements OnInit {
   }
 
   viewReportSmp(spm: SPM) {
-    console.log('Viewing report for:', spm);
+    this.selectedSpm = spm;
     this.currentOpenActionId = null;
+  }
+
+  closeModal() {
+    this.selectedSpm = null;
   }
 }
