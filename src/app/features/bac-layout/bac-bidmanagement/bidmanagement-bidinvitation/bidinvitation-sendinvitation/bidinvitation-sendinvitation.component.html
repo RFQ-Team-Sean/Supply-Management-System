@@ -1,0 +1,90 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-auto relative">
+    <h2 class="text-xl font-semibold mb-6">Invite Bidder</h2>
+
+    <!-- Invite Bidders -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Invite Bidders</label>
+        <div class="flex gap-2">
+          <button class="text-sm text-blue-500" (click)="resetBidders()">Reset</button>
+          <button class="text-sm text-blue-500" (click)="selectAll()">Select All</button>
+        </div>
+      </div>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <input type="text" placeholder="Search bidders..." class="pl-10 w-full border rounded-md p-2 text-sm mb-2">
+      </div>
+      <div class="grid grid-cols-2 gap-4 border rounded-md p-4">
+        <div *ngFor="let bidder of bidders" class="flex items-center">
+          <input 
+            type="checkbox" 
+            [id]="'bidder' + bidder.id"
+            [(ngModel)]="bidder.selected"
+            class="w-4 h-4 mr-2"
+          >
+          <label [for]="'bidder' + bidder.id" class="text-sm">{{ bidder.name }}</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bid Details -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Bid Details</label>
+        <button class="text-sm text-blue-500" (click)="resetBidDetails()">Reset</button>
+      </div>
+      <input 
+        [value]="bidDetails"
+        class="w-full border rounded-md p-2 text-sm mb-3"
+        readonly
+      >
+      <!-- Updated Attached File section -->
+      <div class="flex items-center justify-center gap-3 mt-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+        <span class="text-base text-gray-600">{{ attachedFile.name }}</span>
+        <button 
+          (click)="viewFile()" 
+          class="text-base text-blue-500 hover:text-blue-600 font-medium"
+        >
+          view
+        </button>
+      </div>
+    </div>
+
+    <!-- Purchase Item Request -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Purchase Item Request</label>
+        <button class="text-sm text-blue-500" (click)="resetPurchaseRequest()">Reset</button>
+      </div>
+      <input 
+        [value]="purchaseRequest"
+        class="w-full border rounded-md p-2 text-sm"
+        readonly
+      >
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end gap-4">
+      <button 
+        (click)="cancel()" 
+        class="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+      >
+        Cancel
+      </button>
+      <button 
+        (click)="confirm()" 
+        class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>

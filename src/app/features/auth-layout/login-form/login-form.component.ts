@@ -1,29 +1,46 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { AuthError } from '@supabase/supabase-js';
 
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './login-form.component.html',
   styleUrls: ['./login-form.component.css'],
 })
 export class LoginFormComponent {
   email: string = '';
   password: string = '';
+  isLoading: boolean = false;
+  showError: boolean = false;
+  errorMessage: string = '';
 
   constructor(private router: Router, private supabaseService: SupabaseService) {}
 
+  private showErrorMessage(message: string) {
+    this.errorMessage = message;
+    this.showError = true;
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+      this.showError = false;
+      this.errorMessage = '';
+    }, 5000);
+  }
+
   async signIn() {
+    this.isLoading = true;
+    this.showError = false; // Reset error state
+    
     try {
       const { data, error } = await this.supabaseService.signIn(this.email, this.password);
       
       if (error) {
         console.error('Sign-in error:', error);
-        alert((error as AuthError).message || 'Failed to sign in');
+        this.showErrorMessage((error as AuthError).message || 'Invalid email or password');
         return;
       }
 
@@ -43,12 +60,14 @@ export class LoginFormComponent {
           }
         } else {
           console.error('No role returned from getUserRole');
-          alert('User role not found');
+          this.showErrorMessage('User role not found');
         }
       }
     } catch (error) {
       console.error('Sign-in error:', error);
-      alert('An error occurred during sign-in');
+      this.showErrorMessage('An unexpected error occurred');
+    } finally {
+      this.isLoading = false;
     }
   }
 

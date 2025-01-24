@@ -168,28 +168,23 @@ export class SideBarComponent implements OnInit {
       route: '/bac/dashboard',
     },
     {
-      label: 'PPMP Management',
-      icon: 'ic:outline-school',
-      route: '/bac/bac-ppmpmanagement',
+      label: 'BID Management',
+      icon: 'mdi:basket-plus',
+      route: '/bac/bac-bidmanagement',
     },
-    { label: 'Purchase Request Management', 
+    { label: 'BID Evaluation', 
       icon: 'mdi:basket-plus', 
-      route: '/bac/bac-purchasemanagement' 
+      route: '/bac/bac-bidevaluation' 
     },
     {
-      label: 'Inventory Management',
+      label: 'Supplier Management',
       icon: 'ri:archive-drawer-line',
-      route: '/bac/bac-inventorymanagement',
+      route: '/bac/bac-suppliermanagement',
     },
     {
       label: 'Reports',
       icon: 'ic:baseline-list-alt',
       route: '/bac/bac-reports',
-    },
-    {
-      label: 'Notifications',
-      icon: 'mingcute:notification-fill',
-      route: '/bac/bac-notification',
     },
   ];
 

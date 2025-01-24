@@ -1,0 +1,140 @@
+.order-first {
+    order: 1;
+}
+
+.order-last {
+    order: 2;
+}
+
+/* Optional: Add animation for smoother form transitions */
+app-login-form,
+app-register-form {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Container animations */
+.auth-container {
+    position: relative;
+    overflow: hidden;
+    animation: containerEntrance 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes containerEntrance {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Enhanced sliding panel animation */
+.sliding-panel {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    top: 0;
+    background: linear-gradient(45deg, #30B2E1, #2AA0CF, #30B2E1);
+    background-size: 200% 200%;
+    animation: gradientMove 8s ease infinite;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sliding-panel.right {
+    transform: translateX(100%);
+}
+
+.sliding-panel.left {
+    transform: translateX(0%);
+}
+
+/* Gradient animation */
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Panel content animations */
+.panel-content {
+    opacity: 1;
+    transform: translateX(0);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panel-content.fade-out {
+    opacity: 0;
+    transform: translateX(-30px);
+}
+
+/* Button animations */
+.transition-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.transition-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: 0.6s;
+    z-index: -1;
+}
+
+.transition-button:hover::before {
+    left: 100%;
+}
+
+.transition-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(48, 178, 225, 0.2);
+}
+
+/* Updated Background shapes animations */
+@keyframes floatAndBounce {
+    0% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(20px, 20px);
+    }
+    50% {
+        transform: translate(-20px, 40px);
+    }
+    75% {
+        transform: translate(-40px, -20px);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+.bg-navy-blue {
+    animation: floatAndBounce 15s infinite ease-in-out;
+}
+
+/* Add different animation delays for each shape */
+.bg-navy-blue:nth-child(1) { animation-delay: 0s; }
+.bg-navy-blue:nth-child(2) { animation-delay: -3s; }
+.bg-navy-blue:nth-child(3) { animation-delay: -6s; }
+.bg-navy-blue:nth-child(4) { animation-delay: -9s; }
+.bg-navy-blue:nth-child(5) { animation-delay: -12s; }
