@@ -29,6 +29,21 @@ interface AppUser extends SupabaseUser {
   email: string; 
 }
 
+interface PPMPManagementData {
+  project_id: number;
+  date_created: string;
+  project_name: string;
+  requested_items: string;
+  total_budget: number;
+  status: string;  
+  date_approved: string | null;
+  date_rejected: string | null;
+  fiscal_year: number | null;
+  department: string; 
+  estimated_department_budget: number | null;
+  remaining_department_budget: number | null;
+}
+
 
 @Injectable({
   providedIn: 'root',
@@ -313,5 +328,36 @@ export class SupabaseService {
       return null;
     }
   }
+
+  async getPPMPManagementData(statusFilter: string) {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+  
+    const { data, error } = await this.supabase
+      .rpc('get_ppmp_management_data'); 
+  
+    if (error) {
+      console.error('Error fetching data:', error);
+      return [];
+    }
+
+    const typedData = data as PPMPManagementData[];
+  
+    if (statusFilter === 'Pending'){
+      return typedData?.filter(item => item.status === 'Pending' || item.status === 'Draft') || [];
+    } else if (statusFilter === 'Approved'){
+      return typedData?.filter(item => item.status === 'Approved') || [];
+    } else if (statusFilter === 'Rejected'){
+      return typedData?.filter(item => item.status === 'Rejected') || [];
+    } else if (statusFilter === 'All') {
+      return data as PPMPManagementData[];
+    }else {
+      return [];
+    }
+  }
+  
+  
 
 }
