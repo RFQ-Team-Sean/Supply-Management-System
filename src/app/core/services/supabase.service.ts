@@ -357,6 +357,34 @@ export class SupabaseService {
       return [];
     }
   }
+
+  async insertProject(data: any) {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+
+    const { data: projectData, error } = await this.supabase
+      .from('ppmp_management')
+      .insert(data)
+      .select();
+    if (error) throw error;
+    return projectData;
+  }
+
+  async insertItems(items: any[]) {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+    
+    const { data: itemsData, error } = await this.supabase
+      .from('ppmp_item_requests')
+      .insert(items)
+      .select();
+    if (error) throw error;
+    return itemsData;
+  }
   
   
 

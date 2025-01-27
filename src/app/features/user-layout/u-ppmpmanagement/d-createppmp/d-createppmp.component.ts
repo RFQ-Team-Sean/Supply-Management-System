@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { SupabaseService } from '../../../../core/services/supabase.service';
 
 interface PPMPQuarterDistribution {
   quantity: number;
@@ -57,11 +58,14 @@ throw new Error('Method not implemented.');
     projectName: '',
     estimatedBudget: 0,
     remainingBudget: 0,
-    categories: [],
+    categories: [
+    ],
   };
 category: any;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private supabaseService: SupabaseService) {}
 
   addCategory(): void {
     const newCategory: PPMPCategory = {
@@ -136,14 +140,57 @@ category: any;
     });
   }
 
-  onSubmit(): void {
-    if (this.validateForm()) {
-      console.log('Form submitted:', this.formData);
-      // Add submission logic here
-    } else {
-      console.error('Form validation failed');
+  async onSubmit() {
+    try {
+      // Prepare `ppmp_management` data
+      const projectData = {
+        project_name: this.formData.projectName,
+        total_budget: this.formData.estimatedBudget,
+        department: this.formData.department,
+        estimated_department_budget: this.formData.estimatedBudget,
+        remaining_department_budget: this.formData.remainingBudget,
+        status: 'Pending', // Example initial status
+        category: this.formData.categories.map((cat) => cat.name),
+      };
+  
+      // Insert project into `ppmp_management`
+      const result = await this.supabaseService.insertProject(projectData);
+  
+      if (!result || result.length === 0) {
+        throw new Error('Failed to insert project into the database.');
+      }
+  
+      const project = result[0]; // Safely access the first project
+  
+      // Prepare `ppmp_item_requests` data
+      const itemsData = this.formData.categories.flatMap((category) =>
+        category.items.map((item) => ({
+          item_name: item.itemName,
+          item_description: item.itemDescription,
+          quantity: item.quantity,
+          unit_of_measurement: item.unitOfMeasurement,
+          est_unit_cost: item.estimatedUnitCost,
+          total_cost: item.totalCost,
+          sched_start_date: new Date(), // Example placeholder
+          sched_end_date: new Date(),   // Example placeholder
+          purpose: item.purpose,
+          project_id: project.project_id, // Use inserted project's ID
+          procurement_mode: item.procurementMode,
+          category: category.name,
+        }))
+      );
+  
+      // Insert items into `ppmp_item_requests`
+      await this.supabaseService.insertItems(itemsData);
+  
+      alert('Project and items submitted successfully!');
+      this.router.navigate(['/user/u-ppmpmanagement']);
+    } catch (error) {
+      console.error('Error submitting data:', error);
+      alert('Error submitting data. Check console for details.');
     }
   }
+  
 
   onSaveAsDraft(): void {
     console.log('Saved as draft:', this.formData);
