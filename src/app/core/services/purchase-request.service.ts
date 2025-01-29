@@ -51,6 +51,68 @@ export class PurchaseRequestService {
     );
   }
 
+  // Get department staff pending requests
+  getDeptPendingRequests(): Observable<PurchaseRequest[]> {
+    return from(
+      this.supabase
+        .from('vw_dept_pending_requests')
+        .select('*')
+        .order('date_submitted', { ascending: false })
+    ).pipe(
+      map(({ data, error }: any) => {
+        if (error) throw error;
+        return data;
+      })
+    );
+  }
+
+  // Get GSO pending requests
+  getGsoPendingRequests(): Observable<PurchaseRequest[]> {
+    return from(
+      this.supabase
+        .from('gso_pending_purchase_requests')
+        .select('*')
+        .eq('status', 'Pending')
+        .order('date_submitted', { ascending: false })
+    ).pipe(
+      map(({ data, error }: any) => {
+        if (error) throw error;
+        return data;
+      })
+    );
+  }
+
+  // Submit department request to GSO
+  async submitDeptRequest(pr_id: number): Promise<void> {
+    const { error } = await this.supabase
+      .rpc('submit_dept_request', { p_pr_id: pr_id });
+    
+    if (error) throw error;
+  }
+
+  // Approve GSO request
+  async approveGsoRequest(pr_id: number, approvedBy: string): Promise<void> {
+    const { error } = await this.supabase
+      .rpc('approve_gso_request', { 
+        p_pr_id: pr_id,
+        p_approved_by: approvedBy 
+      });
+    
+    if (error) throw error;
+  }
+
+  // Reject GSO request
+  async rejectGsoRequest(pr_id: number, rejectedBy: string, reason: string): Promise<void> {
+    const { error } = await this.supabase
+      .rpc('reject_gso_request', { 
+        p_pr_id: pr_id,
+        p_rejected_by: rejectedBy,
+        p_rejection_reason: reason 
+      });
+    
+    if (error) throw error;
+  }
+
   // Get all pending requests (both Draft and Submitted)
   getPendingRequests(): Observable<PurchaseRequest[]> {
     return from(
@@ -108,25 +170,6 @@ export class PurchaseRequestService {
         return data;
       })
     );
-  }
-
-  // Submit a draft request
-  async submitPurchaseRequest(pr_id: number): Promise<void> {
-    try {
-      const { error } = await this.supabase
-        .from('dp_pending_purchase_requests')
-        .update({ status: 'Submitted' })
-        .eq('pr_id', pr_id);
-
-      if (error) {
-        console.error('Error submitting request:', error);
-        throw error;
-      }
-      console.log('Successfully submitted request:', pr_id); // Debug log
-    } catch (error) {
-      console.error('Error in submitPurchaseRequest:', error);
-      throw error;
-    }
   }
 
   // Create a new draft request
@@ -204,63 +247,5 @@ export class PurchaseRequestService {
         return data;
       })
     );
-  }
-
-  // Approve a purchase request (move from pending to approved)
-  async approvePurchaseRequest(request: PurchaseRequest, approvedBy: string): Promise<void> {
-    try {
-      // First, delete from pending requests
-      const { error: deleteError } = await this.supabase
-        .from('dp_pending_purchase_requests')
-        .delete()
-        .eq('pr_id', request.pr_id);
-
-      if (deleteError) throw deleteError;
-
-      // Then, insert into approved requests
-      const { error: insertError } = await this.supabase
-        .from('dp_approved_purchase_requests')
-        .insert([{
-          pr_id: request.pr_id,
-          requested_item: request.requested_item,
-          total_amount: request.total_amount,
-          date_submitted: request.date_submitted,
-          date_approved: new Date().toISOString(),
-          status: 'Approved',
-          department: request.department,
-          requestor: request.requestor,
-          priority: request.priority,
-          approved_by: approvedBy
-        }]);
-
-      if (insertError) throw insertError;
-
-      console.log('Successfully approved request:', request.pr_id);
-    } catch (error) {
-      console.error('Error in approvePurchaseRequest:', error);
-      throw error;
-    }
-  }
-
-  // Reject a purchase request
-  async rejectPurchaseRequest(request: PurchaseRequest, rejectedBy: string, rejectionReason: string): Promise<void> {
-    const { data: deletedRequest, error: deleteError } = await this.supabase
-      .from('dp_pending_purchase_requests')
-      .delete()
-      .eq('pr_id', request.pr_id);
-
-    if (deleteError) throw deleteError;
-
-    const { error: insertError } = await this.supabase
-      .from('dp_rejected_purchase_requests')
-      .insert([{
-        ...request,
-        status: 'Rejected',
-        rejected_by: rejectedBy,
-        rejection_reason: rejectionReason,
-        date_rejected: new Date().toISOString()
-      }]);
-
-    if (insertError) throw insertError;
   }
 } 

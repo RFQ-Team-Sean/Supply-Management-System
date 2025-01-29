@@ -94,11 +94,21 @@ export class UPurchaserequestComponent implements OnInit {
   async submitPrm(prm: PurchaseRequest): Promise<void> {
     if (confirm(`Are you sure you want to submit PR ID: ${prm.pr_id}?`)) {
       try {
-        await this.purchaseRequestService.submitPurchaseRequest(prm.pr_id);
-        this.loadPendingRequests(); // Reload the data
+        this.isLoading = true;
+        await this.purchaseRequestService.submitDeptRequest(prm.pr_id);
+        console.log('Successfully submitted request:', prm.pr_id);
+        
+        // Reload the data after successful submission
+        await this.loadPendingRequests();
+        
+        // Show success message (you can implement a proper notification system)
+        alert('Purchase request submitted successfully!');
       } catch (error) {
         console.error('Error submitting request:', error);
-        // Handle error appropriately
+        alert('Failed to submit purchase request. Please try again.');
+      } finally {
+        this.isLoading = false;
+        this.currentOpenActionId = null;
       }
     }
   }

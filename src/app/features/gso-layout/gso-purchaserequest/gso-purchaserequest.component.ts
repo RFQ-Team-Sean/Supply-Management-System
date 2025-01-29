@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { GsoPrmfilterComponent } from '../gso-prmfilter/gso-prmfilter.component';
 import { GsoPrmapprovedrequestComponent } from './gso-prmapprovedrequest/gso-prmapprovedrequest.component';
 import { GsoPrmrejectrequestComponent } from './gso-prmrejectrequest/gso-prmrejectrequest.component';
+import { PurchaseRequestService, PurchaseRequest } from '../../../core/services/purchase-request.service';
 
 interface PRM {
   pr_id: number;
@@ -38,121 +39,47 @@ interface FilterData {
   styleUrl: './gso-purchaserequest.component.css'
 })
 export class GsoPurchaserequestComponent implements OnInit {
-  prmData: PRM[] = [
-    { 
-      pr_id: 1, 
-      requested_item: 'Desktop Computer Set', 
-      total_amount: 45000, 
-      date_submitted: '2024-03-01', 
-      status: 'Pending', 
-      department: 'IT', 
-      requestor: 'John Santos', 
-      priority: 'High' 
-    },
-    { 
-      pr_id: 2, 
-      requested_item: 'Office Chairs', 
-      total_amount: 15000, 
-      date_submitted: '2024-03-02', 
-      status: 'Pending', 
-      department: 'Admin', 
-      requestor: 'Maria Garcia', 
-      priority: 'Medium' 
-    },
-    { 
-      pr_id: 3, 
-      requested_item: 'Printer with Scanner', 
-      total_amount: 25000, 
-      date_submitted: '2024-03-03', 
-      status: 'Pending', 
-      department: 'HR', 
-      requestor: 'Pedro Cruz', 
-      priority: 'High' 
-    },
-    { 
-      pr_id: 4, 
-      requested_item: 'Software Licenses', 
-      total_amount: 35000, 
-      date_submitted: '2024-03-04', 
-      status: 'Pending', 
-      department: 'IT', 
-      requestor: 'Ana Reyes', 
-      priority: 'High' 
-    },
-    { 
-      pr_id: 5, 
-      requested_item: 'Filing Cabinets', 
-      total_amount: 8000, 
-      date_submitted: '2024-03-05', 
-      status: 'Pending', 
-      department: 'Admin', 
-      requestor: 'Jose Dela Cruz', 
-      priority: 'Low' 
-    },
-    { 
-      pr_id: 6, 
-      requested_item: 'Conference Room Projector', 
-      total_amount: 30000, 
-      date_submitted: '2024-03-06', 
-      status: 'Pending', 
-      department: 'Training', 
-      requestor: 'Michelle Torres', 
-      priority: 'Medium' 
-    },
-    { 
-      pr_id: 7, 
-      requested_item: 'Office Supplies Bundle', 
-      total_amount: 5000, 
-      date_submitted: '2024-03-07', 
-      status: 'Pending', 
-      department: 'HR', 
-      requestor: 'Ramon Gonzales', 
-      priority: 'Low' 
-    },
-    { 
-      pr_id: 8, 
-      requested_item: 'Network Equipment', 
-      total_amount: 50000, 
-      date_submitted: '2024-03-08', 
-      status: 'Pending', 
-      department: 'IT', 
-      requestor: 'Lisa Chen', 
-      priority: 'High' 
-    },
-    { 
-      pr_id: 9, 
-      requested_item: 'Air Conditioning Unit', 
-      total_amount: 40000, 
-      date_submitted: '2024-03-09', 
-      status: 'Pending', 
-      department: 'Facilities', 
-      requestor: 'David Miller', 
-      priority: 'Medium' 
-    },
-    { 
-      pr_id: 10, 
-      requested_item: 'Training Materials Set', 
-      total_amount: 12000, 
-      date_submitted: '2024-03-10', 
-      status: 'Pending', 
-      department: 'Training', 
-      requestor: 'Karen Santos', 
-      priority: 'Low' 
-    }
-  ];
-
-  displayedPRMs: PRM[] = [];
+  prmData: PurchaseRequest[] = [];
+  displayedPRMs: PurchaseRequest[] = [];
   searchTerm: string = '';
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 0;
   currentOpenActionId: number | null = null;
   currentView: string = 'pending';
+  isLoading: boolean = false;
+  error: string | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private purchaseRequestService: PurchaseRequestService
+  ) {}
 
   ngOnInit() {
-    this.updateDisplayedPRMs();
+    this.loadPendingRequests();
+  }
+
+  isPending(status: string): boolean {
+    return status === 'Submitted';
+  }
+
+  private loadPendingRequests(): void {
+    this.isLoading = true;
+    this.error = null;
+
+    this.purchaseRequestService.getGsoPendingRequests().subscribe({
+      next: (data) => {
+        console.log('Received GSO pending requests:', data);
+        this.prmData = data;
+        this.updateDisplayedPRMs();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching GSO pending requests:', error);
+        this.error = 'Failed to load pending requests';
+        this.isLoading = false;
+      }
+    });
   }
 
   filterPRMs(): void {
@@ -211,14 +138,17 @@ export class GsoPurchaserequestComponent implements OnInit {
   }
 
   private updateDisplayedPRMs(): void {
-    const pendingData = this.prmData.filter(prm => 
-      prm.status === 'Pending' && 
-      prm.requested_item.toLowerCase().includes(this.searchTerm.toLowerCase())
+    const filteredData = this.prmData.filter(prm => 
+      prm.requested_item.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      prm.department?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      prm.requestor?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      prm.pr_id.toString().includes(this.searchTerm)
     );
     
-    this.totalPages = Math.ceil(pendingData.length / this.itemsPerPage);
+    this.totalPages = Math.ceil(filteredData.length / this.itemsPerPage);
     const start = (this.currentPage - 1) * this.itemsPerPage;
-    this.displayedPRMs = pendingData.slice(start, start + this.itemsPerPage);
+    this.displayedPRMs = filteredData.slice(start, start + this.itemsPerPage);
+    console.log('Displayed GSO PRMs:', this.displayedPRMs);
   }
 
   switchView(view: string): void {
@@ -233,7 +163,7 @@ export class GsoPurchaserequestComponent implements OnInit {
 
   onFilterChange(filterData: FilterData): void {
     const filteredData = this.prmData.filter(prm => {
-      if (prm.status !== 'Pending') return false;
+      if (prm.status !== 'Submitted') return false;
       
       const cost = prm.total_amount;
       const date = new Date(prm.date_submitted);
