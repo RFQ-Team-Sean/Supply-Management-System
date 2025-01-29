@@ -425,6 +425,46 @@ async updatePpmp(projectId: number, ppmpData: any): Promise<{ data: any; error: 
   }
 }
 
+async getPpmpItemsByProjectId(projectId: number): Promise<{ data: any; error: any }> {
+  if (!this.supabase) {
+    console.error('Supabase client not initialized.');
+    return { data: null, error: 'Supabase client not initialized.' };
+  }
+
+  try {
+    const { data, error } = await this.supabase
+      .from('ppmp_item_requests')
+      .select('*')
+      .eq('project_id', projectId);
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching PPMP items:', error);
+    return { data: null, error };
+  }
+}
+
+async updatePpmpItem(itemId: number, itemData: any): Promise<{ data: any; error: any }> {
+  if (!this.supabase) {
+    console.error('Supabase client not initialized.');
+    return { data: null, error: 'Supabase client not initialized.' };
+  }
+
+  try {
+    const { data, error } = await this.supabase
+      .from('ppmp_item_requests')
+      .update(itemData)
+      .eq('id', itemId);
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating PPMP item:', error);
+    return { data: null, error };
+  }
+}
+
 
 
 

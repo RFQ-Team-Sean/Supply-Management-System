@@ -15,6 +15,7 @@ import { Location } from '@angular/common';
 export class DViewppmpprocurementComponent implements OnInit {
   projectId: number | null = null;
   ppmpData: any = null;
+  ppmpItems: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -26,6 +27,7 @@ export class DViewppmpprocurementComponent implements OnInit {
     this.route.paramMap.subscribe(params => {
       this.projectId = Number(params.get('id'));
       this.loadPpmpData();
+      this.loadPpmpItems();
     });
   }
 
@@ -36,6 +38,17 @@ export class DViewppmpprocurementComponent implements OnInit {
         console.error('Error fetching PPMP data:', error);
       } else {
         this.ppmpData = data;
+      }
+    }
+  }
+
+  async loadPpmpItems(): Promise<void> {
+    if (this.projectId !== null) {
+      const { data, error } = await this.supabaseService.getPpmpItemsByProjectId(this.projectId);
+      if (error) {
+        console.error('Error fetching PPMP items:', error);
+      } else {
+        this.ppmpItems = data;
       }
     }
   }

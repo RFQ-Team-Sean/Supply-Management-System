@@ -4,6 +4,28 @@
   <p>{{ ppmpData.total_budget }}</p>
   <p>{{ ppmpData.date_created }}</p>
   <p>{{ ppmpData.status }}</p>
+
+  <h2>Requested Items</h2>
+  <ul>
+    <li *ngFor="let item of ppmpItems">
+      <p><strong>Item Name:</strong> {{ item.item_name }}</p>
+      <p><strong>Description:</strong> {{ item.item_description }}</p>
+      <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+      <p><strong>Unit of Measurement:</strong> {{ item.unit_of_measurement }}</p>
+      <p><strong>Estimated Unit Cost:</strong> {{ item.est_unit_cost }}</p>
+      <p><strong>Total Cost:</strong> {{ item.total_cost }}</p>
+      <p><strong>Category:</strong> {{ item.category }}</p>
+      <p><strong>Q1 Quantity:</strong> {{ item.qd_q1_qty }}</p>
+      <p><strong>Q1 Amount:</strong> {{ item.qd_q1_amt }}</p>
+      <p><strong>Q2 Quantity:</strong> {{ item.qd_q2_qty }}</p>
+      <p><strong>Q2 Amount:</strong> {{ item.qd_q2_amt }}</p>
+      <p><strong>Q3 Quantity:</strong> {{ item.qd_q3_qty }}</p>
+      <p><strong>Q3 Amount:</strong> {{ item.qd_q3_amt }}</p>
+      <p><strong>Q4 Quantity:</strong> {{ item.qd_q4_qty }}</p>
+      <p><strong>Q4 Amount:</strong> {{ item.qd_q4_amt }}</p>
+    </li>
+  </ul>
+
   <button (click)="goBack()">Return</button>
 </div>
 <div *ngIf="!ppmpData">
