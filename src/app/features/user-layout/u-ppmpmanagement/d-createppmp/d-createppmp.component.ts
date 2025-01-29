@@ -140,7 +140,7 @@ category: any;
     });
   }
 
-  async onSubmit() {
+  async onSubmit(status: String) {
     try {
       // Prepare `ppmp_management` data
       const projectData = {
@@ -149,7 +149,7 @@ category: any;
         department: this.formData.department,
         estimated_department_budget: this.formData.estimatedBudget,
         remaining_department_budget: this.formData.remainingBudget,
-        status: 'Pending', // Example initial status
+        status: status,
         category: this.formData.categories.map((cat) => cat.name),
       };
   
@@ -182,8 +182,11 @@ category: any;
   
       // Insert items into `ppmp_item_requests`
       await this.supabaseService.insertItems(itemsData);
-  
-      alert('Project and items submitted successfully!');
+      if(status === 'Pending'){
+        alert('PPMP submitted successfully!');
+      } else if (status === 'Draft'){
+        alert('PPMP saved as draft successfully!');
+      }
       this.router.navigate(['/user/u-ppmpmanagement']);
     } catch (error) {
       console.error('Error submitting data:', error);
@@ -194,7 +197,7 @@ category: any;
 
   onSaveAsDraft(): void {
     console.log('Saved as draft:', this.formData);
-    // Add logic for saving as draft here
+    this.onSubmit('Draft');
   }
 
   onCancel(): void {
