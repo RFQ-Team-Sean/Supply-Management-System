@@ -26,7 +26,21 @@ interface AppUser extends SupabaseUser {
   user_metadata: any;
   aud: string;
   created_at: string;
-  email: string; 
+  email: string;
+}
+
+interface PPMPManagementData {
+  project_id: number;
+  date_created: string;
+  project_name: string;
+  requested_items: string;
+  total_budget: number;
+  status: string;
+  date_approved: string | null;
+  date_rejected: string | null;
+  fiscal_year: number | null;
+  department: string;
+  estimated_department_budget: number | null;
 }
 
 
@@ -102,7 +116,7 @@ export class SupabaseService {
 
       // Store user data
       this.currentUser = userData;
-      
+
       // Store session
       if (authData.session) {
         localStorage.setItem('supabase.auth.token', authData.session.access_token);
@@ -177,7 +191,7 @@ export class SupabaseService {
       console.error('Supabase client not initialized.');
       return [];
     }
-    
+
     const { data, error } = await this.supabase
     .from('account')
     .select('*');
@@ -296,7 +310,7 @@ export class SupabaseService {
       console.error('Supabase client not initialized.');
       return null;
     }
-    
+
     try {
       const { data, error } = await this.supabase.auth.signUp({
         email,
@@ -313,5 +327,146 @@ export class SupabaseService {
       return null;
     }
   }
+
+  async getPPMPManagementData(statusFilter: string) {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+
+    const { data, error } = await this.supabase
+      .rpc('get_ppmp_management_data');
+
+    if (error) {
+      console.error('Error fetching data:', error);
+      return [];
+    }
+
+    const typedData = data as PPMPManagementData[];
+
+    if (statusFilter === 'Pending'){
+      return typedData?.filter(item => item.status === 'Pending' || item.status === 'Draft') || [];
+    } else if (statusFilter === 'Approved'){
+      return typedData?.filter(item => item.status === 'Approved') || [];
+    } else if (statusFilter === 'Rejected'){
+      return typedData?.filter(item => item.status === 'Rejected') || [];
+    } else if (statusFilter === 'All') {
+      return data as PPMPManagementData[];
+    }else {
+      return [];
+    }
+  }
+
+  async insertProject(data: any) {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+
+    const { data: projectData, error } = await this.supabase
+      .from('ppmp_management')
+      .insert(data)
+      .select();
+    if (error) throw error;
+    return projectData;
+  }
+
+  async insertItems(items: any[]) {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+
+    const { data: itemsData, error } = await this.supabase
+      .from('ppmp_item_requests')
+      .insert(items)
+      .select();
+    if (error) throw error;
+    return itemsData;
+  }
+
+  async getPpmpById(projectId: number): Promise<{ data: any; error: any }> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return { data: null, error: 'Supabase client not initialized.' };
+    }
+
+    try {
+      const { data, error } = await this.supabase
+        .from('ppmp_management')
+        .select('*')
+        .eq('project_id', projectId)
+        .single();
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error fetching PPMP data:', error);
+      return { data: null, error };
+    }
+  }
+async updatePpmp(projectId: number, ppmpData: any): Promise<{ data: any; error: any }> {
+  if (!this.supabase) {
+    console.error('Supabase client not initialized.');
+    return { data: null, error: 'Supabase client not initialized.' };
+  }
+
+  try {
+    const { data, error } = await this.supabase
+      .from('ppmp_management')
+      .update(ppmpData)
+      .eq('project_id', projectId);
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating PPMP data:', error);
+    return { data: null, error };
+  }
+}
+
+async getPpmpItemsByProjectId(projectId: number): Promise<{ data: any; error: any }> {
+  if (!this.supabase) {
+    console.error('Supabase client not initialized.');
+    return { data: null, error: 'Supabase client not initialized.' };
+  }
+
+  try {
+    const { data, error } = await this.supabase
+      .from('ppmp_item_requests')
+      .select('*')
+      .eq('project_id', projectId);
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching PPMP items:', error);
+    return { data: null, error };
+  }
+}
+
+async updatePpmpItem(itemId: number, itemData: any): Promise<{ data: any; error: any }> {
+  if (!this.supabase) {
+    console.error('Supabase client not initialized.');
+    return { data: null, error: 'Supabase client not initialized.' };
+  }
+
+  try {
+    const { data, error } = await this.supabase
+      .from('ppmp_item_requests')
+      .update(itemData)
+      .eq('id', itemId);
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating PPMP item:', error);
+    return { data: null, error };
+  }
+}
+
+
+
+
 
 }

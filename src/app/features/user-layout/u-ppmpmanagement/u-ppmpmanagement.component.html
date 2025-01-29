@@ -65,12 +65,13 @@
               <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
+
           <tbody class="divide-y divide-gray-200">
             <tr *ngFor="let ppmp of displayedPpmp" class="hover:bg-gray-50 transition duration-300">
               <td class="py-4 px-6 text-center text-sm text-gray-900">{{ ppmp.project_name }}</td>
-              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items.join(', ') }}</td>
+              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items }}</td>
               <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ ppmp.total_budget | number:'1.2-2' }}</td>
-              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_created }}</td>
+              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_created | date: 'MM/dd/yyyy' }}</td>
               <td class="py-4 px-6 text-center text-sm font-medium" 
                   [ngClass]="{
                     'text-yellow-600': ppmp.status === 'Pending',
@@ -82,7 +83,7 @@
                 <button (click)="toggleActions(ppmp)" class="flex justify-center items-center h-full w-full">
                   <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
                 </button>
-                <div *ngIf="currentOpenActionId === ppmp.id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+                <div *ngIf="currentOpenActionId === ppmp.project_id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
                   <div class="flex flex-col">
                     <button (click)="viewPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">View</button>
                     <button (click)="editPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Edit</button>
