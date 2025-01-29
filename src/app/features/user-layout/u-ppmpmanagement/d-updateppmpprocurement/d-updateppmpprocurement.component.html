@@ -1,19 +1,94 @@
 <!-- filepath: /c:/Users/James/Documents/GitHub/Supply-Management-System/src/app/features/user-layout/u-ppmpmanagement/d-updateppmpprocurement/d-updateppmpprocurement.component.html -->
 <div *ngIf="ppmpData">
   <h1>Edit PPMP: {{ ppmpData.project_name }}</h1>
-  <form (ngSubmit)="updatePpmp()">
-    <label for="project_name">Project Name:</label>
-    <input id="project_name" [(ngModel)]="ppmpData.project_name" name="project_name" required>
+  <form (ngSubmit)="updatePpmp()" class="mb-8">
+    <div class="mb-4">
+      <label for="project_name" class="block text-sm font-medium text-gray-700">Project Name:</label>
+      <input id="project_name" [(ngModel)]="ppmpData.project_name" name="project_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+    </div>
 
-    <label for="requested_items">Requested Items:</label>
-    <textarea id="requested_items" [(ngModel)]="ppmpData.requested_items" name="requested_items" required></textarea>
+    <div class="mb-4">
+      <label for="requested_items" class="block text-sm font-medium text-gray-700">Requested Items:</label>
+      <textarea id="requested_items" [(ngModel)]="ppmpData.requested_items" name="requested_items" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+    </div>
 
-    <label for="total_budget">Total Budget:</label>
-    <input id="total_budget" type="number" [(ngModel)]="ppmpData.total_budget" name="total_budget" required>
+    <div class="mb-4">
+      <label for="total_budget" class="block text-sm font-medium text-gray-700">Total Budget:</label>
+      <input id="total_budget" type="number" [(ngModel)]="ppmpData.total_budget" name="total_budget" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+    </div>
 
-    <button type="submit">Update</button>
+    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Update</button>
   </form>
-  <button (click)="goBack()">Return</button>
+
+  <h2 class="text-xl font-semibold mb-4">Requested Items</h2>
+  <ul class="space-y-4">
+    <li *ngFor="let item of ppmpItems" class="p-4 border rounded-md shadow-sm">
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Item Name:</label>
+        <input [(ngModel)]="item.item_name" name="item_name_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Description:</label>
+        <input [(ngModel)]="item.item_description" name="item_description_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Quantity:</label>
+        <input type="number" [(ngModel)]="item.quantity" name="quantity_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Unit of Measurement:</label>
+        <input [(ngModel)]="item.unit_of_measurement" name="unit_of_measurement_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Estimated Unit Cost:</label>
+        <input type="number" [(ngModel)]="item.est_unit_cost" name="est_unit_cost_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Total Cost:</label>
+        <input type="number" [(ngModel)]="item.total_cost" name="total_cost_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Category:</label>
+        <input [(ngModel)]="item.category" name="category_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Q1 Quantity:</label>
+        <input type="number" [(ngModel)]="item.qd_q1_qty" name="qd_q1_qty_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Q1 Amount:</label>
+        <input type="number" [(ngModel)]="item.qd_q1_amt" name="qd_q1_amt_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Q2 Quantity:</label>
+        <input type="number" [(ngModel)]="item.qd_q2_qty" name="qd_q2_qty_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Q2 Amount:</label>
+        <input type="number" [(ngModel)]="item.qd_q2_amt" name="qd_q2_amt_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Q3 Quantity:</label>
+        <input type="number" [(ngModel)]="item.qd_q3_qty" name="qd_q3_qty_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Q3 Amount:</label>
+        <input type="number" [(ngModel)]="item.qd_q3_amt" name="qd_q3_amt_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Q4 Quantity:</label>
+        <input type="number" [(ngModel)]="item.qd_q4_qty" name="qd_q4_qty_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700">Q4 Amount:</label>
+        <input type="number" [(ngModel)]="item.qd_q4_amt" name="qd_q4_amt_{{item.id}}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      </div>
+    </li>
+  </ul>
+
+  <button (click)="updatePpmpItems()" class="mt-8 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Update Items</button>
+
+  <button (click)="goBack()" class="mt-8 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">Return</button>
 </div>
 <div *ngIf="!ppmpData">
   <p>Loading...</p>

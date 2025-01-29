@@ -15,6 +15,7 @@ import { Location } from '@angular/common';
 export class DUpdateppmpprocurementComponent implements OnInit {
   projectId: number | null = null;
   ppmpData: any = null;
+  ppmpItems: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -26,6 +27,7 @@ export class DUpdateppmpprocurementComponent implements OnInit {
     this.route.paramMap.subscribe(params => {
       this.projectId = Number(params.get('id'));
       this.loadPpmpData();
+      this.loadPpmpItems();
     });
   }
 
@@ -40,6 +42,17 @@ export class DUpdateppmpprocurementComponent implements OnInit {
     }
   }
 
+  async loadPpmpItems(): Promise<void> {
+    if (this.projectId !== null) {
+      const { data, error } = await this.supabaseService.getPpmpItemsByProjectId(this.projectId);
+      if (error) {
+        console.error('Error fetching PPMP items:', error);
+      } else {
+        this.ppmpItems = data;
+      }
+    }
+  }
+
   async updatePpmp(): Promise<void> {
     if (this.ppmpData && this.projectId !== null) {
       const { data, error } = await this.supabaseService.updatePpmp(this.projectId, this.ppmpData);
@@ -47,6 +60,19 @@ export class DUpdateppmpprocurementComponent implements OnInit {
         console.error('Error updating PPMP data:', error);
       } else {
         console.log('PPMP data updated successfully:', data);
+      }
+    }
+  }
+
+  async updatePpmpItems(): Promise<void> {
+    if (this.ppmpItems.length > 0) {
+      for (const item of this.ppmpItems) {
+        const { data, error } = await this.supabaseService.updatePpmpItem(item.id, item);
+        if (error) {
+          console.error('Error updating PPMP item:', error);
+        } else {
+          console.log('PPMP item updated successfully:', data);
+        }
       }
     }
   }
