@@ -60,58 +60,52 @@
             (click)="removeCategory(i)"
             class="text-red-600 hover:text-red-800 self-end"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
         </div>
 
-        <!-- Items Table -->
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Item Name</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Unit</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Unit Cost</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total Cost</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Proc. Mode</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Schedule</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Purpose</th>
-                <th class="px-4 py-2"></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr *ngFor="let item of category.items; let j = index">
-                <td class="px-4 py-2">
+        <!-- Items Section -->
+        <div class="space-y-6">
+          <ng-container *ngFor="let item of category.items; let j = index">
+            <!-- Individual Item Section with Headers -->
+            <div class="border rounded-lg overflow-hidden">
+              <div class="bg-gray-100 p-3 border-b flex justify-between items-center">
+                <h3 class="font-medium text-gray-700">Item {{j + 1}}</h3>
+                <button
+                  type="button"
+                  (click)="removeItem(i, j)"
+                  class="text-red-600 hover:text-red-800"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Item Details Grid -->
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Item Name</label>
                   <input
                     type="text"
                     [(ngModel)]="item.itemName"
                     [name]="'itemName' + i + '-' + j"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
-                </td>
-                <td class="px-4 py-2">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
                   <input
                     type="text"
                     [(ngModel)]="item.itemDescription"
                     [name]="'itemDescription' + i + '-' + j"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
-                </td>
-                <td class="px-4 py-2">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
                   <input
                     type="number"
                     [(ngModel)]="item.quantity"
@@ -119,16 +113,18 @@
                     (input)="calculateTotalCost(item)"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
-                </td>
-                <td class="px-4 py-2">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Unit</label>
                   <input
                     type="text"
                     [(ngModel)]="item.unitOfMeasurement"
                     [name]="'unitOfMeasurement' + i + '-' + j"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
-                </td>
-                <td class="px-4 py-2">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Unit Cost</label>
                   <input
                     type="number"
                     [(ngModel)]="item.estimatedUnitCost"
@@ -136,8 +132,9 @@
                     (input)="calculateTotalCost(item)"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
-                </td>
-                <td class="px-4 py-2">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Total Cost</label>
                   <input
                     type="number"
                     [(ngModel)]="item.totalCost"
@@ -145,56 +142,142 @@
                     readonly
                     class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
                   />
-                </td>
-                <td class="px-4 py-2">
-                  <input
-                    type="text"
-                    [(ngModel)]="item.procurementMode"
-                    [name]="'procurementMode' + i + '-' + j"
-                    class="w-full px-2 py-1 border border-gray-300 rounded-md"
-                  />
-                </td>
-                <td class="px-4 py-2">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Schedule</label>
                   <input
                     type="text"
                     [(ngModel)]="item.schedule"
                     [name]="'schedule' + i + '-' + j"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
-                </td>
-                <td class="px-4 py-2">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Purpose</label>
                   <input
                     type="text"
                     [(ngModel)]="item.purpose"
                     [name]="'purpose' + i + '-' + j"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
-                </td>
-                <td class="px-4 py-2">
-                  <button
-                    type="button"
-                    (click)="removeItem(i, j)"
-                    class="text-red-600 hover:text-red-800"
-                  >
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </div>
+
+              <!-- Quarterly Distribution Section -->
+              <div class="border-t bg-gray-50 p-4">
+                <h4 class="text-sm font-medium text-gray-700 mb-3">Quarterly Distribution</h4>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <!-- Q1 -->
+                  <div class="border rounded-md p-3 bg-blue-50">
+                    <div class="text-sm font-medium text-blue-800 mb-2">Quarter 1</div>
+                    <div class="space-y-2">
+                      <div>
+                        <label class="block text-xs text-gray-600 mb-1">Quantity</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="item.quarterDistribution.q1.quantity"
+                          [name]="'q1Quantity' + i + '-' + j"
+                          (input)="calculateQuarterAmount(item, 'q1')"
+                          class="w-full px-2 py-1 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-600 mb-1">Amount</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="item.quarterDistribution.q1.amount"
+                          [name]="'q1Amount' + i + '-' + j"
+                          readonly
+                          class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Q2 -->
+                  <div class="border rounded-md p-3 bg-green-50">
+                    <div class="text-sm font-medium text-green-800 mb-2">Quarter 2</div>
+                    <div class="space-y-2">
+                      <div>
+                        <label class="block text-xs text-gray-600 mb-1">Quantity</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="item.quarterDistribution.q2.quantity"
+                          [name]="'q2Quantity' + i + '-' + j"
+                          (input)="calculateQuarterAmount(item, 'q2')"
+                          class="w-full px-2 py-1 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-600 mb-1">Amount</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="item.quarterDistribution.q2.amount"
+                          [name]="'q2Amount' + i + '-' + j"
+                          readonly
+                          class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Q3 -->
+                  <div class="border rounded-md p-3 bg-yellow-50">
+                    <div class="text-sm font-medium text-yellow-800 mb-2">Quarter 3</div>
+                    <div class="space-y-2">
+                      <div>
+                        <label class="block text-xs text-gray-600 mb-1">Quantity</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="item.quarterDistribution.q3.quantity"
+                          [name]="'q3Quantity' + i + '-' + j"
+                          (input)="calculateQuarterAmount(item, 'q3')"
+                          class="w-full px-2 py-1 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-600 mb-1">Amount</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="item.quarterDistribution.q3.amount"
+                          [name]="'q3Amount' + i + '-' + j"
+                          readonly
+                          class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Q4 -->
+                  <div class="border rounded-md p-3 bg-purple-50">
+                    <div class="text-sm font-medium text-purple-800 mb-2">Quarter 4</div>
+                    <div class="space-y-2">
+                      <div>
+                        <label class="block text-xs text-gray-600 mb-1">Quantity</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="item.quarterDistribution.q4.quantity"
+                          [name]="'q4Quantity' + i + '-' + j"
+                          (input)="calculateQuarterAmount(item, 'q4')"
+                          class="w-full px-2 py-1 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-600 mb-1">Amount</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="item.quarterDistribution.q4.amount"
+                          [name]="'q4Amount' + i + '-' + j"
+                          readonly
+                          class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
 
         <!-- Add Item Button -->
         <div class="flex justify-center mt-4">
@@ -214,7 +297,7 @@
       <button
         type="button"
         (click)="addCategory()"
-        class="px-4 py-2 bg-blue-500 text-white rounded-md"
+        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
       >
         Add Category
       </button>
@@ -244,5 +327,4 @@
         Submit
       </button>
     </div>
-  </form>
 </div>

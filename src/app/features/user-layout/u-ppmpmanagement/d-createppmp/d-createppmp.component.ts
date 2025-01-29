@@ -1,3 +1,5 @@
+// d-createppmp.component.ts
+
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -49,23 +51,20 @@ interface PPMPFormData {
   styleUrl: './d-createppmp.component.css'
 })
 export class DCreateppmpComponent {
-adjustWidth($event: Event) {
-throw new Error('Method not implemented.');
-}
   formData: PPMPFormData = {
     fiscalYear: '',
     department: '',
     projectName: '',
     estimatedBudget: 0,
     remainingBudget: 0,
-    categories: [
-    ],
+    categories: [],
   };
-category: any;
+item: any;
 
   constructor(
     private router: Router,
-    private supabaseService: SupabaseService) {}
+    private supabaseService: SupabaseService
+  ) {}
 
   addCategory(): void {
     const newCategory: PPMPCategory = {
@@ -113,36 +112,47 @@ category: any;
     }
   }
 
-  calculateTotalCost(item: PPMPItem): void {
-    // Calculate total item cost
-    if (item.quantity && item.estimatedUnitCost) {
-      item.totalCost = item.quantity * item.estimatedUnitCost;
-    } else {
-      item.totalCost = 0;
-    }
+  calculateQuarterAmount(item: PPMPItem, quarter: 'q1' | 'q2' | 'q3' | 'q4'): void {
+    const quarterDist = item.quarterDistribution[quarter];
+    quarterDist.amount = (quarterDist.quantity || 0) * item.estimatedUnitCost;
+    this.validateQuarterDistribution(item);
+  }
 
-    // Calculate quarter distribution totals
-    const quarterTotal = 
+  validateQuarterDistribution(item: PPMPItem): boolean {
+    const totalQuarterQuantity = 
       (item.quarterDistribution.q1.quantity || 0) +
       (item.quarterDistribution.q2.quantity || 0) +
       (item.quarterDistribution.q3.quantity || 0) +
       (item.quarterDistribution.q4.quantity || 0);
-
-    // Validate quarter distribution matches total item quantity
-    if (quarterTotal !== item.quantity) {
+    
+    if (totalQuarterQuantity !== item.quantity) {
       console.warn('Quarter distribution quantities do not match total item quantity');
+      return false;
     }
-
-    // Calculate quarter amounts with type assertion
-    ['q1', 'q2', 'q3', 'q4'].forEach(quarter => {
-      const quarterDist = item.quarterDistribution[quarter as keyof typeof item.quarterDistribution];
-      quarterDist.amount = (quarterDist.quantity || 0) * item.estimatedUnitCost;
-    });
+    return true;
   }
 
-  async onSubmit(status: String) {
+  calculateTotalCost(item: PPMPItem): void {
+    if (item.quantity && item.estimatedUnitCost) {
+      item.totalCost = item.quantity * item.estimatedUnitCost;
+      
+      // Update all quarter amounts
+      ['q1', 'q2', 'q3', 'q4'].forEach(quarter => {
+        this.calculateQuarterAmount(item, quarter as 'q1' | 'q2' | 'q3' | 'q4');
+      });
+    } else {
+      item.totalCost = 0;
+    }
+  }
+
+  async onSubmit(status: string) {
     try {
-      // Prepare `ppmp_management` data
+      // Validate form before submission
+      if (!this.validateForm()) {
+        alert('Please fill in all required fields and check quarter distributions.');
+        return;
+      }
+
       const projectData = {
         project_name: this.formData.projectName,
         total_budget: this.formData.estimatedBudget,
@@ -152,17 +162,15 @@ category: any;
         status: status,
         category: this.formData.categories.map((cat) => cat.name),
       };
-  
-      // Insert project into `ppmp_management`
+
       const result = await this.supabaseService.insertProject(projectData);
-  
+
       if (!result || result.length === 0) {
         throw new Error('Failed to insert project into the database.');
       }
-  
-      const project = result[0]; // Safely access the first project
-  
-      // Prepare `ppmp_item_requests` data
+
+      const project = result[0];
+
       const itemsData = this.formData.categories.flatMap((category) =>
         category.items.map((item) => ({
           item_name: item.itemName,
@@ -171,32 +179,37 @@ category: any;
           unit_of_measurement: item.unitOfMeasurement,
           est_unit_cost: item.estimatedUnitCost,
           total_cost: item.totalCost,
-          sched_start_date: new Date(), // Example placeholder
-          sched_end_date: new Date(),   // Example placeholder
+          sched_start_date: new Date(),
+          sched_end_date: new Date(),
           purpose: item.purpose,
-          project_id: project.project_id, // Use inserted project's ID
+          project_id: project.project_id,
           procurement_mode: item.procurementMode,
           category: category.name,
+          quarter_distribution: {
+            q1: item.quarterDistribution.q1,
+            q2: item.quarterDistribution.q2,
+            q3: item.quarterDistribution.q3,
+            q4: item.quarterDistribution.q4
+          }
         }))
       );
-  
-      // Insert items into `ppmp_item_requests`
+
       await this.supabaseService.insertItems(itemsData);
-      if(status === 'Pending'){
+      
+      if(status === 'Pending') {
         alert('PPMP submitted successfully!');
-      } else if (status === 'Draft'){
+      } else if (status === 'Draft') {
         alert('PPMP saved as draft successfully!');
       }
+      
       this.router.navigate(['/user/u-ppmpmanagement']);
     } catch (error) {
       console.error('Error submitting data:', error);
       alert('Error submitting data. Check console for details.');
     }
   }
-  
 
   onSaveAsDraft(): void {
-    console.log('Saved as draft:', this.formData);
     this.onSubmit('Draft');
   }
 
@@ -205,7 +218,6 @@ category: any;
   }
 
   private validateForm(): boolean {
-    // Existing validation logic with added checks for quarter distribution
     if (!this.formData.fiscalYear || !this.formData.department || !this.formData.projectName) {
       console.error('Required fields are missing');
       return false;
@@ -227,15 +239,8 @@ category: any;
           return false;
         }
 
-        // Additional validation for quarter distribution
-        const quarterTotal = 
-          item.quarterDistribution.q1.quantity +
-          item.quarterDistribution.q2.quantity +
-          item.quarterDistribution.q3.quantity +
-          item.quarterDistribution.q4.quantity;
-
-        if (quarterTotal !== item.quantity) {
-          console.error('Quarter distribution quantities do not match total item quantity');
+        if (!this.validateQuarterDistribution(item)) {
+          console.error('Quarter distribution validation failed for item:', item);
           return false;
         }
       }
