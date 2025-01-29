@@ -37,6 +37,7 @@ import { GsoSuppliermanagemnetComponent } from './features/gso-layout/gso-suppli
 import { UCreateprmComponent } from './features/user-layout/u-purchaserequest/u-createprm/u-createprm.component';
 import { DCreateppmpComponent } from './features/user-layout/u-ppmpmanagement/d-createppmp/d-createppmp.component';
 import { DViewppmpprocurementComponent } from './features/user-layout/u-ppmpmanagement/d-viewppmpprocurement/d-viewppmpprocurement.component';
+import { DUpdateppmpprocurementComponent } from './features/user-layout/u-ppmpmanagement/d-updateppmpprocurement/d-updateppmpprocurement.component';
 import { GsoPpmpentryComponent } from './features/gso-layout/gso-ppmpentry/gso-ppmpentry.component';
 import { GsoBiddingmanagementComponent } from './features/gso-layout/gso-biddingmanagement/gso-biddingmanagement.component';
 
@@ -77,6 +78,7 @@ export const routes: Routes = [
       { path: 'u-createprm', component: UCreateprmComponent },
       { path: 'u-profile', component: UProfileComponent },
       { path: 'd-viewppmprocurement/:id', component: DViewppmpprocurementComponent },
+      { path: 'd-updateppmprocurement/:id', component: DUpdateppmpprocurementComponent },
     ],
   },
   {

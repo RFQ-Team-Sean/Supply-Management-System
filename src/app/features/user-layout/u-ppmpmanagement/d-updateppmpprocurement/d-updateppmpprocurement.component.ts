@@ -1,18 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { SupabaseService } from '../../../../core/services/supabase.service';
 import { Location } from '@angular/common';
 
 @Component({
-  selector: 'app-d-viewppmpprocurement',
+  selector: 'app-d-updateppmpprocurement',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './d-viewppmpprocurement.component.html',
-  styleUrls: ['./d-viewppmpprocurement.component.css']
+  imports: [CommonModule, FormsModule],
+  templateUrl: './d-updateppmpprocurement.component.html',
+  styleUrls: ['./d-updateppmpprocurement.component.css']
 })
-export class DViewppmpprocurementComponent implements OnInit {
+export class DUpdateppmpprocurementComponent implements OnInit {
   projectId: number | null = null;
   ppmpData: any = null;
 
@@ -40,7 +40,18 @@ export class DViewppmpprocurementComponent implements OnInit {
     }
   }
 
-  goBack(): void {
+  async updatePpmp(): Promise<void> {
+    if (this.ppmpData && this.projectId !== null) {
+      const { data, error } = await this.supabaseService.updatePpmp(this.projectId, this.ppmpData);
+      if (error) {
+        console.error('Error updating PPMP data:', error);
+      } else {
+        console.log('PPMP data updated successfully:', data);
+      }
+    }
+  }
+
+  goBack() {
     this.location.back();
   }
 }

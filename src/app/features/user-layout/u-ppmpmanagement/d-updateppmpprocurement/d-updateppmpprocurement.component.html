@@ -1,0 +1,20 @@
+<!-- filepath: /c:/Users/James/Documents/GitHub/Supply-Management-System/src/app/features/user-layout/u-ppmpmanagement/d-updateppmpprocurement/d-updateppmpprocurement.component.html -->
+<div *ngIf="ppmpData">
+  <h1>Edit PPMP: {{ ppmpData.project_name }}</h1>
+  <form (ngSubmit)="updatePpmp()">
+    <label for="project_name">Project Name:</label>
+    <input id="project_name" [(ngModel)]="ppmpData.project_name" name="project_name" required>
+
+    <label for="requested_items">Requested Items:</label>
+    <textarea id="requested_items" [(ngModel)]="ppmpData.requested_items" name="requested_items" required></textarea>
+
+    <label for="total_budget">Total Budget:</label>
+    <input id="total_budget" type="number" [(ngModel)]="ppmpData.total_budget" name="total_budget" required>
+
+    <button type="submit">Update</button>
+  </form>
+  <button (click)="goBack()">Return</button>
+</div>
+<div *ngIf="!ppmpData">
+  <p>Loading...</p>
+</div>

@@ -4,6 +4,7 @@
   <p>{{ ppmpData.total_budget }}</p>
   <p>{{ ppmpData.date_created }}</p>
   <p>{{ ppmpData.status }}</p>
+  <button (click)="goBack()">Return</button>
 </div>
 <div *ngIf="!ppmpData">
   <p>Loading...</p>
