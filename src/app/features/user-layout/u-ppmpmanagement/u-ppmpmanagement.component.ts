@@ -1,3 +1,4 @@
+import { DViewppmpprocurementComponent } from './d-viewppmpprocurement/d-viewppmpprocurement.component';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -20,9 +21,9 @@ interface PPMP {
   selector: 'app-u-ppmpmanagement',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
-    FormsModule, 
+    CommonModule,
+    RouterModule,
+    FormsModule,
     APpmpfilterComponent,
     DPpmprejectedprocurementComponent,
     DPpmpapprovedprocurementComponent
@@ -82,7 +83,7 @@ export class UPpmpmanagement implements OnInit {
   }
 
   viewPpmp(ppmp: PPMP): void {
-    this.router.navigate(['/user/u-ppmpviewdetails', ppmp.project_id]);
+    this.router.navigate(['/user/d-viewppmprocurement', ppmp.project_id]);
   }
 
   editPpmp(ppmp: PPMP): void {
@@ -97,7 +98,7 @@ export class UPpmpmanagement implements OnInit {
 
   searchRoles(event: Event): void {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
-    this.displayedPpmp = this.ppmpData.filter(ppmp => 
+    this.displayedPpmp = this.ppmpData.filter(ppmp =>
       ppmp.project_name.toLowerCase().includes(searchTerm) //||
       // ppmp.requested_items.some(item => item.toLowerCase().includes(searchTerm))
     );
@@ -111,16 +112,16 @@ export class UPpmpmanagement implements OnInit {
       const ppmpDate = new Date(ppmp.date_created);
       const fromDate = filters.dateFrom ? new Date(filters.dateFrom) : null;
       const toDate = filters.dateTo ? new Date(filters.dateTo) : null;
-      
-      const dateMatches = (!fromDate || ppmpDate >= fromDate) && 
+
+      const dateMatches = (!fromDate || ppmpDate >= fromDate) &&
                          (!toDate || ppmpDate <= toDate);
 
       // Filter by project name
-      const projectMatches = !filters.department || 
+      const projectMatches = !filters.department ||
                            ppmp.project_name.toLowerCase().includes(filters.department.toLowerCase());
 
       // Filter by status
-      const statusMatches = !filters.status || 
+      const statusMatches = !filters.status ||
                            ppmp.status === filters.status;
 
       return dateMatches && projectMatches && statusMatches;

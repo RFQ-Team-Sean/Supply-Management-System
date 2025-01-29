@@ -1,0 +1,10 @@
+<div *ngIf="ppmpData">
+  <h1>{{ ppmpData.project_name }}</h1>
+  <p>{{ ppmpData.requested_items }}</p>
+  <p>{{ ppmpData.total_budget }}</p>
+  <p>{{ ppmpData.date_created }}</p>
+  <p>{{ ppmpData.status }}</p>
+</div>
+<div *ngIf="!ppmpData">
+  <p>Loading...</p>
+</div>
