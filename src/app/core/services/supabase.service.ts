@@ -406,6 +406,27 @@ export class SupabaseService {
       return { data: null, error };
     }
   }
+async updatePpmp(projectId: number, ppmpData: any): Promise<{ data: any; error: any }> {
+  if (!this.supabase) {
+    console.error('Supabase client not initialized.');
+    return { data: null, error: 'Supabase client not initialized.' };
+  }
+
+  try {
+    const { data, error } = await this.supabase
+      .from('ppmp_management')
+      .update(ppmpData)
+      .eq('project_id', projectId);
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating PPMP data:', error);
+    return { data: null, error };
+  }
+}
+
+
 
 
 

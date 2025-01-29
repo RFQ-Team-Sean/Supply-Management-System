@@ -1,4 +1,3 @@
-import { DViewppmpprocurementComponent } from './d-viewppmpprocurement/d-viewppmpprocurement.component';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -87,7 +86,7 @@ export class UPpmpmanagement implements OnInit {
   }
 
   editPpmp(ppmp: PPMP): void {
-    this.router.navigate(['/user/u-ppmpedit', ppmp.project_id]);
+    this.router.navigate(['/user/d-updateppmprocurement', ppmp.project_id]);
   }
 
   submitPpmp(ppmp: PPMP): void {
