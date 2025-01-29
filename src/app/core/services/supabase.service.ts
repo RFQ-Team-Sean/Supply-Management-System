@@ -41,7 +41,6 @@ interface PPMPManagementData {
   fiscal_year: number | null;
   department: string;
   estimated_department_budget: number | null;
-  remaining_department_budget: number | null;
 }
 
 

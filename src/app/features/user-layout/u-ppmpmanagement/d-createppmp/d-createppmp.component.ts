@@ -1,5 +1,3 @@
-// d-createppmp.component.ts
-
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,9 +16,6 @@ interface PPMPItem {
   unitOfMeasurement: string;
   estimatedUnitCost: number;
   totalCost: number;
-  procurementMode: string;
-  schedule: string;
-  purpose: string;
   quarterDistribution: {
     q1: PPMPQuarterDistribution;
     q2: PPMPQuarterDistribution;
@@ -35,11 +30,9 @@ interface PPMPCategory {
 }
 
 interface PPMPFormData {
-  fiscalYear: string;
   department: string;
   projectName: string;
   estimatedBudget: number;
-  remainingBudget: number;
   categories: PPMPCategory[];
 }
 
@@ -52,11 +45,9 @@ interface PPMPFormData {
 })
 export class DCreateppmpComponent {
   formData: PPMPFormData = {
-    fiscalYear: '',
     department: '',
     projectName: '',
     estimatedBudget: 0,
-    remainingBudget: 0,
     categories: [],
   };
 item: any;
@@ -90,9 +81,6 @@ item: any;
       unitOfMeasurement: '',
       estimatedUnitCost: 0,
       totalCost: 0,
-      procurementMode: '',
-      schedule: '',
-      purpose: '',
       quarterDistribution: {
         q1: { quantity: 0, amount: 0 },
         q2: { quantity: 0, amount: 0 },
@@ -147,7 +135,7 @@ item: any;
 
   async onSubmit(status: string) {
     try {
-      // Validate form before submission
+      //Validate form before submission
       if (!this.validateForm()) {
         alert('Please fill in all required fields and check quarter distributions.');
         return;
@@ -158,7 +146,6 @@ item: any;
         total_budget: this.formData.estimatedBudget,
         department: this.formData.department,
         estimated_department_budget: this.formData.estimatedBudget,
-        remaining_department_budget: this.formData.remainingBudget,
         status: status,
         category: this.formData.categories.map((cat) => cat.name),
       };
@@ -179,18 +166,16 @@ item: any;
           unit_of_measurement: item.unitOfMeasurement,
           est_unit_cost: item.estimatedUnitCost,
           total_cost: item.totalCost,
-          sched_start_date: new Date(),
-          sched_end_date: new Date(),
-          purpose: item.purpose,
           project_id: project.project_id,
-          procurement_mode: item.procurementMode,
           category: category.name,
-          quarter_distribution: {
-            q1: item.quarterDistribution.q1,
-            q2: item.quarterDistribution.q2,
-            q3: item.quarterDistribution.q3,
-            q4: item.quarterDistribution.q4
-          }
+          qd_q1_qty: item.quarterDistribution.q1.quantity,
+          qd_q1_amt: item.quarterDistribution.q1.amount,
+          qd_q2_qty: item.quarterDistribution.q2.quantity,
+          qd_q2_amt: item.quarterDistribution.q2.amount,
+          qd_q3_qty: item.quarterDistribution.q3.quantity,
+          qd_q3_amt: item.quarterDistribution.q3.amount,
+          qd_q4_qty: item.quarterDistribution.q4.quantity,
+          qd_q4_amt: item.quarterDistribution.q4.amount,
         }))
       );
 
@@ -218,12 +203,12 @@ item: any;
   }
 
   private validateForm(): boolean {
-    if (!this.formData.fiscalYear || !this.formData.department || !this.formData.projectName) {
+    if (!this.formData.department || !this.formData.projectName) {
       console.error('Required fields are missing');
       return false;
     }
 
-    if (this.formData.estimatedBudget < 0 || this.formData.remainingBudget < 0) {
+    if (this.formData.estimatedBudget < 0) {
       console.error('Budget values cannot be negative');
       return false;
     }
