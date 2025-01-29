@@ -1,33 +1,111 @@
-<div *ngIf="ppmpData">
-  <h1>{{ ppmpData.project_name }}</h1>
-  <p>{{ ppmpData.requested_items }}</p>
-  <p>{{ ppmpData.total_budget }}</p>
-  <p>{{ ppmpData.date_created }}</p>
-  <p>{{ ppmpData.status }}</p>
+<div *ngIf="isModalOpen" class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-content">
+    <button class="close-button" (click)="closeModal()">&times;</button>
 
-  <h2>Requested Items</h2>
-  <ul>
-    <li *ngFor="let item of ppmpItems">
-      <p><strong>Item Name:</strong> {{ item.item_name }}</p>
-      <p><strong>Description:</strong> {{ item.item_description }}</p>
-      <p><strong>Quantity:</strong> {{ item.quantity }}</p>
-      <p><strong>Unit of Measurement:</strong> {{ item.unit_of_measurement }}</p>
-      <p><strong>Estimated Unit Cost:</strong> {{ item.est_unit_cost }}</p>
-      <p><strong>Total Cost:</strong> {{ item.total_cost }}</p>
-      <p><strong>Category:</strong> {{ item.category }}</p>
-      <p><strong>Q1 Quantity:</strong> {{ item.qd_q1_qty }}</p>
-      <p><strong>Q1 Amount:</strong> {{ item.qd_q1_amt }}</p>
-      <p><strong>Q2 Quantity:</strong> {{ item.qd_q2_qty }}</p>
-      <p><strong>Q2 Amount:</strong> {{ item.qd_q2_amt }}</p>
-      <p><strong>Q3 Quantity:</strong> {{ item.qd_q3_qty }}</p>
-      <p><strong>Q3 Amount:</strong> {{ item.qd_q3_amt }}</p>
-      <p><strong>Q4 Quantity:</strong> {{ item.qd_q4_qty }}</p>
-      <p><strong>Q4 Amount:</strong> {{ item.qd_q4_amt }}</p>
-    </li>
-  </ul>
+    <div *ngIf="ppmpData">
+      <!-- Header -->
+      <div class="text-center mb-6">
+        <h1 class="text-lg font-bold">PROJECT PROCUREMENT MANAGEMENT PLAN</h1>
+        <h2 class="text-md">C.Y. 2025</h2>
+      </div>
 
-  <button (click)="goBack()">Return</button>
-</div>
-<div *ngIf="!ppmpData">
-  <p>Loading...</p>
+      <!-- Department Info -->
+      <div class="flex justify-between mb-4 text-sm">
+        <div>
+          <label>DEPARTMENT:</label>
+          <input type="text" [value]="ppmpData.department" class="border px-2 py-1 ml-2" readonly>
+        </div>
+        <div>
+          <label>Date Submitted:</label>
+          <span class="ml-2">{{ ppmpData.date_created | date:'MMMM dd, yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table class="w-full border-collapse border border-gray-300 text-sm">
+          <thead>
+            <tr>
+              <th rowspan="2" class="border p-2 text-center">ITEM NAME.</th>
+              <th rowspan="2" class="border p-2 text-center">DESCRIPTION</th>
+              <th rowspan="2" class="border p-2 text-center">UNIT</th>
+              <th rowspan="2" class="border p-2 text-center">UNIT COST</th>
+              <th rowspan="2" class="border p-2 text-center">QTY.</th>
+              <th rowspan="2" class="border p-2 text-center">TOTAL COST</th>
+              <th colspan="8" class="border p-2 text-center">DISTRIBUTION</th>
+            </tr>
+            <tr>
+              <th colspan="2" class="border p-2 text-center">1st Quarter</th>
+              <th colspan="2" class="border p-2 text-center">2nd Quarter</th>
+              <th colspan="2" class="border p-2 text-center">3rd Quarter</th>
+              <th colspan="2" class="border p-2 text-center">4th Quarter</th>
+            </tr>
+            <tr>
+              <th colspan="6" class="border"></th>
+              <th class="border p-2 text-center">QTY.</th>
+              <th class="border p-2 text-center">AMOUNT</th>
+              <th class="border p-2 text-center">QTY.</th>
+              <th class="border p-2 text-center">AMOUNT</th>
+              <th class="border p-2 text-center">QTY.</th>
+              <th class="border p-2 text-center">AMOUNT</th>
+              <th class="border p-2 text-center">QTY.</th>
+              <th class="border p-2 text-center">AMOUNT</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let category of categories; trackBy: trackByIndex">
+              <!-- Category Header with Total in the Same Row -->
+              <tr class="category-header">
+                <td colspan="5" class="border p-2 font-bold">{{ category.name }}</td>
+                <td class="border p-2 font-bold text-right">Total: {{ category.totalAmount | number:'1.2-2' }}</td>
+                <td colspan="8" class="border"></td>
+              </tr>
+
+              <!-- Items under Category -->
+              <ng-container *ngFor="let item of category.items; trackBy: trackByIndex">
+                <tr>
+                  <td class="border p-2 text-center">{{ item.item_name }}</td>
+                  <td class="border p-2">{{ item.item_description }}</td>
+                  <td class="border p-2 text-center">{{ item.unit_of_measurement }}</td>
+                  <td class="border p-2 text-right">{{ item.est_unit_cost | number:'1.2-2' }}</td>
+                  <td class="border p-2 text-center">{{ item.quantity }}</td>
+                  <td class="border p-2 text-right">{{ item.total_cost | number:'1.2-2' }}</td>
+                  <td class="border p-2 text-center">{{ item.qd_q1_qty }}</td>
+                  <td class="border p-2 text-right">{{ item.qd_q1_amt | number:'1.2-2' }}</td>
+                  <td class="border p-2 text-center">{{ item.qd_q2_qty }}</td>
+                  <td class="border p-2 text-right">{{ item.qd_q2_amt | number:'1.2-2' }}</td>
+                  <td class="border p-2 text-center">{{ item.qd_q3_qty }}</td>
+                  <td class="border p-2 text-right">{{ item.qd_q3_amt | number:'1.2-2' }}</td>
+                  <td class="border p-2 text-center">{{ item.qd_q4_qty }}</td>
+                  <td class="border p-2 text-right">{{ item.qd_q4_amt | number:'1.2-2' }}</td>
+                </tr>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Signature Section -->
+      <div class="mt-8 flex justify-between text-sm">
+        <div>
+          <p class="mb-4">PREPARED BY:</p>
+          <div class="mt-8 border-t border-black w-48">
+            <p class="text-center mt-1">DEPARTMENT STAFF</p>
+          </div>
+        </div>
+        <div>
+          <p class="mb-4">APPROVED BY:</p>
+          <div class="mt-8 border-t border-black w-48">
+            <p class="text-center mt-1">DEPARTMENT HEAD</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 text-xs">
+        <p>This is to certify that the above procurement plan is in accordance with the objectives of this office.</p>
+      </div>
+    </div>
+    <div *ngIf="!ppmpData">
+    </div>
+  </div>
 </div>

@@ -48,6 +48,9 @@ interface PPMPManagementData {
   providedIn: 'root',
 })
 export class SupabaseService {
+  getCategories(): { data: any; error: any; } | PromiseLike<{ data: any; error: any; }> {
+    throw new Error('Method not implemented.');
+  }
   from(table: string) {
     throw new Error('Method not implemented.');
   }

@@ -129,4 +129,12 @@
   </div>
 </div>
 
+@if (showViewModal && selectedProjectId) {
+  <app-d-viewppmpprocurement 
+    [projectId]="selectedProjectId"
+    [isModalOpen]="showViewModal"
+    (modalClosed)="closeViewModal()">
+  </app-d-viewppmpprocurement>
+}
+
 <router-outlet></router-outlet>

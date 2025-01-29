@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { APpmpfilterComponent } from "./a-ppmpfilter/a-ppmpfilter.component";
 import { DPpmprejectedprocurementComponent } from "./d-ppmprejectedprocurement/d-ppmprejectedprocurement.component";
 import { DPpmpapprovedprocurementComponent } from "./d-ppmpapprovedprocurement/d-ppmpapprovedprocurement.component";
+import { DViewppmpprocurementComponent } from "./d-viewppmpprocurement/d-viewppmpprocurement.component";
 import { SupabaseService } from '../../../core/services/supabase.service';
 
 interface PPMP {
@@ -25,7 +26,8 @@ interface PPMP {
     FormsModule,
     APpmpfilterComponent,
     DPpmprejectedprocurementComponent,
-    DPpmpapprovedprocurementComponent
+    DPpmpapprovedprocurementComponent,
+    DViewppmpprocurementComponent
   ],
   templateUrl: './u-ppmpmanagement.component.html',
   styleUrls: ['./u-ppmpmanagement.component.css']
@@ -39,11 +41,12 @@ export class UPpmpmanagement implements OnInit {
   currentOpenActionId: number | null = null;
   currentView: 'pending' | 'approved' | 'rejected' = 'pending';
   isLoading: boolean = true;
+  showViewModal: boolean = false;
+  selectedProjectId: number | null = null;
 
   constructor(
     private router: Router,
     private supabaseService: SupabaseService) {}
-
   ngOnInit(): void {
     this.loadPpmpRecords();
   }
@@ -81,8 +84,16 @@ export class UPpmpmanagement implements OnInit {
     this.updateDisplayedPpmp();
   }
 
-  viewPpmp(ppmp: PPMP): void {
-    this.router.navigate(['/user/d-viewppmprocurement', ppmp.project_id]);
+    viewPpmp(ppmp: PPMP): void {
+    this.selectedProjectId = ppmp.project_id;
+    this.showViewModal = true;
+    this.currentOpenActionId = null; // Close the actions dropdown
+  }
+
+    closeViewModal(): void {
+    this.showViewModal = false;
+    this.selectedProjectId = null;
+    setTimeout(() => this.showViewModal = true, 0);
   }
 
   editPpmp(ppmp: PPMP): void {
@@ -94,6 +105,8 @@ export class UPpmpmanagement implements OnInit {
     this.updateDisplayedPpmp();
     this.currentOpenActionId = null;
   }
+
+  
 
   searchRoles(event: Event): void {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
