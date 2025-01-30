@@ -1,70 +1,38 @@
-import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { SupabaseService } from '../../../../core/services/supabase.service';
 import { Location } from '@angular/common';
-
-interface PPMPItem {
-  item_name: string;
-  item_description: string;
-  unit_of_measurement: string;
-  est_unit_cost: number;
-  quantity: number;
-  total_cost: number;
-  qd_q1_qty: number;
-  qd_q1_amt: number;
-  qd_q2_qty: number;
-  qd_q2_amt: number;
-  qd_q3_qty: number;
-  qd_q3_amt: number;
-  qd_q4_qty: number;
-  qd_q4_amt: number;
-  category: string;
-}
+import { SupabaseService } from '../../../../core/services/supabase.service';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-d-viewppmpprocurement',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule],
   templateUrl: './d-viewppmpprocurement.component.html',
   styleUrls: ['./d-viewppmpprocurement.component.css']
 })
 export class DViewppmpprocurementComponent implements OnInit {
-  @Input() projectId: number | null = null;
   @Input() isModalOpen: boolean = false;
+  @Input() projectId: number | null = null;
   @Output() modalClosed = new EventEmitter<void>();
-
   ppmpData: any = null;
-  ppmpItems: PPMPItem[] = [];
-  categories: { name: string; items: PPMPItem[]; totalAmount: number }[] = [];
+  ppmpItems: any[] = [];
+  categories: any[] = [];
+  @ViewChild('reportContent') reportContent!: ElementRef;
 
   constructor(
     private route: ActivatedRoute,
     private supabaseService: SupabaseService,
-    private location: Location
+    private location: Location,
   ) {}
 
   ngOnInit(): void {
-    if (!this.isModalOpen) {
-      this.route.paramMap.subscribe(params => {
-        this.projectId = Number(params.get('id'));
-        this.loadData();
-      });
-    } else if (this.projectId) {
-      this.loadData();
+    if (this.projectId !== null) {
+      this.loadPpmpData();
+      this.loadPpmpItems();
     }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['projectId'] && this.projectId) {
-      this.loadData();
-    }
-  }
-
-  private async loadData(): Promise<void> {
-    await this.loadPpmpData();
-    await this.loadPpmpItems();
   }
 
   async loadPpmpData(): Promise<void> {
@@ -91,7 +59,7 @@ export class DViewppmpprocurementComponent implements OnInit {
   }
 
   categorizeItems(): void {
-    const categoriesMap: { [key: string]: { name: string; items: PPMPItem[]; totalAmount: number } } = {};
+    const categoriesMap: { [key: string]: any } = {};
     this.ppmpItems.forEach(item => {
       if (!categoriesMap[item.category]) {
         categoriesMap[item.category] = {
@@ -106,15 +74,28 @@ export class DViewppmpprocurementComponent implements OnInit {
     this.categories = Object.values(categoriesMap);
   }
 
-  openModal(): void {
-    this.isModalOpen = true;
-    document.body.style.overflow = 'hidden'; 
+  async downloadPDF(): Promise<void> {
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const content = this.reportContent.nativeElement;
+
+    // Hide the buttons before generating the PDF
+    const buttons = content.querySelectorAll('button');
+    buttons.forEach((button: HTMLButtonElement) => button.style.display = 'none');
+
+    const canvas = await html2canvas(content);
+    const imgData = canvas.toDataURL('image/png');
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    doc.save('PPMP_Report.pdf');
+
+    // Show the buttons again after generating the PDF
+    buttons.forEach((button: HTMLButtonElement) => button.style.display = 'inline-flex');
   }
 
   closeModal(): void {
-    this.isModalOpen = false;
-    this.modalClosed.emit(); 
-    document.body.style.overflow = 'auto'; 
+    this.modalClosed.emit();
   }
 
   onOverlayClick(event: MouseEvent): void {
