@@ -352,6 +352,7 @@ export class SupabaseService {
     }
 
     const typedData = data as PPMPManagementData[];
+    typedData.sort((a, b) => (a.status === 'Draft' ? -1 : b.status === 'Draft' ? 1 : 0));
 
     if (statusFilter === 'Pending'){
       return typedData?.filter(item => item.status === 'Pending' || item.status === 'Draft') || [];
