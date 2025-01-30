@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +30,8 @@ interface PPMP {
     DViewppmpprocurementComponent
   ],
   templateUrl: './u-ppmpmanagement.component.html',
-  styleUrls: ['./u-ppmpmanagement.component.css']
+  styleUrls: ['./u-ppmpmanagement.component.css'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class UPpmpmanagement implements OnInit {
   ppmpData: PPMP[] = [];
@@ -106,7 +107,7 @@ export class UPpmpmanagement implements OnInit {
     this.currentOpenActionId = null;
   }
 
-  
+
 
   searchRoles(event: Event): void {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();

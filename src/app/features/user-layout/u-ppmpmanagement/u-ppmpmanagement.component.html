@@ -15,22 +15,22 @@
     <div class="flex-1">
       <!-- Option Buttons -->
       <div class="flex gap-4 mb-4 border-b border-gray-200">
-        <button 
-          (click)="switchView('pending')" 
+        <button
+          (click)="switchView('pending')"
           [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'pending', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'pending'}"
           class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
         >
           Pending Procurement
         </button>
-        <button 
-          (click)="switchView('approved')" 
+        <button
+          (click)="switchView('approved')"
           [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'approved', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'approved'}"
           class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
         >
           Approved Procurement
         </button>
-        <button 
-          (click)="switchView('rejected')" 
+        <button
+          (click)="switchView('rejected')"
           [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'rejected', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'rejected'}"
           class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
         >
@@ -45,9 +45,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
             </svg>
-            <input 
-              type="text" 
-              placeholder="Search users by name, email or role" 
+            <input
+              type="text"
+              placeholder="Search users by name, email or role"
               class="w-full p-2 focus:outline-none"
               (input)="searchRoles($event)"
             />
@@ -72,7 +72,7 @@
               <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items }}</td>
               <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ ppmp.total_budget | number:'1.2-2' }}</td>
               <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_created | date: 'MM/dd/yyyy' }}</td>
-              <td class="py-4 px-6 text-center text-sm font-medium" 
+              <td class="py-4 px-6 text-center text-sm font-medium"
                   [ngClass]="{
                     'text-yellow-600': ppmp.status === 'Pending',
                     'text-gray-600': ppmp.status === 'Draft'
@@ -129,12 +129,11 @@
   </div>
 </div>
 
-@if (showViewModal && selectedProjectId) {
-  <app-d-viewppmpprocurement 
-    [projectId]="selectedProjectId"
-    [isModalOpen]="showViewModal"
-    (modalClosed)="closeViewModal()">
-  </app-d-viewppmpprocurement>
-}
+<app-d-viewppmpprocurement
+  *ngIf="showViewModal && selectedProjectId"
+  [projectId]="selectedProjectId"
+  [isModalOpen]="showViewModal"
+  (modalClosed)="closeViewModal()">
+</app-d-viewppmpprocurement>
 
 <router-outlet></router-outlet>
