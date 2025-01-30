@@ -48,6 +48,12 @@ interface PPMPManagementData {
   providedIn: 'root',
 })
 export class SupabaseService {
+  getQuarterlyDistributionByItemId(id: any): { data: any; error: any; } | PromiseLike<{ data: any; error: any; }> {
+    throw new Error('Method not implemented.');
+  }
+  deletePpmpItem(id: number) {
+    throw new Error('Method not implemented.');
+  }
   getCategories(): { data: any; error: any; } | PromiseLike<{ data: any; error: any; }> {
     throw new Error('Method not implemented.');
   }
