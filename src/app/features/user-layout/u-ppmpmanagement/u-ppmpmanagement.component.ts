@@ -101,13 +101,11 @@ export class UPpmpmanagement implements OnInit {
     this.router.navigate(['/user/d-updateppmprocurement', ppmp.project_id]);
   }
 
-  submitPpmp(ppmp: PPMP): void {
-    ppmp.status = 'Pending';
-    this.updateDisplayedPpmp();
-    this.currentOpenActionId = null;
-  }
-
-
+  // submitPpmp(ppmp: PPMP): void {
+  //   ppmp.status = 'Pending';
+  //   this.updateDisplayedPpmp();
+  //   this.currentOpenActionId = null;
+  // }
 
   searchRoles(event: Event): void {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();

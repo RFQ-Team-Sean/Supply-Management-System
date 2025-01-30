@@ -93,8 +93,8 @@
                 <div *ngIf="currentOpenActionId === ppmp.project_id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
                   <div class="flex flex-col">
                     <button (click)="viewPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">View</button>
-                    <button (click)="editPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Edit</button>
-                    <button (click)="submitPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Submit</button>
+                    <button *ngIf="ppmp.status === 'Draft'" (click)="editPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Edit</button>
+                    <!-- <button *ngIf="ppmp.status === 'Draft'" (click)="submitPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Submit</button> -->
                   </div>
                 </div>
               </td>
