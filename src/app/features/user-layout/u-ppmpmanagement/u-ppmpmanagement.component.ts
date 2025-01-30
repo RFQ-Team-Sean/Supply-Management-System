@@ -54,7 +54,7 @@ export class UPpmpmanagement implements OnInit {
 
   async loadPpmpRecords() {
     this.isLoading = true;
-    const data = await this.supabaseService.getPPMPManagementData('Pending');
+    const data = await this.supabaseService.getPPMPManagementData('Submitted');
     if (data) {
       this.ppmpData = data;
     }
@@ -88,7 +88,7 @@ export class UPpmpmanagement implements OnInit {
     viewPpmp(ppmp: PPMP): void {
     this.selectedProjectId = ppmp.project_id;
     this.showViewModal = true;
-    this.currentOpenActionId = null; // Close the actions dropdown
+    this.currentOpenActionId = null;
   }
 
     closeViewModal(): void {

@@ -181,7 +181,7 @@ item: any;
 
       await this.supabaseService.insertItems(itemsData);
       
-      if(status === 'Pending') {
+      if(status === 'Submitted') {
         alert('PPMP submitted successfully!');
       } else if (status === 'Draft') {
         alert('PPMP saved as draft successfully!');
