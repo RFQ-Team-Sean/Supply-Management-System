@@ -1,1 +1,90 @@
-<p>gso-ppmpentry works!</p>
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">PPMP Submissions</h1>
+  
+    <div *ngIf="isLoading" class="text-center py-10">
+      <p>Loading PPMP records...</p>
+    </div>
+  
+    <div *ngIf="!isLoading" class="bg-white rounded-lg shadow-lg p-4">
+      <table class="min-w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Project Name</th>
+            <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Requested Items</th>
+            <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Budget</th>
+            <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date Created</th>
+            <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+  
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let ppmp of displayedPpmp" class="hover:bg-gray-50 transition duration-300">
+            <td class="py-4 px-6 text-center text-sm text-gray-900">{{ ppmp.project_name }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ ppmp.total_budget | number:'1.2-2' }}</td>
+            <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_created | date: 'MM/dd/yyyy' }}</td>
+            <td class="py-4 px-6 text-center text-sm font-medium"
+                [ngClass]="{
+                  'text-yellow-600': ppmp.status === 'Pending',
+                  'text-gray-600': ppmp.status === 'Draft'
+                }">
+              {{ ppmp.status }}
+            </td>
+            <td class="py-4 px-6 text-center text-sm font-medium space-x-2">
+              <button 
+                (click)="viewPpmp(ppmp)" 
+                class="text-blue-600 hover:text-blue-900 transition duration-300">
+                View
+              </button>
+              <button 
+                (click)="approvePpmp(ppmp)" 
+                class="text-green-600 hover:text-green-900 transition duration-300">
+                Approve
+              </button>
+              <button 
+                (click)="rejectPpmp(ppmp)" 
+                class="text-red-600 hover:text-red-900 transition duration-300">
+                Reject
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+  
+      <!-- Pagination -->
+      <div class="flex items-center justify-between mt-4">
+        <button 
+          (click)="changePage(currentPage - 1)" 
+          [disabled]="currentPage === 1" 
+          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+          Previous
+        </button>
+  
+        <div class="flex space-x-2">
+          <span 
+            *ngFor="let page of [].constructor(totalPages); let i = index" 
+            (click)="changePage(i + 1)" 
+            [ngClass]="{'bg-blue-500 text-white': currentPage === i + 1, 'bg-gray-200 text-gray-700': currentPage !== i + 1}" 
+            class="px-3 py-1 rounded-lg cursor-pointer">
+            {{ i + 1 }}
+          </span>
+        </div>
+  
+        <button 
+          (click)="changePage(currentPage + 1)" 
+          [disabled]="currentPage === totalPages" 
+          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- View Modal (to be implemented) -->
+  <app-d-viewppmpprocurement
+    *ngIf="showViewModal && selectedProjectId"
+    [projectId]="selectedProjectId"
+    [isModalOpen]="showViewModal"
+    (modalClosed)="showViewModal = false">
+  </app-d-viewppmpprocurement>
