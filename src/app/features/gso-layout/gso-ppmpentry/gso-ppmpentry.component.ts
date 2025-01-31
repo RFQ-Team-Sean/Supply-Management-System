@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { DViewppmpprocurementComponent } from "../../user-layout/u-ppmpmanagement/d-viewppmpprocurement/d-viewppmpprocurement.component";
@@ -19,12 +20,16 @@ interface PPMP {
   imports: [
     CommonModule,
     RouterModule,
+    FormsModule,
     DViewppmpprocurementComponent
 ],
   templateUrl: './gso-ppmpentry.component.html',
   styleUrls: ['./gso-ppmpentry.component.css']
 })
 export class GsoPpmpentryComponent implements OnInit {
+filterPpmp() {
+throw new Error('Method not implemented.');
+}
   ppmpData: PPMP[] = [];
   displayedPpmp: PPMP[] = [];
   currentPage: number = 1;
@@ -34,6 +39,7 @@ export class GsoPpmpentryComponent implements OnInit {
   isLoading: boolean = true;
   showViewModal: boolean = false;
   selectedProjectId: number | null = null;
+searchTerm: any;
 
   constructor(
     private router: Router,
