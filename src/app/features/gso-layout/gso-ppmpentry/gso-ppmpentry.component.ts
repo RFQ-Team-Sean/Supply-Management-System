@@ -74,6 +74,10 @@ searchTerm: any;
     this.updateDisplayedPpmp();
   }
 
+  toggleActions(ppmp: PPMP): void {
+    this.currentOpenActionId = this.currentOpenActionId === ppmp.project_id ? null : ppmp.project_id;
+  }
+
   viewPpmp(ppmp: PPMP): void {
     this.selectedProjectId = ppmp.project_id;
     this.showViewModal = true;

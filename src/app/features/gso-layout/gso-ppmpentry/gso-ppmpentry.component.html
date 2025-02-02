@@ -41,22 +41,17 @@
                 }">
               {{ ppmp.status === 'Submitted' ? 'Submitted for Review' : ppmp.status }}
             </td>
-            <td class="py-2 px-4 text-center text-sm font-medium space-x-2">
-              <button 
-                (click)="viewPpmp(ppmp)" 
-                class="text-blue-600 hover:text-blue-900">
-                View
+            <td class="py-4 px-6 text-center text-sm font-medium relative">
+              <button (click)="toggleActions(ppmp)" class="flex justify-center items-center h-full w-full">
+                <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
               </button>
-              <button 
-                (click)="approvePpmp(ppmp)" 
-                class="text-green-600 hover:text-green-900">
-                Approve
-              </button>
-              <button 
-                (click)="rejectPpmp(ppmp)" 
-                class="text-red-600 hover:text-red-900">
-                Reject
-              </button>
+              <div *ngIf="currentOpenActionId === ppmp.project_id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+                <div class="flex flex-col">
+                  <button (click)="viewPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">View</button>
+                  <button (click)="approvePpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Approve</button>
+                  <button (click)="rejectPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Reject</button>
+                </div>
+              </div>
             </td>
           </tr>
         </tbody>
