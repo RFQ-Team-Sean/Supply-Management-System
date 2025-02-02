@@ -33,7 +33,7 @@ throw new Error('Method not implemented.');
   ppmpData: PPMP[] = [];
   displayedPpmp: PPMP[] = [];
   currentPage: number = 1;
-  itemsPerPage: number = 5;
+  itemsPerPage: number = 10;
   totalPages: number = 0;
   currentOpenActionId: number | null = null;
   isLoading: boolean = true;
@@ -52,7 +52,8 @@ searchTerm: any;
 
   async loadSubmittedPpmpRecords() {
     this.isLoading = true;
-    const data = await this.supabaseService.getPPMPManagementData('Pending');
+    const data = await this.supabaseService.getPendingGsoPpmps();
+    // console.log('data is: ', data);
     if (data) {
       this.ppmpData = data;
       this.totalPages = Math.ceil(this.ppmpData.length / this.itemsPerPage);

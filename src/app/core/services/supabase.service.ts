@@ -41,6 +41,7 @@ interface PPMPManagementData {
   fiscal_year: number | null;
   department: string;
   estimated_department_budget: number | null;
+  submission_status: string | null;
 }
 
 
@@ -340,33 +341,52 @@ export class SupabaseService {
   async getPPMPManagementData(statusFilter: string) {
     if (!this.supabase) {
       console.error('Supabase client not initialized.');
-      return null;
+      return [];
+    }
+  
+    const { data, error } = await this.supabase.rpc('get_ppmp_management_data');
+  
+    if (error) {
+      console.error('Error fetching data:', error);
+      return [];
+    }
+  
+    const typedData = data as PPMPManagementData[];
+    typedData.sort((a, b) => (a.status === 'Draft' ? -1 : b.status === 'Draft' ? 1 : 0));
+  
+    if (statusFilter === 'Submitted') {
+      return typedData.filter(item => item.status === 'Submitted' || item.status === 'Draft');
+    } else if (statusFilter === 'Approved') {
+      return typedData.filter(item => item.status === 'Approved');
+    } else if (statusFilter === 'Rejected') {
+      return typedData.filter(item => item.status === 'Rejected');
+    } else if (statusFilter === 'All') {
+      return typedData;
+    }
+  
+    return [];
+  }
+
+  async getPendingGsoPpmps(){
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return [];
     }
 
-    const { data, error } = await this.supabase
-      .rpc('get_ppmp_management_data');
-
+    const { data, error } = await this.supabase.rpc('get_ppmp_management_data');
+  
     if (error) {
       console.error('Error fetching data:', error);
       return [];
     }
 
-    const typedData = data as PPMPManagementData[];
-    typedData.sort((a, b) => (a.status === 'Draft' ? -1 : b.status === 'Draft' ? 1 : 0));
-
-    if (statusFilter === 'Submitted'){
-      return typedData?.filter(item => item.status === 'Draft' || item.status === 'Submitted') || [];
-    } else if (statusFilter === 'Approved'){
-      return typedData?.filter(item => item.status === 'Approved') || [];
-    } else if (statusFilter === 'Rejected'){
-      return typedData?.filter(item => item.status === 'Rejected') || [];
-    } else if (statusFilter === 'All') {
-      return data as PPMPManagementData[];
-    }else {
-      return [];
-    }
+    const typedData = data as PPMPManagementData[]; 
+    console.log('data is: ', typedData);
+    return typedData.filter((item) => item.submission_status === 'Pending - GSO');
   }
-
+  
+  
+  
   async insertProject(data: any) {
     if (!this.supabase) {
       console.error('Supabase client not initialized.');

@@ -37,10 +37,9 @@
             <td class="py-2 px-4 text-center text-sm text-gray-500">{{ ppmp.date_created | date: 'MM/dd/yyyy' }}</td>
             <td class="py-2 px-4 text-center text-sm font-medium"
                 [ngClass]="{
-                  'text-yellow-600': ppmp.status === 'Pending',
-                  'text-gray-600': ppmp.status === 'Draft'
+                  'text-yellow-600': ppmp.status === 'Submitted'
                 }">
-              {{ ppmp.status }}
+              {{ ppmp.status === 'Submitted' ? 'Submitted for Review' : ppmp.status }}
             </td>
             <td class="py-2 px-4 text-center text-sm font-medium space-x-2">
               <button 

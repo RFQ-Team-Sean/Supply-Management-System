@@ -148,7 +148,10 @@ item: any;
         estimated_department_budget: this.formData.estimatedBudget,
         status: status,
         category: this.formData.categories.map((cat) => cat.name),
+        submission_status: '',
       };
+
+      projectData.submission_status = status === 'Draft' ? 'N/A' : status === 'Submitted' ? 'GSO - Pending' : projectData.submission_status;
 
       const result = await this.supabaseService.insertProject(projectData);
 
