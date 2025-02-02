@@ -138,7 +138,8 @@ export class UPurchaserequestComponent implements OnInit {
   }
 
   editPrm(prm: PurchaseRequest): void {
-    this.router.navigate(['/user/u-prmpedit', prm.pr_id]);
+    this.router.navigate(['/user/u-prmedit', prm.pr_id]);
+    this.currentOpenActionId = null;
   }
 
   private updateDisplayedPRMs(): void {
