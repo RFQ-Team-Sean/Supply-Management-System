@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UPurchasemanagement } from './u-purchaserequest.component';
+import { UPurchaserequestComponent } from './u-purchaserequest.component';
 
 describe('UIncomingComponent', () => {
-  let component: UPurchasemanagement;
-  let fixture: ComponentFixture<UPurchasemanagement>;
+  let component: UPurchaserequestComponent;
+  let fixture: ComponentFixture<UPurchaserequestComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UPurchasemanagement]
+      imports: [UPurchaserequestComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(UPurchasemanagement);
+    fixture = TestBed.createComponent(UPurchaserequestComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
