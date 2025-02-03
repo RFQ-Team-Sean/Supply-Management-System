@@ -1,6 +1,5 @@
-<!--Create PPMP-->
-<div class="bg-white rounded-lg shadow-sm p-6">
-  <h2 class="text-xl font-semibold mb-6">New Project Procurement Management Plan</h2>
+<div *ngIf="ppmpData" class="bg-white rounded-lg shadow-sm p-6">
+  <h2 class="text-xl font-semibold mb-6">Update Project Procurement Management Plan</h2>
 
   <form #ppmpForm="ngForm" class="space-y-6">
     <!-- Header Section -->
@@ -9,7 +8,7 @@
         <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
         <input
           type="text"
-          [(ngModel)]="formData.department"
+          [(ngModel)]="ppmpData.department"
           name="department"
           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
@@ -18,17 +17,17 @@
         <label class="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
         <input
           type="text"
-          [(ngModel)]="formData.projectName"
+          [(ngModel)]="ppmpData.project_name"
           name="projectName"
           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Estimated Department Budget</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Total Budget</label>
         <input
           type="number"
-          [(ngModel)]="formData.estimatedBudget"
-          name="estimatedBudget"
+          [(ngModel)]="ppmpData.total_budget"
+          name="totalBudget"
           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </div>
@@ -36,7 +35,7 @@
 
     <!-- Categories Section -->
     <div class="space-y-4">
-      <div *ngFor="let category of formData.categories; let i = index" class="border rounded-lg p-4">
+      <div *ngFor="let category of ppmpData.categories; let i = index" class="border rounded-lg p-4">
         <div class="flex justify-between items-center mb-4">
           <div class="w-full mr-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
@@ -82,7 +81,7 @@
                   <label class="block text-xs font-medium text-gray-700 mb-1">Item Name</label>
                   <input
                     type="text"
-                    [(ngModel)]="item.itemName"
+                    [(ngModel)]="item.item_name"
                     [name]="'itemName' + i + '-' + j"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
@@ -91,7 +90,7 @@
                   <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
                   <input
                     type="text"
-                    [(ngModel)]="item.itemDescription"
+                    [(ngModel)]="item.item_description"
                     [name]="'itemDescription' + i + '-' + j"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
@@ -110,7 +109,7 @@
                   <label class="block text-xs font-medium text-gray-700 mb-1">Unit</label>
                   <input
                     type="text"
-                    [(ngModel)]="item.unitOfMeasurement"
+                    [(ngModel)]="item.unit_of_measurement"
                     [name]="'unitOfMeasurement' + i + '-' + j"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
                   />
@@ -119,7 +118,7 @@
                   <label class="block text-xs font-medium text-gray-700 mb-1">Unit Cost</label>
                   <input
                     type="number"
-                    [(ngModel)]="item.estimatedUnitCost"
+                    [(ngModel)]="item.est_unit_cost"
                     [name]="'estimatedUnitCost' + i + '-' + j"
                     (input)="calculateTotalCost(item)"
                     class="w-full px-2 py-1 border border-gray-300 rounded-md"
@@ -129,13 +128,12 @@
                   <label class="block text-xs font-medium text-gray-700 mb-1">Total Cost</label>
                   <input
                     type="number"
-                    [(ngModel)]="item.totalCost"
+                    [(ngModel)]="item.total_cost"
                     [name]="'totalCost' + i + '-' + j"
                     readonly
                     class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
                   />
                 </div>
-                
               </div>
 
               <!-- Quarterly Distribution Section -->
@@ -150,7 +148,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Quantity</label>
                         <input
                           type="number"
-                          [(ngModel)]="item.quarterDistribution.q1.quantity"
+                          [(ngModel)]="item.quarter_distribution.q1.quantity"
                           [name]="'q1Quantity' + i + '-' + j"
                           (input)="calculateQuarterAmount(item, 'q1')"
                           class="w-full px-2 py-1 border border-gray-300 rounded-md"
@@ -160,7 +158,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Amount</label>
                         <input
                           type="number"
-                          [(ngModel)]="item.quarterDistribution.q1.amount"
+                          [(ngModel)]="item.quarter_distribution.q1.amount"
                           [name]="'q1Amount' + i + '-' + j"
                           readonly
                           class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
@@ -177,7 +175,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Quantity</label>
                         <input
                           type="number"
-                          [(ngModel)]="item.quarterDistribution.q2.quantity"
+                          [(ngModel)]="item.quarter_distribution.q2.quantity"
                           [name]="'q2Quantity' + i + '-' + j"
                           (input)="calculateQuarterAmount(item, 'q2')"
                           class="w-full px-2 py-1 border border-gray-300 rounded-md"
@@ -187,7 +185,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Amount</label>
                         <input
                           type="number"
-                          [(ngModel)]="item.quarterDistribution.q2.amount"
+                          [(ngModel)]="item.quarter_distribution.q2.amount"
                           [name]="'q2Amount' + i + '-' + j"
                           readonly
                           class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
@@ -204,7 +202,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Quantity</label>
                         <input
                           type="number"
-                          [(ngModel)]="item.quarterDistribution.q3.quantity"
+                          [(ngModel)]="item.quarter_distribution.q3.quantity"
                           [name]="'q3Quantity' + i + '-' + j"
                           (input)="calculateQuarterAmount(item, 'q3')"
                           class="w-full px-2 py-1 border border-gray-300 rounded-md"
@@ -214,7 +212,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Amount</label>
                         <input
                           type="number"
-                          [(ngModel)]="item.quarterDistribution.q3.amount"
+                          [(ngModel)]="item.quarter_distribution.q3.amount"
                           [name]="'q3Amount' + i + '-' + j"
                           readonly
                           class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
@@ -231,7 +229,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Quantity</label>
                         <input
                           type="number"
-                          [(ngModel)]="item.quarterDistribution.q4.quantity"
+                          [(ngModel)]="item.quarter_distribution.q4.quantity"
                           [name]="'q4Quantity' + i + '-' + j"
                           (input)="calculateQuarterAmount(item, 'q4')"
                           class="w-full px-2 py-1 border border-gray-300 rounded-md"
@@ -241,7 +239,7 @@
                         <label class="block text-xs text-gray-600 mb-1">Amount</label>
                         <input
                           type="number"
-                          [(ngModel)]="item.quarterDistribution.q4.amount"
+                          [(ngModel)]="item.quarter_distribution.q4.amount"
                           [name]="'q4Amount' + i + '-' + j"
                           readonly
                           class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
@@ -254,15 +252,16 @@
             </div>
           </ng-container>
 
-        <!-- Add Item Button -->
-        <div class="flex justify-center mt-4">
-          <button
-            type="button"
-            (click)="addItem(i)"
-            class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-          >
-            Add Item
-          </button>
+          <!-- Add Item Button -->
+          <div class="flex justify-center mt-4">
+            <button
+              type="button"
+              (click)="addItem(i)"
+              class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Add Item
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -292,14 +291,24 @@
         (click)="onSaveAsDraft()"
         class="px-4 py-2 border border-blue-500 rounded-md text-sm font-medium text-blue-500 bg-white hover:bg-blue-50"
       >
-        Save as Draft
+        Update Draft
       </button>
       <button
         type="submit"
         (click)="onSubmit('Submitted')"
         class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-500 hover:bg-blue-600"
-      >
-        Submit
-      </button>
+        >
+          Submit PPMP
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <div *ngIf="!ppmpData">
+    <div class="flex items-center justify-center h-64">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+        <p class="mt-4 text-gray-600">Loading PPMP data...</p>
+      </div>
     </div>
-</div>
+  </div>

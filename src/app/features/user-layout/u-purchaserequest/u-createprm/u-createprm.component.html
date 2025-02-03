@@ -206,3 +206,175 @@
     </div>
   </div>
 </div>
+
+<div class="bg-white rounded-lg shadow-sm p-6">
+  <h2 class="text-xl font-semibold mb-6">New Purchase Request</h2>
+
+  <form [formGroup]="prmForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Header Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Department Name</label>
+        <input
+          type="text"
+          formControlName="departmentName"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Requested By</label>
+        <input
+          type="text"
+          formControlName="requestedBy"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Contact</label>
+        <input
+          type="text"
+          formControlName="contact"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Date Submitted</label>
+        <input
+          type="date"
+          formControlName="dateSubmitted"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">PR ID</label>
+        <input
+          type="text"
+          formControlName="prId"
+          readonly
+          class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+        />
+      </div>
+    </div>
+
+    <!-- Items Section -->
+    <div class="space-y-4" formArrayName="items">
+      <div *ngFor="let item of itemsFormArray.controls; let i = index" [formGroupName]="i" 
+           class="border rounded-lg overflow-hidden">
+        <!-- Item Header -->
+        <div class="bg-gray-100 p-3 border-b flex justify-between items-center">
+          <h3 class="font-medium text-gray-700">Item {{i + 1}}</h3>
+          <button
+            type="button"
+            (click)="removeItem(i)"
+            class="text-red-600 hover:text-red-800"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Item Details -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Item Name</label>
+            <input
+              type="text"
+              formControlName="item"
+              class="w-full px-2 py-1 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+            <input
+              type="number"
+              formControlName="quantity"
+              (input)="updateItemTotal(i)"
+              class="w-full px-2 py-1 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Unit Price</label>
+            <input
+              type="number"
+              formControlName="unitPrice"
+              (input)="updateItemTotal(i)"
+              class="w-full px-2 py-1 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Unit of Measure</label>
+            <input
+              type="text"
+              formControlName="unitOfMeasure"
+              class="w-full px-2 py-1 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Total Cost</label>
+            <input
+              type="number"
+              formControlName="totalCost"
+              readonly
+              class="w-full px-2 py-1 border border-gray-300 rounded-md bg-gray-50"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Item Button -->
+    <div class="flex justify-center">
+      <button
+        type="button"
+        (click)="addItem()"
+        class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Add Item
+      </button>
+    </div>
+
+    <!-- Total Amount -->
+    <div class="flex justify-end">
+      <div class="w-48">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+        <input
+          type="number"
+          formControlName="totalAmount"
+          readonly
+          class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+        />
+      </div>
+    </div>
+
+    <!-- Justification -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Justification</label>
+      <textarea
+        formControlName="justification"
+        rows="4"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+      ></textarea>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end space-x-3">
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-500 hover:bg-blue-600"
+      >
+        Submit
+      </button>
+    </div>
+  </form>
+</div>
