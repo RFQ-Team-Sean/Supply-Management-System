@@ -7,7 +7,7 @@
     <div class="flex gap-6">
       <!-- Left Side: Filters -->
       <div class="w-[300px] flex-shrink-0">
-        <app-gso-prmfilter></app-gso-prmfilter>
+        <app-gsopurchaserequest-filter></app-gsopurchaserequest-filter>
       </div>
   
       <!-- Right Side: Tables -->
@@ -19,21 +19,21 @@
             [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'pending', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'pending'}"
             class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
           >
-            Pending Purchase Request
+            Approval Request
           </button>
           <button 
             (click)="switchView('approved')" 
             [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'approved', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'approved'}"
             class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
           >
-            Approved Purchase Request
+            Approved Request
           </button>
           <button 
-            (click)="switchView('rejected')" 
-            [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'rejected', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'rejected'}"
+            (click)="switchView('returned')" 
+            [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'returned', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'returned'}"
             class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
           >
-            Rejected Purchase Request
+           Returned Request
           </button>
         </div>
   
@@ -98,8 +98,6 @@
                   <div *ngIf="currentOpenActionId === prm.pr_id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
                     <div class="flex flex-col">
                       <button (click)="viewPrm(prm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">View</button>
-                      <button (click)="approvePrm(prm)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Approve</button>
-                      <button (click)="rejectPrm(prm)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Reject</button>
                     </div>
                   </div>
                 </td>
@@ -127,12 +125,12 @@
   
         <!-- Approved Table -->
         <div *ngIf="currentView === 'approved'" class="bg-white rounded-lg shadow-lg p-4">
-            <app-gso-prmapprovedrequest></app-gso-prmapprovedrequest>
+          <app-gsopurchaserequest-approvedrequest></app-gsopurchaserequest-approvedrequest>
         </div>
   
-        <!-- Rejected Table -->
-        <div *ngIf="currentView === 'rejected'" class="bg-white rounded-lg shadow-lg p-4">
-            <app-gso-prmrejectrequest></app-gso-prmrejectrequest>
+        <!-- Returned Table -->
+        <div *ngIf="currentView === 'returned'" class="bg-white rounded-lg shadow-lg p-4">
+          <app-gspurchaerequest-returnedrequest></app-gspurchaerequest-returnedrequest>
         </div>
       </div>
     </div>

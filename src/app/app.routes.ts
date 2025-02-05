@@ -38,6 +38,7 @@ import { UCreateprmComponent } from './features/user-layout/u-purchaserequest/u-
 import { DCreateppmpComponent } from './features/user-layout/u-ppmpmanagement/d-createppmp/d-createppmp.component';
 import { GsoPpmpentryComponent } from './features/gso-layout/gso-ppmpentry/gso-ppmpentry.component';
 import { GsoBiddingmanagementComponent } from './features/gso-layout/gso-biddingmanagement/gso-biddingmanagement.component';
+import { GsoprapprovedrequestTrackingComponent } from './features/gso-layout/gso-purchaserequest/gsopurchaserequest-approvedrequest/gsoprapprovedrequest-tracking/gsoprapprovedrequest-tracking.component';
 
 //BAC
 import { BacDashboardComponent } from './features/bac-layout/bac-dashboard/bac-dashboard.component';
@@ -105,6 +106,7 @@ export const routes: Routes = [
       { path: 'gso-ppmpentry', component: GsoPpmpentryComponent },
       { path: 'gso-biddingmanagement', component: GsoBiddingmanagementComponent },
       { path: 'gso-purchaserequest', component: GsoPurchaserequestComponent },
+      { path: 'gso-purchaserequest/approved-tracking/:pr_id', component: GsoprapprovedrequestTrackingComponent },
       { path: 'gso-inventorymanagement', component: GsoInventorymanagementComponent },
       { path: 'gso-suppliermanagement', component: GsoSuppliermanagemnetComponent },
       { path: 'gso-reports', component: GsoReportsComponent },
