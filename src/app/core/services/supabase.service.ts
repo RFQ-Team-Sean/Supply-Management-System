@@ -42,6 +42,21 @@ interface PPMPManagementData {
   submission_status: string | null;
 }
 
+interface PPMPManagementData {
+  project_id: number;
+  date_created: string;
+  project_name: string;
+  requested_items: string;
+  total_budget: number;
+  status: string;  // Assuming status is a string, adjust if it's a custom type
+  date_approved: string | null;
+  date_rejected: string | null;
+  fiscal_year: number | null;
+  department: string;  // Adjust according to your department type
+  estimated_department_budget: number | null;
+  remaining_department_budget: number | null;
+}
+
 
 @Injectable({
   providedIn: 'root',
@@ -432,6 +447,23 @@ export class SupabaseService {
 
     if (error) {
       throw new Error(`Failed to update user: ${error.message}`);
+    }
+  }
+
+  async updateEmail(newEmail: string) {
+    try {
+      if (this.supabase) {
+        const { error } = await this.supabase.auth.updateUser({ email: newEmail });
+        if (error) {
+          console.error('Error updating email:', error.message);
+          alert('Failed to update email. Please try again.');
+        } else {
+          alert('Email updated successfully! Please check your inbox to confirm the change.');
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert('An unexpected error occurred. Please try again.');
     }
   }
 

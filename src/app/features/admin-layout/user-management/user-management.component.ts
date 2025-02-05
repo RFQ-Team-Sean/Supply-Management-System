@@ -94,6 +94,18 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
+  roleDisplayMapping: { [key: string]: string } = {
+    gso: 'GSO Officer',
+    admin: 'Admin',
+    bac: 'BAC Staff',
+    department: 'IT Department',
+    //property: 'Property Officer'
+  };
+
+  getRoleDisplay(role: string): string {
+    return this.roleDisplayMapping[role] || role;
+  }
+
   selectStatus(status: string): void {
     this.selectedStatus = status;
   }
@@ -238,6 +250,23 @@ export class UserManagementComponent implements OnInit {
     if (this.selectedImage) {
       console.log(this.selectedImage)
       imagePath = await this.SupabaseService.uploadProfileImage(this.selectedImage, updatedUser_id);
+    }
+
+    switch(updatedUser.role){
+      case 'Department Staff':
+        updatedUser.role = 'department';
+        break;
+      case 'BAC Staff':
+        updatedUser.role = 'bac';
+        break;
+      case 'Admin':
+        updatedUser.role = 'admin';
+        break;
+      case 'GSO Officer':
+        updatedUser.role = 'gso';
+        break;
+      default:
+        updatedUser.role = '';
     }
 
     await this.SupabaseService.updateUser(updatedUser_id, {

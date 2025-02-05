@@ -81,13 +81,13 @@ export class HeaderComponent implements OnInit {
         route = '/admin/a-profile';
         break;
       case 'department':
-        route = '/user/profile';
+        route = '/user/u-profile';
         break;
       case 'gso':
-        route = '/gso/profile';
+        route = '/gso/gso-profile';
         break;
       case 'bac':
-        route = '/bac/profile';
+        route = '/bac/bac-profile';
         break;
     }
 
