@@ -40,7 +40,7 @@ export class UPpmpmanagement implements OnInit {
   itemsPerPage: number = 5;
   totalPages: number = 0;
   currentOpenActionId: number | null = null;
-  currentView: 'pending' | 'approved' | 'rejected' = 'pending';
+  // currentView: 'pending' | 'approved' | 'rejected' = 'pending';
   isLoading: boolean = true;
   showViewModal: boolean = false;
   selectedProjectId: number | null = null;
@@ -54,7 +54,7 @@ export class UPpmpmanagement implements OnInit {
 
   async loadPpmpRecords() {
     this.isLoading = true;
-    const data = await this.supabaseService.getPPMPManagementData('Submitted');
+    const data = await this.supabaseService.getPPMPManagementData('All');
     if (data) {
       this.ppmpData = data;
     }
@@ -79,11 +79,11 @@ export class UPpmpmanagement implements OnInit {
     this.currentOpenActionId = this.currentOpenActionId === ppmp.project_id ? null : ppmp.project_id;
   }
 
-  switchView(view: 'pending' | 'approved' | 'rejected'): void {
-    this.currentView = view;
-    this.currentPage = 1;
-    this.updateDisplayedPpmp();
-  }
+  // switchView(view: 'pending' | 'approved' | 'rejected'): void {
+  //   this.currentView = view;
+  //   this.currentPage = 1;
+  //   this.updateDisplayedPpmp();
+  // }
 
     viewPpmp(ppmp: PPMP): void {
     this.selectedProjectId = ppmp.project_id;

@@ -13,37 +13,13 @@
 
     <!-- Right Side: Tables -->
     <div class="flex-1">
-      <!-- Option Buttons -->
-      <div class="flex gap-4 mb-4 border-b border-gray-200">
-        <button
-          (click)="switchView('pending')"
-          [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'pending', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'pending'}"
-          class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
-        >
-          Submitted/Draft Procurement
-        </button>
-        <button
-          (click)="switchView('approved')"
-          [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'approved', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'approved'}"
-          class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
-        >
-          Approved Procurement
-        </button>
-        <button
-          (click)="switchView('rejected')"
-          [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'rejected', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'rejected'}"
-          class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
-        >
-          Rejected Procurement
-        </button>
-      </div>
 
-      <!-- Users Table -->
-      <div *ngIf="currentView === 'pending'" class="bg-white rounded-lg shadow-lg p-4">
+      <!-- PPMP Table -->
+      <div class="bg-white rounded-lg shadow-lg p-4">
         <div *ngIf="isLoading" class="flex items-center justify-center py-8">
           <div class="flex flex-col items-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-900"></div>
-            <p class="mt-3 text-gray-700">Loading submitted/draft PPMPs...</p>
+            <p class="mt-3 text-gray-700">Loading PPMPs...</p>
           </div>
         </div>
 
@@ -76,12 +52,14 @@
           <tbody class="divide-y divide-gray-200">
             <tr *ngFor="let ppmp of displayedPpmp" class="hover:bg-gray-50 transition duration-300">
               <td class="py-4 px-6 text-center text-sm text-gray-900">{{ ppmp.project_name }}</td>
-              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items }}</td>
+              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items.split(', ').length > 1 ? 'Multiple items' : ppmp.requested_items }}</td>
               <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ ppmp.total_budget | number:'1.2-2' }}</td>
               <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_created | date: 'MM/dd/yyyy' }}</td>
               <td class="py-4 px-6 text-center text-sm font-medium"
                   [ngClass]="{
-                    'text-yellow-600': ppmp.status === 'Submitted',
+                    'text-blue-600': ppmp.status === 'Submitted',
+                    'text-green-600': ppmp.status === 'Approved',
+                    'text-yellow-600': ppmp.status === 'Returned',
                     'text-gray-600': ppmp.status === 'Draft'
                   }">
                 {{ ppmp.status }}
@@ -118,19 +96,6 @@
             Next
           </button>
         </div>
-      </div>
-
-      <!-- Approved Table -->
-      <div *ngIf="currentView === 'approved'" class="bg-white rounded-lg shadow-lg p-4">
-        <app-d-ppmpapprovedprocurement>
-
-        </app-d-ppmpapprovedprocurement>
-      </div>
-
-      <!-- Rejected Table -->
-      <div *ngIf="currentView === 'rejected'" class="bg-white rounded-lg shadow-lg p-4">
-        <app-d-ppmprejectedprocurement>
-        </app-d-ppmprejectedprocurement>
       </div>
     </div>
   </div>
