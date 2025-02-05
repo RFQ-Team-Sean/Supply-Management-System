@@ -21,6 +21,9 @@ interface RequestItem {
   styleUrl: './u-createprm.component.css'
 })
 export class UCreateprmComponent implements OnInit {
+onSaveAsDraft() {
+throw new Error('Method not implemented.');
+}
   prmForm: FormGroup;
   currentDateTime: Date = new Date();
   errorMessage: string = '';

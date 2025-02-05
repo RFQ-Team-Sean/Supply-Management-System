@@ -36,6 +36,8 @@ import { AReportsdetailsComponent } from './features/admin-layout/a-reports/a-re
 import { GsoSuppliermanagemnetComponent } from './features/gso-layout/gso-suppliermanagemnet/gso-suppliermanagemnet.component';
 import { UCreateprmComponent } from './features/user-layout/u-purchaserequest/u-createprm/u-createprm.component';
 import { DCreateppmpComponent } from './features/user-layout/u-ppmpmanagement/d-createppmp/d-createppmp.component';
+import { DViewppmpprocurementComponent } from './features/user-layout/u-ppmpmanagement/d-viewppmpprocurement/d-viewppmpprocurement.component';
+import { DUpdateppmpprocurementComponent } from './features/user-layout/u-ppmpmanagement/d-updateppmpprocurement/d-updateppmpprocurement.component';
 import { GsoPpmpentryComponent } from './features/gso-layout/gso-ppmpentry/gso-ppmpentry.component';
 import { GsoBiddingmanagementComponent } from './features/gso-layout/gso-biddingmanagement/gso-biddingmanagement.component';
 import { GsoprapprovedrequestTrackingComponent } from './features/gso-layout/gso-purchaserequest/gsopurchaserequest-approvedrequest/gsoprapprovedrequest-tracking/gsoprapprovedrequest-tracking.component';
@@ -75,7 +77,9 @@ export const routes: Routes = [
       { path: 'u-systemsetting', component: USystemsetting },
       { path: 'u-notification', component: UNotification },
       { path: 'u-createprm', component: UCreateprmComponent },
-      { path: 'u-profile', component: UProfileComponent },    
+      { path: 'u-profile', component: UProfileComponent },
+      { path: 'd-viewppmprocurement/:id', component: DViewppmpprocurementComponent },
+      { path: 'd-updateppmprocurement/:id', component: DUpdateppmpprocurementComponent },
     ],
   },
   {
@@ -92,7 +96,7 @@ export const routes: Routes = [
       { path: 'user-management', component: UserManagementComponent },
       { path: 'create-user', component: CreateUserComponent },
       { path: 'a-reportsdetails/:reportCode', component: AReportsdetailsComponent },
-      { path: 'a-profile', component: AProfileComponent },    
+      { path: 'a-profile', component: AProfileComponent },
     ],
   },
   {
@@ -114,7 +118,7 @@ export const routes: Routes = [
       { path: 'gso-systemsettings', component: GsoSystemsettingsComponent },
       { path: 'gso-newitem', component: GsoNewitemComponent },
       { path: 'gso-inventoryvedit/:id', component: GsoInventoryeditComponent },
-      { path: 'a-profile', component: AProfileComponent },    
+      { path: 'a-profile', component: AProfileComponent },
     ],
   },
   {
