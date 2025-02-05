@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { BidmanagementBidinvitationComponent } from "./bidmanagement-bidinvitation/bidmanagement-bidinvitation.component";
 import { BidmanagementBidcanvasComponent } from "./bidmanagement-bidcanvas/bidmanagement-bidcanvas.component";
 import { BidmanagmentFilterComponent } from "./bidmanagment-filter/bidmanagment-filter.component";
+import { BidmanagementReviewbidsComponent } from "./bidmanagement-reviewbids/bidmanagement-reviewbids.component";
 
 interface BIDM {
   id: number;
@@ -27,6 +28,7 @@ interface BIDM {
     BidmanagementBidinvitationComponent,
     BidmanagementBidcanvasComponent,
     BidmanagmentFilterComponent,
+    BidmanagementReviewbidsComponent,
   ],
   templateUrl: './bac-bidmanagement.component.html',
   styleUrl: './bac-bidmanagement.component.css'
@@ -40,6 +42,8 @@ export class BacBidmanagementComponent implements OnInit {
   currentOpenActionId: number | null = null;
   currentView: 'active' | 'invitation' | 'canvas' = 'active';
   displayedBidm: BIDM[] = [];
+  showReviewModal = false;
+  selectedBid: BIDM | null = null;
 
   constructor(private router: Router) {}
 
@@ -205,7 +209,8 @@ export class BacBidmanagementComponent implements OnInit {
   }
 
   reviewBids(bidm: BIDM): void {
-    this.router.navigate(['/bac/bid-review', bidm.id]);
+    this.selectedBid = bidm;
+    this.showReviewModal = true;
     this.currentOpenActionId = null;
   }
 

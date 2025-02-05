@@ -15,22 +15,22 @@
     <div class="flex-1">
       <!-- Option Buttons -->
       <div class="flex gap-4 mb-4 border-b border-gray-200">
-        <button 
-          (click)="switchView('pending')" 
+        <button
+          (click)="switchView('pending')"
           [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'pending', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'pending'}"
           class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
         >
-          Pending Procurement
+          Submitted/Draft Procurement
         </button>
-        <button 
-          (click)="switchView('approved')" 
+        <button
+          (click)="switchView('approved')"
           [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'approved', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'approved'}"
           class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
         >
           Approved Procurement
         </button>
-        <button 
-          (click)="switchView('rejected')" 
+        <button
+          (click)="switchView('rejected')"
           [ngClass]="{'text-indigo-950 border-indigo-950': currentView === 'rejected', 'text-gray-500 border-transparent hover:text-indigo-950': currentView !== 'rejected'}"
           class="px-3 py-2 text-xs font-medium transition-colors border-b-2"
         >
@@ -40,21 +40,28 @@
 
       <!-- Users Table -->
       <div *ngIf="currentView === 'pending'" class="bg-white rounded-lg shadow-lg p-4">
-        <div class="flex mb-4">
+        <div *ngIf="isLoading" class="flex items-center justify-center py-8">
+          <div class="flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-900"></div>
+            <p class="mt-3 text-gray-700">Loading submitted/draft PPMPs...</p>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoading" class="flex mb-4">
           <div class="flex-grow flex items-center border rounded-lg px-2 bg-white">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
             </svg>
-            <input 
-              type="text" 
-              placeholder="Search users by name, email or role" 
+            <input
+              type="text"
+              placeholder="Search users by name, email or role"
               class="w-full p-2 focus:outline-none"
               (input)="searchRoles($event)"
             />
           </div>
         </div>
 
-        <table class="min-w-full">
+        <table *ngIf="!isLoading" class="min-w-full">
           <thead class="bg-gray-50">
             <tr>
               <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Project Name</th>
@@ -65,15 +72,16 @@
               <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
+
           <tbody class="divide-y divide-gray-200">
             <tr *ngFor="let ppmp of displayedPpmp" class="hover:bg-gray-50 transition duration-300">
               <td class="py-4 px-6 text-center text-sm text-gray-900">{{ ppmp.project_name }}</td>
-              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items.join(', ') }}</td>
+              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.requested_items }}</td>
               <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ ppmp.total_budget | number:'1.2-2' }}</td>
-              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_created }}</td>
-              <td class="py-4 px-6 text-center text-sm font-medium" 
+              <td class="py-4 px-6 text-center text-sm text-gray-500">{{ ppmp.date_created | date: 'MM/dd/yyyy' }}</td>
+              <td class="py-4 px-6 text-center text-sm font-medium"
                   [ngClass]="{
-                    'text-yellow-600': ppmp.status === 'Pending',
+                    'text-yellow-600': ppmp.status === 'Submitted',
                     'text-gray-600': ppmp.status === 'Draft'
                   }">
                 {{ ppmp.status }}
@@ -82,11 +90,11 @@
                 <button (click)="toggleActions(ppmp)" class="flex justify-center items-center h-full w-full">
                   <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
                 </button>
-                <div *ngIf="currentOpenActionId === ppmp.id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
+                <div *ngIf="currentOpenActionId === ppmp.project_id" class="absolute right-0 bg-white shadow-md rounded-md mt-2 z-10">
                   <div class="flex flex-col">
                     <button (click)="viewPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">View</button>
-                    <button (click)="editPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Edit</button>
-                    <button (click)="submitPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Submit</button>
+                    <button *ngIf="ppmp.status === 'Draft'" (click)="editPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-blue-500 hover:text-white">Edit</button>
+                    <!-- <button *ngIf="ppmp.status === 'Draft'" (click)="submitPpmp(ppmp)" class="px-4 py-2 text-left hover:bg-gray-500 hover:text-white">Submit</button> -->
                   </div>
                 </div>
               </td>
@@ -95,7 +103,7 @@
         </table>
 
         <!-- Pagination -->
-        <div class="flex items-center justify-between mt-4">
+        <div *ngIf="!isLoading" class="flex items-center justify-between mt-4">
           <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
             Previous
           </button>
@@ -127,5 +135,12 @@
     </div>
   </div>
 </div>
+
+<app-d-viewppmpprocurement
+  *ngIf="showViewModal && selectedProjectId"
+  [projectId]="selectedProjectId"
+  [isModalOpen]="showViewModal"
+  (modalClosed)="closeViewModal()">
+</app-d-viewppmpprocurement>
 
 <router-outlet></router-outlet>

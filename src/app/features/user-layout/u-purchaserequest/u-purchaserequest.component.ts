@@ -5,23 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { DPrmfilterComponent } from './d-prmfilter/d-prmfilter.component';
 import { DPrmapprovedrequestComponent } from "./d-prmapprovedrequest/d-prmapprovedrequest.component";
 import { DPrmrejectrequestComponent } from "./d-prmrejectrequest/d-prmrejectrequest.component";
-
-interface PRM {
-  pr_id: number;
-  requested_item: string;
-  total_amount: number;
-  date_submitted: string;
-  status: string;
-  department?: string;
-  requestor?: string;
-  priority?: string;
-}
-
-interface FilterData {
-  dateFrom: string;
-  dateTo: string;
-  costValue: number;
-}
+import { PurchaseRequestService, PurchaseRequest } from '../../../core/services/purchase-request.service';
 
 @Component({
   selector: 'app-u-purchaserequest',
@@ -33,155 +17,73 @@ interface FilterData {
     DPrmfilterComponent,
     DPrmapprovedrequestComponent,
     DPrmrejectrequestComponent
-],
+  ],
   templateUrl: './u-purchaserequest.component.html',
   styleUrls: ['./u-purchaserequest.component.css']
 })
 export class UPurchaserequestComponent implements OnInit {
-  prmData: PRM[] = [
-    { 
-      pr_id: 1, 
-      requested_item: 'Laptop', 
-      total_amount: 45000, 
-      date_submitted: '2024-03-01', 
-      status: 'Pending', 
-      department: 'IT', 
-      requestor: 'John Doe', 
-      priority: 'High' 
-    },
-    { 
-      pr_id: 2, 
-      requested_item: 'Office Chairs', 
-      total_amount: 15000, 
-      date_submitted: '2024-03-02', 
-      status: 'Pending', 
-      department: 'Admin', 
-      requestor: 'Jane Smith', 
-      priority: 'Medium' 
-    },
-    { 
-      pr_id: 3, 
-      requested_item: 'Printer', 
-      total_amount: 25000, 
-      date_submitted: '2024-03-02', 
-      status: 'Pending', 
-      department: 'HR', 
-      requestor: 'Mike Johnson', 
-      priority: 'High' 
-    },
-    { 
-      pr_id: 4, 
-      requested_item: 'Software Licenses', 
-      total_amount: 35000, 
-      date_submitted: '2024-03-03', 
-      status: 'Pending', 
-      department: 'IT', 
-      requestor: 'Sarah Wilson', 
-      priority: 'High' 
-    },
-    { 
-      pr_id: 5, 
-      requested_item: 'Filing Cabinets', 
-      total_amount: 8000, 
-      date_submitted: '2024-03-03', 
-      status: 'Pending', 
-      department: 'Admin', 
-      requestor: 'Robert Brown', 
-      priority: 'Low' 
-    },
-    { 
-      pr_id: 6, 
-      requested_item: 'Projector', 
-      total_amount: 30000, 
-      date_submitted: '2024-03-04', 
-      status: 'Pending', 
-      department: 'Training', 
-      requestor: 'Emily Davis', 
-      priority: 'Medium' 
-    },
-    { 
-      pr_id: 7, 
-      requested_item: 'Office Supplies', 
-      total_amount: 5000, 
-      date_submitted: '2024-03-04', 
-      status: 'Pending', 
-      department: 'HR', 
-      requestor: 'Tom Anderson', 
-      priority: 'Low' 
-    },
-    { 
-      pr_id: 8, 
-      requested_item: 'Network Equipment', 
-      total_amount: 50000, 
-      date_submitted: '2024-03-05', 
-      status: 'Pending', 
-      department: 'IT', 
-      requestor: 'Lisa Chen', 
-      priority: 'High' 
-    },
-    { 
-      pr_id: 9, 
-      requested_item: 'Air Conditioner', 
-      total_amount: 40000, 
-      date_submitted: '2024-03-05', 
-      status: 'Pending', 
-      department: 'Facilities', 
-      requestor: 'David Miller', 
-      priority: 'Medium' 
-    },
-    { 
-      pr_id: 10, 
-      requested_item: 'Training Materials', 
-      total_amount: 12000, 
-      date_submitted: '2024-03-06', 
-      status: 'Pending', 
-      department: 'Training', 
-      requestor: 'Karen White', 
-      priority: 'Low' 
-    }
-  ];
-
-  displayedPRMs: PRM[] = [];
+  prmData: PurchaseRequest[] = [];
+  displayedPRMs: PurchaseRequest[] = [];
   searchTerm: string = '';
   currentPage: number = 1;
   itemsPerPage: number = 5;
   totalPages: number = 0;
   currentOpenActionId: number | null = null;
   currentView: string = 'pending';
+  isLoading: boolean = false;
+  error: string | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private purchaseRequestService: PurchaseRequestService
+  ) {}
 
   ngOnInit() {
-    this.updateDisplayedPRMs();
+    this.loadPendingRequests();
+  }
+
+  private loadPendingRequests(): void {
+    this.isLoading = true;
+    this.error = null;
+    
+    this.purchaseRequestService.getPendingRequests().subscribe({
+      next: (data) => {
+        console.log('Received data in component:', data);
+        this.prmData = data;
+        this.updateDisplayedPRMs();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching pending requests:', error);
+        this.error = 'Failed to load pending requests';
+        this.isLoading = false;
+      }
+    });
   }
 
   filterPRMs(): void {
     this.updateDisplayedPRMs();
   }
 
-  toggleActions(prm: PRM): void {
+  toggleActions(prm: PurchaseRequest): void {
     this.currentOpenActionId = this.currentOpenActionId === prm.pr_id ? null : prm.pr_id;
   }
 
-  performAction(action: string, prm: PRM): void {
+  trackPrm(prm: PurchaseRequest): void {
+    this.router.navigate(['/user/u-prmviewdetails', prm.pr_id]);
+    this.currentOpenActionId = null;
+  }
+
+  performAction(action: string, prm: PurchaseRequest): void {
     switch (action) {
       case 'View':
         this.router.navigate(['/user/u-prmviewdetails', prm.pr_id]);
         break;
-      case 'Print':
-        this.printPRM(prm); // Call print method
-        break;
       case 'Edit':
-        this.router.navigate(['/user/u-prmpedit', prm.pr_id]); // Ensure routing to edit
+        this.router.navigate(['/user/u-prmpedit', prm.pr_id]);
         break;
-      case 'Delete':
-        this.prmData = this.prmData.filter(p => p.pr_id !== prm.pr_id);
-        this.totalPages = Math.ceil(this.prmData.length / this.itemsPerPage);
-        if (this.currentPage > this.totalPages) {
-          this.currentPage = this.totalPages;
-        }
-        this.updateDisplayedPRMs();
-        console.log(`Deleting PR ID: ${prm.pr_id}`);
+      case 'Submit':
+        this.submitPrm(prm);
         break;
       default:
         console.log(`No action defined for: ${action}`);
@@ -189,33 +91,24 @@ export class UPurchaserequestComponent implements OnInit {
     this.currentOpenActionId = null;
   }
 
-  private printPRM(prm: PRM): void {
-    console.log(`Printing PR ID: ${prm.pr_id}`);
-    // Example implementation for printing
-    const printContent = `
-      <h1>Purchase Request Details</h1>
-      <p>PR ID: ${prm.pr_id}</p>
-      <p>Requested Item: ${prm.requested_item}</p>
-      <p>Total Amount: ${prm.total_amount}</p>
-      <p>Date Submitted: ${prm.date_submitted}</p>
-      <p>Status: ${prm.status}</p>
-    `;
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.print();
-    }
-  }
-
-  private cancelPRM(prm: PRM): void {
-    if (confirm(`Are you sure you want to cancel PR ID: ${prm.pr_id}?`)) {
-      // Update the status to 'Canceled'
-      const index = this.prmData.findIndex(p => p.pr_id === prm.pr_id);
-      if (index !== -1) {
-        this.prmData[index].status = 'Canceled'; // Update status or handle as needed
-        this.updateDisplayedPRMs(); // Refresh displayed data
-        console.log(`Canceled PR ID: ${prm.pr_id}`);
+  async submitPrm(prm: PurchaseRequest): Promise<void> {
+    if (confirm(`Are you sure you want to submit PR ID: ${prm.pr_id}?`)) {
+      try {
+        this.isLoading = true;
+        await this.purchaseRequestService.submitDeptRequest(prm.pr_id);
+        console.log('Successfully submitted request:', prm.pr_id);
+        
+        // Reload the data after successful submission
+        await this.loadPendingRequests();
+        
+        // Show success message (you can implement a proper notification system)
+        alert('Purchase request submitted successfully!');
+      } catch (error) {
+        console.error('Error submitting request:', error);
+        alert('Failed to submit purchase request. Please try again.');
+      } finally {
+        this.isLoading = false;
+        this.currentOpenActionId = null;
       }
     }
   }
@@ -226,81 +119,47 @@ export class UPurchaserequestComponent implements OnInit {
     this.updateDisplayedPRMs();
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'Approved':
-        return 'green';
-      case 'Rejected':
-        return 'red';
-      case 'Pending':
-        return '#000054';
-      default:
-        return 'black';
-    }
-  }
-
-  createPRM() {
-    this.router.navigate(['/user/u-createprm']);
-  }
-
-  private updateDisplayedPRMs(): void {
-    const pendingData = this.prmData.filter(prm => 
-      prm.status === 'Pending' && 
-      prm.requested_item.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
-    
-    this.totalPages = Math.ceil(pendingData.length / this.itemsPerPage);
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    this.displayedPRMs = pendingData.slice(start, start + this.itemsPerPage);
-  }
-
   switchView(view: string): void {
     this.currentView = view;
+    if (view === 'pending') {
+      this.loadPendingRequests();
+    }
   }
 
   searchRoles(event: Event): void {
     const searchValue = (event.target as HTMLInputElement).value;
-    this.searchTerm = searchValue;
-    this.filterPRMs();
+    this.searchTerm = searchValue.toLowerCase();
+    this.currentPage = 1;
+    this.updateDisplayedPRMs();
   }
 
-  viewPrm(prm: PRM): void {
+  viewPrm(prm: PurchaseRequest): void {
     this.router.navigate(['/user/u-prmviewdetails', prm.pr_id]);
   }
 
-  editPrm(prm: PRM): void {
-    this.router.navigate(['/user/u-prmpedit', prm.pr_id]);
+  editPrm(prm: PurchaseRequest): void {
+    this.router.navigate(['/user/u-prmedit', prm.pr_id]);
+    this.currentOpenActionId = null;
   }
 
-  submitPrm(prm: PRM): void {
-    if (confirm(`Are you sure you want to submit PR ID: ${prm.pr_id}?`)) {
-      const index = this.prmData.findIndex(p => p.pr_id === prm.pr_id);
-      if (index !== -1) {
-        this.prmData[index].status = 'Pending';
-        this.updateDisplayedPRMs();
-      }
-    }
-  }
-
-  onFilterChange(filterData: FilterData): void {
-    const filteredData = this.prmData.filter(prm => {
-      if (prm.status !== 'Pending') return false;
-      
-      const cost = prm.total_amount;
-      const date = new Date(prm.date_submitted);
-      
-      const costMatch = cost <= filterData.costValue;
-      let dateMatch = true;
-      
-      if (filterData.dateFrom && filterData.dateTo) {
-        const fromDate = new Date(filterData.dateFrom);
-        const toDate = new Date(filterData.dateTo);
-        dateMatch = date >= fromDate && date <= toDate;
-      }
-      
-      return costMatch && dateMatch;
-    });
+  private updateDisplayedPRMs(): void {
+    console.log('Updating displayed PRMs with data:', this.prmData);
+    const filteredData = this.prmData.filter(prm => 
+      prm.requested_item.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      prm.department?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      prm.requestor?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      prm.pr_id.toString().includes(this.searchTerm)
+    );
     
-    this.displayedPRMs = filteredData;
+    this.totalPages = Math.ceil(filteredData.length / this.itemsPerPage);
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    this.displayedPRMs = filteredData.slice(start, start + this.itemsPerPage);
+    console.log('Displayed PRMs:', this.displayedPRMs);
+  }
+
+  onFilterChange(filterData: any): void {
+    // Implement filter logic here
+    console.log('Filter data:', filterData);
   }
 }
+

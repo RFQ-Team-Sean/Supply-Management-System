@@ -134,3 +134,9 @@
   </div>
   
   <router-outlet></router-outlet>
+  
+  <app-bidmanagement-reviewbids
+    *ngIf="showReviewModal && selectedBid"
+    [selectedBid]="selectedBid"
+    (closeModal)="showReviewModal = false"
+  ></app-bidmanagement-reviewbids>

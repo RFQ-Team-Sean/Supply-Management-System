@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BidinvitationMoredetailsComponent } from './bidinvitation-moredetails/bidinvitation-moredetails.component';
+import { BidinvitationSendinvitationComponent } from './bidinvitation-sendinvitation/bidinvitation-sendinvitation.component';
 
 interface BIDM {
   id: number;
@@ -13,7 +15,7 @@ interface BIDM {
 @Component({
   selector: 'app-bidmanagement-bidinvitation',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BidinvitationMoredetailsComponent, BidinvitationSendinvitationComponent],
   templateUrl: './bidmanagement-bidinvitation.component.html',
   styleUrl: './bidmanagement-bidinvitation.component.css'
 })
@@ -106,6 +108,9 @@ export class BidmanagementBidinvitationComponent implements OnInit {
   itemsPerPage = 5;
   totalPages = 0;
   currentOpenActionId: number | null = null;
+  showDetailsModal = false;
+  selectedBidm: BIDM | null = null;
+  showSendInvitationModal = false;
 
   ngOnInit() {
     this.updateDisplayedBidms();
@@ -139,12 +144,25 @@ export class BidmanagementBidinvitationComponent implements OnInit {
     this.currentOpenActionId = this.currentOpenActionId === bidm.id ? null : bidm.id;
   }
 
-  viewBidm(bidm: BIDM) {
-    console.log('Viewing Bid Invitation:', bidm);
+  moreDetailsBidm(bidm: BIDM) {
+    this.selectedBidm = bidm;
+    this.showDetailsModal = true;
+    this.currentOpenActionId = null;
+  }
+
+  closeDetailsModal() {
+    this.showDetailsModal = false;
+    this.selectedBidm = null;
   }
 
   sendInvitation(bidm: BIDM) {
-    console.log('Sending Invitation to:', bidm);
+    this.selectedBidm = bidm;
+    this.showSendInvitationModal = true;
     this.currentOpenActionId = null;
+  }
+
+  closeSendInvitationModal() {
+    this.showSendInvitationModal = false;
+    this.selectedBidm = null;
   }
 }

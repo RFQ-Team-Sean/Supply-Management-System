@@ -53,7 +53,19 @@
             </div>
           </div>
   
-          <table class="min-w-full">
+          <!-- Loading State -->
+          <div *ngIf="isLoading" class="text-center py-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p class="mt-2 text-gray-600">Loading requests...</p>
+          </div>
+  
+          <!-- Error State -->
+          <div *ngIf="error" class="text-center py-4 text-red-600">
+            {{ error }}
+          </div>
+  
+          <!-- Table -->
+          <table *ngIf="!isLoading && !error" class="min-w-full">
             <thead class="bg-gray-50">
               <tr>
                 <th class="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PR ID</th>
@@ -65,14 +77,17 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
+              <tr *ngIf="displayedPRMs.length === 0" class="text-center">
+                <td colspan="6" class="py-4 text-gray-500">No pending requests found</td>
+              </tr>
               <tr *ngFor="let prm of displayedPRMs" class="hover:bg-gray-50 transition duration-300">
                 <td class="py-4 px-6 text-center text-sm text-gray-900">{{ prm.pr_id }}</td>
                 <td class="py-4 px-6 text-center text-sm text-gray-500">{{ prm.requested_item }}</td>
                 <td class="py-4 px-6 text-center text-sm text-gray-900">₱{{ prm.total_amount | number:'1.2-2' }}</td>
-                <td class="py-4 px-6 text-center text-sm text-gray-500">{{ prm.date_submitted }}</td>
+                <td class="py-4 px-6 text-center text-sm text-gray-500">{{ prm.date_submitted | date:'medium' }}</td>
                 <td class="py-4 px-6 text-center text-sm font-medium" 
                     [ngClass]="{
-                      'text-yellow-600': prm.status === 'Pending'
+                      'text-yellow-600': isPending(prm.status)
                     }">
                   {{ prm.status }}
                 </td>

@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { BidmanagementCreateComponent } from '../bidmanagement-create/bidmanagement-create.component';
 
 interface FilterOptions {
   dateFrom: string;
@@ -13,13 +14,15 @@ interface FilterOptions {
 @Component({
   selector: 'app-bidmanagment-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BidmanagementCreateComponent],
   templateUrl: './bidmanagment-filter.component.html',
   styleUrl: './bidmanagment-filter.component.css'
 })
 export class BidmanagmentFilterComponent {
   @Output() filterChanged = new EventEmitter<FilterOptions>();
   @Input() currentView: 'active' | 'invitation' | 'canvas' = 'active';
+
+  showCreateModal = false;
 
   constructor(private router: Router) {}
 
@@ -73,6 +76,10 @@ export class BidmanagmentFilterComponent {
   }
 
   openBIDM(): void {
-    this.router.navigate(['/user/u-ppmpmanagement/create']);
+    this.showCreateModal = true;
+  }
+
+  closeCreateModal(): void {
+    this.showCreateModal = false;
   }
 }

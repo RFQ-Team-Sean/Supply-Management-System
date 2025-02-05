@@ -91,7 +91,7 @@
           
           <!-- Text Content -->
           <div class="flex-1 text-left">
-            <h3 class="text-base font-medium text-gray-900">Bidding Management</h3>
+            <h3 class="text-base font-medium text-gray-900">Create new Pre-bidding</h3>
           </div>
         </div>
   
@@ -104,3 +104,8 @@
       </button>
     </div>
   </section>  
+
+  <app-bidmanagement-create
+    *ngIf="showCreateModal"
+    (closeModal)="closeCreateModal()"
+  ></app-bidmanagement-create>  
