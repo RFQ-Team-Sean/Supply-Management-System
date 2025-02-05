@@ -1,0 +1,118 @@
+<section class="w-[300px] bg-white p-4">
+  <header class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-bold">Filters</h2>
+    <button
+      class="text-sm hover:text-blue-600 transition duration-300"
+      (click)="resetFilters()"
+    >
+      Reset
+    </button>
+  </header>
+
+  <!-- User Filters -->
+  <ng-container *ngIf="currentView === 'users'">
+    <!-- Role Selection -->
+    <div class="flex flex-col gap-2">
+      <h3 class="text-sm font-bold text-black">Role</h3>
+      <select 
+        [(ngModel)]="selectedRoles"
+        class="px-2 py-1 rounded-lg text-sm border border-gray-300 focus:outline-none focus:border-indigo-950"
+      >
+        <option value="" hidden>Select Role</option>
+        <option *ngFor="let role of userRoles" [value]="role">
+          {{ role }}
+        </option>
+      </select>
+    </div>
+
+    <hr class="my-4 border-gray-300" />
+
+    <!-- Status Selection -->
+    <div class="flex flex-col gap-2">
+      <h3 class="text-sm font-bold text-black">Status</h3>
+      <select 
+        [(ngModel)]="selectedStatus"
+        class="px-2 py-1 rounded-lg text-sm border border-gray-300 focus:outline-none focus:border-indigo-950"
+      >
+        <option value="" hidden>Select Status</option>
+        <option *ngFor="let status of userStatuses" [value]="status">
+          {{ status }}
+        </option>
+      </select>
+    </div>
+  </ng-container>
+
+  <!-- Role Filters -->
+  <ng-container *ngIf="currentView === 'roles'">
+    <!-- Role Type Selection -->
+    <div class="flex flex-col gap-2">
+      <h3 class="text-sm font-bold text-black">Role Type</h3>
+      <select 
+        [(ngModel)]="selectedRoleType"
+        class="px-2 py-1 rounded-lg text-sm border border-gray-300 focus:outline-none focus:border-indigo-950"
+      >
+        <option value="" hidden>Select Role</option>
+        <option *ngFor="let role of roleTypes" [value]="role">
+          {{ role }}
+        </option>
+      </select>
+    </div>
+
+    <hr class="my-4 border-gray-300" />
+
+    <!-- Permission Level Selection -->
+    <div class="flex flex-col gap-2">
+      <h3 class="text-sm font-bold text-black">Permission Level</h3>
+      <select 
+        [(ngModel)]="selectedPermission"
+        class="px-2 py-1 rounded-lg text-sm border border-gray-300 focus:outline-none focus:border-indigo-950"
+      >
+        <option value="" hidden>Select Permission</option>
+        <option *ngFor="let permission of permissionLevels" [value]="permission">
+          {{ permission }}
+        </option>
+      </select>
+    </div>
+  </ng-container>
+
+  <button
+    class="w-full py-2 text-sm font-bold text-white rounded-lg bg-indigo-950 hover:bg-indigo-800 transition duration-300 mt-4"
+    (click)="applyFilters()"
+  >
+    Apply
+  </button>
+
+  <!-- Action Buttons -->
+  <div class="mt-4">
+    <button
+      *ngIf="currentView === 'users'"
+      (click)="createUser()"
+      class="w-full py-2 bg-blue-600 text-white font-bold rounded-lg text-sm hover:bg-blue-700"
+    >
+      {{ isCreatingUser ? 'Close Form' : 'Create User' }}
+    </button>
+    
+    <button
+      *ngIf="currentView === 'roles'"
+      (click)="createRole()"
+      class="w-full py-2 bg-blue-600 text-white font-bold rounded-lg text-sm hover:bg-blue-700"
+    >
+      {{ isCreatingRole ? 'Close Form' : 'Add Role' }}
+    </button>
+  </div>
+</section>
+
+<!-- Forms -->
+<div *ngIf="isCreatingUser" class="mt-4">
+  <app-create-user
+    (userCreated)="onUserCreated($event)"
+    (cancelCreate)="onCancelCreate()"
+  ></app-create-user>
+</div>
+
+<div *ngIf="isCreatingRole" class="mt-4">
+  <app-add-rolesandpermission
+    (roleCreated)="onRoleCreated($event)"
+    (cancelAdd)="onCancelRole()"
+  ></app-add-rolesandpermission>
+</div>

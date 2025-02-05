@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { createClient, PostgrestError, SupabaseClient, User as SupabaseUser, AuthError } from '@supabase/supabase-js';
+import { createClient, PostgrestError, SupabaseClient, User as SupabaseUser, AuthError, AuthResponse as SupabaseAuthResponse } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { PLATFORM_ID, Inject } from '@angular/core';
 
 
-
-
 export interface User {
-  account_id: number;
+  id: string;
   name: string;
   username: string;
   email: string;
@@ -210,6 +208,7 @@ export class SupabaseService {
       console.error('Error fetching users:', error);
       return [];
     }
+    console.log(data[0].account_id);
     return data as User[];
   }
 
@@ -277,6 +276,25 @@ export class SupabaseService {
     return data;
   }
 
+  async fetchRolesAndPermissions(): Promise<any[]> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return [];
+    }
+
+    const { data, error } = await this.supabase
+      .from('roles_and_permissions')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching roles and permissions:', error);
+      throw error;
+    }
+
+    return data || [];
+  }
+
   async getCurrentUser(): Promise<User | null> {
     if (!this.supabase) {
       console.error('Supabase client not initialized.');
@@ -335,6 +353,123 @@ export class SupabaseService {
     } catch (error) {
       console.error('Error creating user:', error);
       return null;
+    }
+  }
+
+  // Client Registration with Email and Email Confirmation
+  async registerUser(email: string, password: string, userData: any): Promise<{ data: any; error: AuthError | null }> {
+    await this.ensureSupabaseInitialized();
+
+    try {
+      const { data, error }: SupabaseAuthResponse = await this.supabase!.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userData,
+          emailRedirectTo: `${window.location.origin}/auth-confirmation`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Registration successful:', data);
+      return { data, error: null };
+    } catch (error) {
+      console.error('Error during registration:', error);
+      return { data: null, error: error as AuthError };
+    }
+  }
+
+  async uploadProfileImage(file: File, userId: string): Promise<string | null> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+
+    try {
+      const { data, error } = await this.supabase.storage
+        .from('profile_images')
+        .upload(`profiles/${userId}/profileimage`, file, {
+          upsert: true,
+        });
+      console.log("works");
+      if (error) {
+        console.error('Image upload failed:', error.message);
+        return null;
+      }
+
+      return data?.path ? `profiles/${userId}/profileimage` : null;
+    } catch (error) {
+      console.error('Unexpected error during image upload:', error);
+      return null;
+    }
+  }
+
+  async getPublicImageUrl(path: string): Promise<string | null> {
+    if (!this.supabase) {
+      console.error('Supabase client not initialized.');
+      return null;
+    }
+
+    try {
+      const { data } = this.supabase.storage.from('profile_images').getPublicUrl(path);
+      console.log(data)
+      return data.publicUrl || null;
+    } catch (error) {
+      console.error('Error generating public URL:', error);
+      return null;
+    }
+  }
+
+
+  async updateUser(userId: string, updates: any): Promise<void> {
+    const { error } = await this.supabase!
+      .from('account')
+      .update(updates)
+      .eq('id', userId);
+
+    if (error) {
+      throw new Error(`Failed to update user: ${error.message}`);
+    }
+  }
+
+  async updateRoleAndPermission(id: number, updates: any): Promise<void> {
+    const { error } = await this.supabase!
+      .from('roles_and_permissions')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to update role and permission: ${error.message}`);
+    }
+  }
+
+  async addRoleAndPermission(role: string, permission: string): Promise<void> {
+    const { error } = await this.supabase!
+      .from('roles_and_permissions')
+      .insert([
+        {
+          role,
+          permission,
+          num_of_users: 0,
+          created_at: new Date(),
+        }
+      ]);
+
+    if (error) {
+      throw new Error(`Failed to add role and permission: ${error.message}`);
+    }
+  }
+
+  async deleteRoleAndPermission(roleId: number): Promise<void> {
+    const { error } = await this.supabase!
+      .from('roles_and_permissions')
+      .delete()
+      .eq('id', roleId);
+    if (error) {
+      throw new Error(`Failed to delete role: ${error.message}`);
     }
   }
 

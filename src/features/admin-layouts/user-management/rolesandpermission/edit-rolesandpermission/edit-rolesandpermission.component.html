@@ -1,0 +1,42 @@
+<form (ngSubmit)="updateRole()" class="space-y-4">
+  <div>
+    <label class="block text-sm font-medium text-gray-700">Role</label>
+    <input 
+      type="text" 
+      [(ngModel)]="roleData.roles" 
+      name="role" 
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" 
+      required 
+    />
+  </div>
+
+  <div>
+    <label class="block text-sm font-medium text-gray-700">Permission</label>
+    <select 
+      [(ngModel)]="roleData.permission" 
+      name="permission" 
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+      required
+    >
+      <option *ngFor="let permission of permissionLevels" [value]="permission">
+        {{ permission }}
+      </option>
+    </select>
+  </div>
+
+  <div class="flex gap-2">
+    <button 
+      type="submit" 
+      class="flex-1 bg-indigo-950 text-white px-4 py-2 rounded-lg hover:bg-indigo-800"
+    >
+      Update
+    </button>
+    <button 
+      type="button" 
+      (click)="cancelEdit()" 
+      class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+    >
+      Cancel
+    </button>
+  </div>
+</form>

@@ -1,4 +1,5 @@
 import { Component, Output, EventEmitter } from '@angular/core';
+import { SupabaseService } from '../../../../../core/services/supabase.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -11,12 +12,20 @@ import { FormsModule } from '@angular/forms';
 export class AddRolesandpermissionComponent {
   @Output() roleCreated = new EventEmitter<{ roles: string; permission: string }>();
 
-  roles: string = '';
+  role: string = '';
   permission: string = '';
 
-  createRole(): void {
-    this.roleCreated.emit({ roles: this.roles, permission: this.permission });
-    this.roles = '';
-    this.permission = '';
+  constructor(private SupabaseService: SupabaseService) {}
+
+  async createRole(): Promise<void> {
+    try {
+      await this.SupabaseService.addRoleAndPermission(this.role, this.permission);
+      this.roleCreated.emit({ roles: this.role, permission: this.permission });
+      this.role = '';
+      this.permission = '';
+      console.log('Role and permission added successfully');
+    } catch (error) {
+      console.error('Error adding role and permission:', error);
+    }
   }
 }

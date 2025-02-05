@@ -30,10 +30,10 @@
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <tr *ngFor="let role of displayedLogs" class="hover:bg-gray-50">
-          <td class="py-4 px-6 text-sm text-center text-gray-900">{{ role.roles }}</td>
-          <td class="py-4 px-6 text-sm text-center text-gray-500">{{ role.number_of_users }}</td>
+          <td class="py-4 px-6 text-sm text-center text-gray-900">{{ role.role }}</td>
+          <td class="py-4 px-6 text-sm text-center text-gray-500">{{ role.num_of_users }}</td>
           <td class="py-4 px-6 text-sm text-center text-gray-500">{{ role.permission }}</td>
-          <td class="py-4 px-6 text-sm text-center text-gray-500">{{ role.last_modified }}</td>
+          <td class="py-4 px-6 text-sm text-center text-gray-500">{{ role.last_modified | date}}</td>
           <td class="py-4 px-6 text-center text-sm font-medium relative">
             <button (click)="toggleActions(role)" class="flex justify-center items-center h-full w-full">
               <img src="assets/icons/action.png" alt="Actions Icon" class="w-5 h-5 mx-auto" />
