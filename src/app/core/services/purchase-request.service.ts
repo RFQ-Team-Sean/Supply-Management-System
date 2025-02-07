@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
-import { Observable, from, map } from 'rxjs';
+import { Observable, from, map, of } from 'rxjs';
 import { createClient, SupabaseClient, AuthSession, PostgrestError } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';

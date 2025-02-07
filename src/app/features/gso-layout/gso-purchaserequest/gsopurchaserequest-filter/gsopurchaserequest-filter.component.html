@@ -1,0 +1,57 @@
+<div class="bg-[#FFFDF6] rounded-lg shadow-lg p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-semibold">▼ Filter</h2>
+    </div>
+  
+    <!-- Department Filter -->
+    <div class="mb-4">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Department</label>
+        <button 
+          (click)="resetDepartment()" 
+          class="text-xs text-blue-500 hover:text-blue-700">
+          Reset
+        </button>
+      </div>
+      <select 
+        [(ngModel)]="filter.department"
+        class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+        <option value="">Select Department</option>
+        <option value="IT">IT Department</option>
+        <option value="HR">HR Department</option>
+        <option value="Finance">Finance Department</option>
+        <option value="Operations">Operations Department</option>
+      </select>
+    </div>
+  
+    <!-- Date Received Filter -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm text-gray-600">Date Received</label>
+        <button 
+          (click)="resetDateReceived()" 
+          class="text-xs text-blue-500 hover:text-blue-700">
+          Reset
+        </button>
+      </div>
+      <input 
+        type="date" 
+        [(ngModel)]="filter.dateReceived"
+        class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+    </div>
+  
+    <!-- Action Buttons -->
+    <div class="flex gap-2">
+      <button 
+        (click)="resetAll()"
+        class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-300">
+        Reset
+      </button>
+      <button 
+        (click)="applyFilter()"
+        class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
+        Apply
+      </button>
+    </div>
+  </div>
+  

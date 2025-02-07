@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { GsoPrmfilterComponent } from '../gso-prmfilter/gso-prmfilter.component';
-import { GsoPrmapprovedrequestComponent } from './gso-prmapprovedrequest/gso-prmapprovedrequest.component';
-import { GsoPrmrejectrequestComponent } from './gso-prmrejectrequest/gso-prmrejectrequest.component';
 import { PurchaseRequestService, PurchaseRequest } from '../../../core/services/purchase-request.service';
+import { GsopurchaserequestFilterComponent } from './gsopurchaserequest-filter/gsopurchaserequest-filter.component';
+import { GsopurchaserequestApprovedrequestComponent } from './gsopurchaserequest-approvedrequest/gsopurchaserequest-approvedrequest.component';
+import { GspurchaerequestReturnedrequestComponent } from './gspurchaerequest-returnedrequest/gspurchaerequest-returnedrequest.component';
 
 interface PRM {
   pr_id: number;
@@ -31,9 +31,9 @@ interface FilterData {
     CommonModule,
     RouterModule,
     FormsModule,
-    GsoPrmfilterComponent,
-    GsoPrmapprovedrequestComponent,
-    GsoPrmrejectrequestComponent,
+    GsopurchaserequestFilterComponent,
+    GsopurchaserequestApprovedrequestComponent,
+    GspurchaerequestReturnedrequestComponent,
   ],
   templateUrl: './gso-purchaserequest.component.html',
   styleUrl: './gso-purchaserequest.component.css'
@@ -92,28 +92,6 @@ export class GsoPurchaserequestComponent implements OnInit {
 
   viewPrm(prm: PRM): void {
     this.router.navigate(['/gso/gso-prmviewdetails', prm.pr_id]);
-    this.currentOpenActionId = null;
-  }
-
-  approvePrm(prm: PRM): void {
-    if (confirm(`Are you sure you want to approve PR ID: ${prm.pr_id}?`)) {
-      const index = this.prmData.findIndex(p => p.pr_id === prm.pr_id);
-      if (index !== -1) {
-        this.prmData[index].status = 'Approved';
-        this.updateDisplayedPRMs();
-      }
-    }
-    this.currentOpenActionId = null;
-  }
-
-  rejectPrm(prm: PRM): void {
-    if (confirm(`Are you sure you want to reject PR ID: ${prm.pr_id}?`)) {
-      const index = this.prmData.findIndex(p => p.pr_id === prm.pr_id);
-      if (index !== -1) {
-        this.prmData[index].status = 'Rejected';
-        this.updateDisplayedPRMs();
-      }
-    }
     this.currentOpenActionId = null;
   }
 

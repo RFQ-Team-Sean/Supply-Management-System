@@ -1,0 +1,70 @@
+@media print {
+    /* Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Show only the printable sections and their contents */
+    .printable,
+    .printable * {
+        visibility: visible !important;
+        display: block !important;
+    }
+
+    /* Hide specific elements */
+    .no-print {
+        display: none !important;
+    }
+
+    /* Reset background colors and ensure text is visible */
+    .bg-white {
+        background-color: white !important;
+        box-shadow: none !important;
+    }
+
+    /* Remove unnecessary spacing for print */
+    .container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* Position the printable content at the top of the page */
+    .printable {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 1in !important;
+    }
+
+    /* Table styles for print */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    th, td {
+        border: 1px solid black !important;
+        padding: 8px !important;
+    }
+
+    /* Text styles for print */
+    .text-gray-600 {
+        color: black !important;
+    }
+    
+    .text-\[\#00A3E0\] {
+        color: black !important;
+    }
+
+    /* Add page border */
+    @page {
+        margin: 0.5in;
+    }
+}
+
+/* Hide printable template during normal display */
+.printable.hidden {
+    display: none;
+}
