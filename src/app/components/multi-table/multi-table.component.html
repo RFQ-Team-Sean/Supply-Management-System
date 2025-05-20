@@ -1,0 +1,196 @@
+<mat-card class="cardWithShadow w-full h-full">
+    <mat-card-content>
+      <h1 class="text-xl font-semibold">{{config?.title ?? 'Sequence Table'}}</h1>
+      <p class="mt-2 text-gray-500">
+        {{config?.description ?? 'This is a sequence table example.'}}
+      </p>
+  
+      <!-- Add Sequence Button and Search Input -->
+      <div class="flex justify-between items-center my-4 w-full">
+        <div class="flex gap-4 items-center w-full">         
+          <p-iconfield fluid class="w-full max-w-72">
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              fluid
+              class="w-full"
+              #searchInput
+              (input)="dt.filterGlobal(searchInput.value, 'contains')"
+              type="text"
+              pInputText
+              placeholder="Search"
+            />
+          </p-iconfield>
+          <div class="flex-1"></div>
+        <!-- Add Action Buttons -->
+          @for (action of config?.topActions; track action){
+              <p-button
+                  [pTooltip]="action.tooltip"
+                  (click)="action.function()"
+                  [outlined]="true"
+                  [disabled]="!config?.dataLoaded"
+                  [label]="action.label"
+                  [icon]="action.icon"
+              ></p-button>
+          }
+        </div>
+      </div>
+      @if(config?.tabs?.length){
+        <p-tabs [value]="config!.activeTab!" >
+          <p-tablist>
+              @for(tab of config?.tabs; track tab.id; let tabIndex = $index){
+                <p-tab [value]="tabIndex" (click)="changeTab(tabIndex)">
+                        <div class="px-3 flex gap-6">
+                            @if(tab.icon){
+                              <i class="{{tab.icon}}"></i>
+                            }
+                            <span>{{tab.label}}</span>
+                        </div>
+                </p-tab>
+              }
+          </p-tablist>
+      </p-tabs>
+      }
+      <!-- Draggable Table -->
+    <p-table
+    #dt
+    [value]="filteredData()"
+    [rows]="10"
+    [paginator]="config?.type != 'sequence'"
+    [globalFilterFields]="getSearchFields()"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    [showCurrentPageReport]="false"
+    [responsive]="true"
+    [reorderableColumns]="true"
+    [rowHover]="true"
+    [scrollable]="true"
+    scrollHeight="400px"
+    styleClass="h-full"
+    [tableStyle]="{'min-width': '100%', 'min-height' : '100%'}"
+    dataKey="id"
+    (onRowReorder)="onRowOrder($event)"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        @if(config?.type == 'sequence' && searchInput.value == ''){
+            <th style="width: 3rem"></th>
+            <th>Level</th>
+        }
+        @for(column of getColumnNames(); track column){
+            <th>{{column}}</th>
+        }
+        @if(hasActions()){
+            <th class="w-[100px]">Actions</th>
+        }
+      </tr>
+    </ng-template>
+  
+    <ng-template pTemplate="body" let-row let-index="rowIndex">
+        @if(config?.dataLoaded){
+          <tr [class]="config?.rowHighlight ? config?.rowHighlight(row):''" [pReorderableRow]="index">
+            @if(config?.type == 'sequence' && searchInput.value == ''){
+                <td>
+                    <i class="pi pi-bars" pReorderableRowHandle></i>
+                </td>
+                <td>
+                    {{index + 1}}
+                </td>
+            }
+            @for(field of getFields(); track field){
+              <td>{{formatValue(field,row)}}</td>
+            }
+
+            @if(hasActions()){
+              <td>
+                <div class="flex gap-3">
+                  <p-menu 
+                    #menu 
+                    [model]="getMenuItems(row)" 
+                    [popup]="true" 
+                    appendTo="body">
+                  </p-menu>
+                  @if(getMenuItems(row).length > 0){
+                    <p-button
+                    rounded="true"
+                    icon="pi pi-ellipsis-v"
+                    pTooltip="Click for more actions"
+                    [outlined]="true"
+                    size="small"
+                    (click)="menu.toggle($event)">
+                  </p-button>
+                  }
+                  @for(action of getRowActions(row) ; track action.label; let r = $index){
+                    @if(action.hidden ? !action.hidden(row):true){
+                      <p-button
+                        [severity]="action.color"
+                        [pTooltip]="action.tooltip"
+                        [outlined]="true"
+                        size="small"
+                        [disabled]="action.disabled ? action.disabled(row):false"
+                        [icon]="action.icon"
+                        [label]="action.shape == 'rounded' ? '':action.label"
+                        [rounded]="action.shape == 'rounded'"
+                        (click)="action.function ? action.confirmation ? confirm($event, row, action) : triggerRowAction($event, row,action):null"
+                      ></p-button>
+                    }
+                  }
+                </div>
+              </td>
+            }
+     
+          </tr>
+        }
+          @else{
+            <tr>
+              @if(config?.type == 'sequence' && searchInput.value == ''){
+                <td>
+                    <i class="pi pi-bars" pReorderableRowHandle></i>
+                </td>
+                <td><p-skeleton /></td>
+              }
+              @for( field of getFields(); track field){
+                <td><p-skeleton /></td>
+              }
+              @if(hasActions()){
+                <td><p-skeleton /></td>
+              }
+            </tr>
+          }
+    </ng-template>
+  
+    <ng-template #emptymessage>
+      @if(config?.dataLoaded){
+        <tr>
+          <td [attr.colspan]="getColumnNames().length + (hasActions() ? 1 :0) + (config?.type == 'sequence' && searchInput.value == '' ? 2 : 0)">
+            <div class="flex flex-col w-full items-center justify-center mb-8">
+              <div class="overflow-hidden h-52 w-52 mr-8">
+                <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+              </div>
+              <span>No items found.</span>
+            </div>
+          </td>
+        </tr>
+      } @else{
+        @for(num of [1,2,3,4,5]; track num){
+          <tr>
+            @if(config?.type == 'sequence' && searchInput.value == ''){
+              <td>
+                  <i class="pi pi-bars" pReorderableRowHandle></i>
+              </td>
+              <td><p-skeleton /></td>
+            }
+            @for( field of getFields(); track field){
+              <td><p-skeleton /></td>
+            }
+            @if(hasActions()){
+              <td><p-skeleton /></td>
+            }
+          </tr>
+        }
+      }
+    </ng-template>
+  </p-table>
+    </mat-card-content>
+  </mat-card>
+  
+  <p-toast></p-toast>
+  <p-confirmpopup />

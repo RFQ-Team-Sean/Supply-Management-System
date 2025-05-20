@@ -1,0 +1,130 @@
+<!-- app-shared.component.html -->
+<div class="app-document">
+    <!-- Header Section -->
+    <!-- Updated Header Section with side-by-side logos -->
+        <div class="document-header">
+            <div class="header-logos">
+            <img src="../../../../assets/images/logos/qby.png" alt="SSU Logo" class="logo-left">
+            <div class="header-text">
+                <h1>DON ANTON CAESAR STATE UNIVERSITY</h1>
+                <h2>Brgy. Barangahawon, Tabaco</h2>
+                <h3>Annual Procurement Plan - SUPPLEMENTAL, {{formattedQuarter}} Quarter</h3>
+                <h4>Calendar Year {{currentYear}}</h4>
+            </div>
+            <div class="certification-logos">
+                <img src="../../../../assets/images/logos/BP.png" alt="Bagong Pilipinas Logo" class="logo-right bp-logo">
+                <img src="../../../../assets/images/logos/ISO.png" alt="ISO Certified Logo" class="logo-right iso-logo">
+            </div>
+            </div>
+        </div>
+      <!-- Add this right after the document-header section -->
+    <div class="export-button-container">
+      <button (click)="exportToPDF()" class="export-btn">Export to PDF</button>
+    </div>
+        <!-- Main Table -->
+        <table class="procurement-table">
+          <!-- Table Headers -->
+          <thead>
+            <tr>
+              <th rowspan="2">Code (PAP)</th>
+              <th rowspan="2">Procurement Program/Project</th>
+              <th rowspan="2">PMO/End-User</th>
+              <th rowspan="2">Mode of Procurement</th>
+              <th colspan="4">Schedule for Each Procurement Activity</th>
+              <th rowspan="2">Source of Funds</th>
+              <th colspan="3">Estimated Budget (PhP)</th>
+              <th rowspan="2">Remarks</th>
+            </tr>
+            <tr class="sub-header">
+              <th>Advertisement/Posting of IB/REI</th>
+              <th>Submission/Opening of Bids</th>
+              <th>Notice of Award</th>
+              <th>Contract Signing</th>
+              <th>Total</th>
+              <th>MOOE</th>
+              <th>CO</th>
+            </tr>
+          </thead>
+      
+          <!-- Table Body -->
+          <tbody>
+            <!-- Main Campus Section -->
+            <tr class="section-header">
+              <td colspan="13">SSU-MAIN CAMPUS</td>
+            </tr>
+      
+            <!-- Categories Section -->
+            <ng-container *ngFor="let category of categories">
+              <tr class="category-header">
+                <td colspan="13">{{category.name}} - (Fund: {{category.fund}})</td>
+              </tr>
+      
+              <!-- Dynamic Data Rows -->
+              <ng-container *ngFor="let item of category.items">
+              <tr [class.editable]="isEditing" class="data-row">
+                <td>{{item.id}}</td>
+                <td>{{item.program}}</td>
+                <td>{{item.endUser}}</td>
+                <td>{{item.procurementMode}}</td>
+                <td>{{formatDate(item.advertisementDate)}}</td>
+                <td>{{formatDate(item.submissionDate)}}</td>
+                <td>{{formatDate(item.awardDate)}}</td>
+                <td>{{formatDate(item.signingDate)}}</td>
+                <td>{{item.fundSource}}</td>
+                <td class="amount">{{formatCurrency(item.totalBudget)}}</td>
+                <td class="amount">{{formatCurrency(item.mooe)}}</td>
+                <td class="amount">{{formatCurrency(item.co)}}</td>
+                <td>{{item.remarks}}</td>
+              </tr>
+              </ng-container>
+      
+              <!-- Category Subtotal -->
+              <tr class="subtotal-row">
+                <td colspan="9">Sub-total for {{category.name}} -</td>
+                <td class="amount">{{formatCurrency(calculateCategoryTotals(category).totalBudget)}}</td>
+                <td class="amount">{{formatCurrency(calculateCategoryTotals(category).totalMOOE)}}</td>
+                <td class="amount">{{formatCurrency(calculateCategoryTotals(category).totalCO)}}</td>
+                <td></td>
+              </tr>
+            </ng-container>
+      
+            <!-- Grand Total Row -->
+            <tr class="subtotal-row total-row">
+              <td colspan="9">Grand-total -</td>
+              <td class="amount">{{formatCurrency(getTotalBudget())}}</td>
+              <td class="amount">{{formatCurrency(getTotalMOOE())}}</td>
+              <td class="amount">{{formatCurrency(getTotalCO())}}</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      
+        <!-- Footer Section -->
+        <div class="document-footer">
+          <div class="prepared-by">
+            <p>Prepared by:</p>
+            <div class="signature-line">
+              <p>(Sgd.) {{preparedBy?.name}}</p>
+              <p>{{preparedBy?.position}}</p>
+            </div>
+          </div>
+          
+          <div class="committee-section">
+            <p>Recommended by the Bids & Awards Committee:</p>
+            <div class="signatures-grid">
+              <div class="signature-line" *ngFor="let member of committeeMembers">
+                <p>(Sgd.) {{member.name}}</p>
+                <p>{{member.position}}</p>
+              </div>
+            </div>
+          </div>
+      
+          <div class="approval-section">
+            <p>APPROVED:</p>
+            <div class="signature-line">
+              <p>(Sgd.) {{approvedBy?.name}}</p>
+              <p>{{approvedBy?.position}}</p>
+            </div>
+          </div>
+        </div>
+      </div>

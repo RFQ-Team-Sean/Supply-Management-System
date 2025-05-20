@@ -1,0 +1,22 @@
+[
+  {
+    "id": "1",
+    "name": "John Doe",
+    "username": "johndoe",
+    "password": "password123",
+    "user_type": "Admin",
+    "role": "BAC",
+    "department_id": "1",
+    "office_id": "1"
+  },
+  {
+    "id": "2",
+    "name": "Jane Smith",
+    "username": "janesmith",
+    "password": "password456",
+    "user_type": "SuperAdmin",
+    "role": "HOPE",
+    "department_id": "2",
+    "office_id": "2"
+  }
+]

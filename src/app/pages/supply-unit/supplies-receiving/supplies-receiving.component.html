@@ -1,0 +1,137 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title class="mb-4">Supplies Receiving</mat-card-title>
+    <p class="text-gray-600 mb-4">Record and manage consumable supplies such as stationery, cleaning materials, and other day-to-day operational items.</p>
+
+    <div class="flex justify-between items-center mb-4">
+      <span class="p-input-icon-left w-full max-w-72">
+        <i class="pi pi-search"></i>
+        <input class="w-full" pInputText [(ngModel)]="searchValue" (input)="dt.filterGlobal(searchValue,'contains')" placeholder="Search supplies..." />
+      </span>
+
+      <p-button label="Add New Supply" icon="pi pi-plus" styleClass="p-button-success" (onClick)="openNewDialog()"></p-button>
+    </div>
+
+    <p-table #dt [value]="supplies" [rows]="10" [paginator]="true" [globalFilterFields]="['itemName','category','supplier']"
+      [rowHover]="true" dataKey="id" [rowsPerPageOptions]="[10,25,50]"
+      styleClass="p-datatable-sm p-datatable-gridlines">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Item Name</th>
+          <th>Category</th>
+          <th>Quantity</th>
+          <th>Unit</th>
+          <th>Supplier</th>
+          <th>Received Date</th>
+          <th>Storage Location</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-supply>
+        <tr>
+          <td>{{supply.itemName}}</td>
+          <td>{{supply.category}}</td>
+          <td>{{supply.quantity}}</td>
+          <td>{{supply.unit}}</td>
+          <td>{{supply.supplier}}</td>
+          <td>{{supply.receivedDate | date:'shortDate'}}</td>
+          <td>{{supply.storageLocation}}</td>
+          <td>
+            <p-tag [severity]="supply.status === 'approved' ? 'success' : supply.status === 'rejected' ? 'danger' : 'warn'"
+              [value]="supply.status"></p-tag>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <p-button icon="pi pi-pencil" (onClick)="editSupply(supply)" 
+                styleClass="p-button-rounded p-button-text"></p-button>
+              <p-button icon="pi pi-trash" (onClick)="deleteSupply($event, supply)"
+                styleClass="p-button-rounded p-button-text p-button-danger"></p-button>
+              <p-button *ngIf="supply.status === 'pending'" icon="pi pi-check" (onClick)="approveSupply(supply)"
+                styleClass="p-button-rounded p-button-text p-button-success"
+                pTooltip="Approve"></p-button>
+              <p-button *ngIf="supply.status === 'pending'" icon="pi pi-times" (onClick)="rejectSupply(supply)"
+                styleClass="p-button-rounded p-button-text p-button-danger"
+                pTooltip="Reject"></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="text-center p-4">No supplies found.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+<!-- Add/Edit Dialog -->
+<p-dialog [(visible)]="showSupplyDialog" [header]="isEditing ? 'Edit Supply' : 'Add New Supply'"
+  [modal]="true" [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">
+  <form [formGroup]="supplyForm" (ngSubmit)="saveSupply()">
+    <div class="grid grid-cols-2 gap-4">
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Item Name*</label>
+        <input type="text" pInputText formControlName="itemName" class="w-full" />
+      </div>
+
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+        <textarea pInputTextarea formControlName="description" class="w-full" rows="3"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity*</label>
+        <p-inputNumber formControlName="quantity" [min]="1" class="w-full"></p-inputNumber>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Unit*</label>
+        <p-dropdown [options]="unitOptions" formControlName="unit" placeholder="Select Unit"
+          [style]="{'width':'100%'}"></p-dropdown>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Category*</label>
+        <p-dropdown [options]="categoryOptions" formControlName="category" placeholder="Select Category"
+          [style]="{'width':'100%'}"></p-dropdown>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Supplier*</label>
+        <input type="text" pInputText formControlName="supplier" class="w-full" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Received Date*</label>
+        <p-calendar formControlName="receivedDate" [showIcon]="true" [style]="{'width':'100%'}"
+          dateFormat="yy-mm-dd"></p-calendar>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+        <p-calendar formControlName="expiryDate" [showIcon]="true" [style]="{'width':'100%'}"
+          dateFormat="yy-mm-dd"></p-calendar>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Storage Location*</label>
+        <input type="text" pInputText formControlName="storageLocation" class="w-full" />
+      </div>
+
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+        <textarea pInputTextarea formControlName="remarks" class="w-full" rows="2"></textarea>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" (onClick)="hideDialog()" styleClass="p-button-text"></p-button>
+    <p-button label="Save" icon="pi pi-check" (onClick)="saveSupply()" [disabled]="!supplyForm.valid"></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmPopup></p-confirmPopup>

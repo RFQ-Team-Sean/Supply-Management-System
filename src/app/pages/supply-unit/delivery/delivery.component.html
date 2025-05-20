@@ -1,0 +1,162 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+        <mat-card-title class="select-none font-light">Delivery Management</mat-card-title>
+        <div class="flex justify-between items-center">
+            <p>Manage and deliver stocked items in this section.</p>
+            <div class="relative w-72">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2">
+                    <i class="pi pi-search text-[#9CA3AF] text-[14px]"></i>
+                </span>
+                <input 
+                    class="w-full pl-10 pr-4 py-[6px] rounded-[4px] border border-gray-300 bg-white text-sm focus:outline-none focus:border-[#D1D5DB] placeholder:text-[#6B7280] placeholder:text-[14px]"
+                    [(ngModel)]="searchValue" 
+                    (input)="dt.filterGlobal(searchValue, 'custom-contains')" 
+                    type="text"
+                    placeholder="Search" />
+            </div>
+        </div>
+
+        <p-table #dt dataKey="deliveryReceipt.id" [rowHover]="true" [value]="drItems"
+            [paginator]="true"
+            [rows]="5"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            sortField="deliveryReceipt.supplier_name" sortMode="single" [scrollable]="true" scrollHeight="600px"
+            rowGroupMode="subheader" groupRowsBy="deliveryReceipt.receipt_number"
+            [globalFilterFields]="['deliveryReceipt.supplier_name', 'deliveryReceipt.receipt_number', 'name', 'ticker', 'storage_name', 'product_name', 'description', 'price', 'quantity', 'dateAdded']"
+            [filterDelay]="0"
+            [tableStyle]="{'min-width': '60rem'}">
+
+            <ng-template #header>
+                <tr>
+                    <th pFrozen="left">Name</th>
+                    <th>Ticker</th>
+                    <th>Storage</th>
+                    <th>Type</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Date Added</th>
+                    <th>Description</th>
+                    @if(showActionColumn) {
+                    <th>Action</th>
+                    }
+                </tr>
+            </ng-template>
+
+        <ng-template #groupheader let-po>
+    <tr class="hover:cursor-pointer" pRowGroupHeader>
+        <td [attr.colspan]="9">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-5">
+                    <img [alt]="po.deliveryReceipt.supplier_name" src="assets/images/products/dash-prd-4.jpg"
+                        width="32" class="rounded-full" style="vertical-align: middle" />
+                    <span class="font-bold">{{ po.deliveryReceipt.supplier_name}} </span>
+                    <p-divider layout="vertical" />
+                    <span>Receipt No. {{po.deliveryReceipt.receipt_number.toUpperCase()}}</span>
+                </div>
+                <div class="flex rounded-[4px] overflow-hidden shadow-sm">
+                    <button 
+                        class="flex items-center gap-2 px-3 h-[38px] bg-white hover:bg-gray-50 text-[#6366F1] font-medium border border-gray-200"
+                        pTooltip="Click to view delivery receipt"
+                        (click)="viewReceipts(po.deliveryReceipt.receipts)">
+                        <i class="pi pi-receipt text-[13px]"></i>
+                        <span class="text-[13px]">Receipt</span>
+                    </button>
+                </div>
+            </div>
+        </td>
+    </tr>
+</ng-template>
+
+
+            <ng-template #groupfooter let-po>
+                <tr class="hover:cursor-pointer">
+                    <td [attr.colspan]="9" class="text-left pr-12">
+                        <div class="flex items-center">
+                            <div class="flex gap-2"><span class="font-semibold">Total Price: </span>
+                                <span>{{ calculateItemPriceTotal(po.deliveryReceipt.id) | currency:'PHP' }}</span>
+                            </div>
+                            <p-divider layout="vertical" />
+                            <div class="flex gap-2"><span class="font-semibold">Total Items: </span>
+                                <span>{{ calculateItemTotal(po.deliveryReceipt.id) }}</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-po>
+                @for(item of po.items; track item.id){
+                <tr class="hover:cursor-pointer">
+                    <td pFrozen="left">
+                        <i class="pi pi-box mr-2"></i> {{ item.name }}
+                    </td>
+                    <td>{{ item.ticker }}</td>
+                    <td>{{ item.storage_name }}</td>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.price | currency:'PHP' }}</td>
+                    <td>{{ item.quantity | number }}</td>
+                    <td>{{ item.dateAdded | date: 'yyyy-MM-dd' }}</td>
+                    <td>{{ item.description || 'No description set.' }}</td>
+                    @if(showActionColumn) {
+                    <td class="w-16">
+                        @if(item.status =='delivered'){
+                            <div class="flex gap-4">
+                                <p-button severity="secondary" pTooltip="Delivered" size="small" icon="pi pi-box"
+                                    [disabled]="true" [outlined]="true" rounded />
+                            </div>
+                        }@else if(item.status=='pending'){
+                            <div class="flex gap-4">
+                                <p-button severity="success" pTooltip="Click to mark as delivered" size="small" icon="pi pi-check"
+                                    (click)="markItemAsDelivered(item)" [outlined]="true" rounded />
+                            </div>
+                        }@else{
+                            <p-button [disabled]="true" severity="secondary" pTooltip="Still in warehouse" size="small" icon="pi pi-warehouse"
+                            [outlined]="true" rounded />
+                        }
+                    </td>
+                    }
+                </tr>
+                }
+            </ng-template>
+
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="9">
+                        <div class="flex flex-col w-full items-center justify-center mb-8">
+                            <div class="overflow-hidden h-52 w-52 mr-8">
+                                <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+                            </div>
+                            <span>No delivery receipt items found.</span>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+        </p-table>
+    </mat-card-content>
+</mat-card>
+
+<p-toast position="bottom-right"></p-toast>
+<p-confirm-popup></p-confirm-popup>
+
+<p-dialog [position]="'bottom'" [modal]="false" [(visible)]="showReceipt" [style]="{ width: '40rem', height:'20rem' }">
+    <ng-template #header>
+        <div class="select-none py-0 inline-flex items-center justify-center gap-3">
+            <i class="pi pi-receipt text-xl"></i>
+            <span class="font-bold text-lg whitespace-nowrap">Delivery Receipt</span>
+            <i pTooltip="This container is draggable and can be resized at the bottom right. Scroll down for more items." class="pi pi-question-circle"></i>
+        </div>
+    </ng-template>
+    <p-carousel class="select-none" [value]="selectedReceipts" [showNavigators]="false" [numVisible]="1" [numScroll]="1"
+        [circular]="true" [responsiveOptions]="responsiveOptions">
+        <ng-template let-receipt #item>
+            <div class="rounded-xl border border-surface rounded-border p-2">
+                <div class="mb-4">
+                    <div class="relative mx-auto">
+                        <img [src]="receipt" class="w-full rounded-border" />
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </p-carousel>
+</p-dialog>

@@ -1,0 +1,182 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>User Management</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      View and manage users, account codes, sub accounts, and positions in this section.
+    </mat-card-subtitle>
+
+    <div class="flex justify-between items-center mt-4">
+  
+   
+        <div class="relative w-[300px]">
+            <p-iconfield fluid class="w-full max-w-72">
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input
+          fluid
+          class="w-full"
+          pSize="small"
+          #userSearchInput
+          (input)="userTable.filterGlobal(userSearchInput.value, 'contains')"
+          type="text"
+          pInputText
+          placeholder="Search users..."
+        />
+         </p-iconfield>
+        </div>
+
+
+      <p-button
+          label="Add User"
+          icon="pi pi-plus"
+          (click)="openNewUserDialog()"
+          size="small"
+          outlined="true"
+        ></p-button>
+
+
+    </div>
+
+   <p-table
+  #userTable
+  [value]="users"
+  [rows]="10"
+  [paginator]="true"
+  dataKey="id"
+  [loading]="userLoading"
+  [globalFilterFields]="['fullname', 'username', 'user_type', 'role', 'officeName']"
+>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="fullname">Full Name</th>
+          <th pSortableColumn="username">Username</th>
+          <th pSortableColumn="role">Role</th>
+          <th pSortableColumn="role">Position</th>
+          <th pSortableColumn="office_id">Office</th>
+          <th pSortableColumn="user_type">User Type</th>
+          
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>{{ user.fullname }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.role }}</td>
+          <td>{{ user.position }}</td>
+          <td>{{ getOfficeName(user.officeId) }}</td>
+          <td>
+            @if ( user.user_type === 'SuperAdmin') {
+              Super Admin
+            } @else () {
+              {{user.user_type}}
+            }</td>
+          <td class="flex gap-x-2">
+            <button pButton icon="pi pi-pencil" outlined="true" (click)="editUser(user)" size="small"></button>
+            <button pButton icon="pi pi-trash" severity="warn" outlined="true" (click)="deleteUser(user)" size="small"></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+
+<p-dialog
+  [(visible)]="userDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '450px' }"
+  [header]="isUserEditMode ? 'Edit User' : 'Add New User'"
+  styleClass="p-fluid"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [position]="'center'"
+>
+  <span class="text-gray-600 block">{{ isUserEditMode ? 'Editing' : 'Adding new' }} user.</span>
+  <small class="text-gray-500 block mb-4">(Please fill out all fields)</small>
+
+  <form [formGroup]="userForm" class="w-full">
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">Full Name</label>
+      <input type="text" pInputText formControlName="fullname" placeholder="Enter full name" class="w-full" required />
+    </div>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">Username</label>
+      <input type="text" pInputText formControlName="username" placeholder="Enter username" class="w-full" required />
+    </div>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">Password</label>
+      <input type="password" pInputText formControlName="password" placeholder="Enter password" class="w-full" />
+    </div>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">User Type</label>
+      <p-dropdown
+        [options]="userTypes"
+        formControlName="user_type"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select User Type"
+        [style]="{ width: '100%' }"
+        appendTo="body"
+      ></p-dropdown>
+    </div>
+
+ 
+
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">Role</label>
+      <p-dropdown
+        [options]="roles"
+        formControlName="role"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select a Role"
+        [style]="{ width: '100%' }"
+        appendTo="body"
+      ></p-dropdown>
+    </div>
+
+        <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">Position</label>
+          <input type="position" pInputText formControlName="position" placeholder="Enter position" class="w-full" />
+
+    </div>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-24">Office</label>
+      <p-dropdown
+        formControlName="officeId"
+        [options]="officeDropdownOptions"
+        placeholder="Select Office"
+        optionLabel="label"
+        optionValue="value"
+        [style]="{ width: '100%' }"
+        appendTo="body"
+      ></p-dropdown>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <button pButton label="Cancel" outlined="true" class="p-button-text" (click)="hideUserDialog()" size="small"></button>
+      <button pButton label="Save" outlined="true" (click)="saveUser()" size="small"></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+
+<p-dialog [(visible)]="deleteDialogVisible" header="Confirm Delete" [style]="{ width: '400px' }" [closable]="false">
+  <div class="flex flex-col items-center text-center">
+    <i class="pi pi-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+    <p>Are you sure you want to delete <strong>{{ userToDelete?.fullname }}</strong>?</p>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="deleteDialogVisible = false"></button>
+    <button pButton label="Delete" icon="pi pi-trash" class="p-button-danger" (click)="confirmDeleteAction()"></button>
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,1224 @@
+    <mat-card class="cardWithShadow">
+      <mat-card-content>
+        <mat-card-title class="select-none font-light">
+            {{isEndUser ? 'My Requests' : 'Request Management'}}
+        </mat-card-title>
+        <mat-card-subtitle class="text-sm text-gray-500">
+            {{isEndUser ? 'View your requests and borrowed items.' : 'View and manage delivery receipt items in this section.'}}
+        </mat-card-subtitle>
+        
+        <!-- Add Tabs -->
+        <div class="mb-4">
+          <div class="flex border-b">
+            <div class="flex items-center gap-2 px-6 py-3 cursor-pointer"
+                 [ngClass]="{'border-b-2 border-indigo-500 text-indigo-600 font-medium': activeTab === 'request',
+                            'text-gray-500 hover:text-gray-700': activeTab !== 'request'}"
+                 (click)="activeTab = 'request'">
+              <span>{{isEndUser ? 'My Requests' : 'Requests'}}</span>
+              <span class="ml-1 bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full text-xs">{{pendingRequestCount}}</span>
+            </div>
+            <!-- <div class="flex items-center gap-2 px-6 py-3 cursor-pointer"
+                 [ngClass]="{'border-b-2 border-indigo-500 text-indigo-600 font-medium': activeTab === 'borrow',
+                            'text-gray-500 hover:text-gray-700': activeTab !== 'borrow'}"
+                 (click)="activeTab = 'borrow'">
+              <span>{{isEndUser ? 'My Borrowed Items' : 'Borrowed Items'}}</span>
+              <span class="ml-1 bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">{{pendingBorrowCount}}</span>
+            </div> -->
+          </div>
+        </div>
+  
+        <!-- Content based on active tab -->
+        <div [ngSwitch]="activeTab">
+          <!-- Request Tab Content -->
+          <div *ngSwitchCase="'request'">
+            <div class="flex justify-between items-center mb-4">
+              <!-- Search Input -->
+              <div class="relative w-72">
+                <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-500"></i>
+                <input class="w-full p-inputtext p-component pl-10 rounded-lg border border-gray-300" 
+                    pInputText 
+                    [(ngModel)]="searchValue" 
+                    (input)="onSearch($event)"
+                    placeholder="Search requests..." 
+                    style="padding-left: 2.5rem"/>
+              </div>
+            </div>
+  
+            <!-- Table Section -->
+            <p-table #dt [value]="filterByStatus()" 
+              [rows]="4" 
+              [paginator]="true" 
+              [sortMode]="'single'"
+              [sortField]="'dateRequest'"
+              [sortOrder]="-1"
+              [globalFilterFields]="['dateRequest', 'department', 'requestedBy', 'status']"
+              [rowHover]="true"
+              dataKey="id"
+              [scrollable]="true" 
+              scrollHeight="400px"
+              styleClass="p-datatable-gridlines">
+              
+              <ng-template pTemplate="header">
+                <tr>
+                  <th pSortableColumn="itemCode">
+                    RIS Number
+                    <p-sortIcon field="itemCode"></p-sortIcon>
+                  </th>
+                  <th pSortableColumn="department">
+                    Department
+                    <p-sortIcon field="department"></p-sortIcon>
+                  </th>
+                  <th pSortableColumn="requestedBy">
+                    Requested By
+                    <p-sortIcon field="requestedBy"></p-sortIcon>
+                  </th>
+                  <th pSortableColumn="dateRequest">
+                    Date Request
+                    <p-sortIcon field="dateRequest"></p-sortIcon>
+                  </th>
+                  <th pSortableColumn="status">
+                    Status
+                    <p-sortIcon field="status"></p-sortIcon>
+                  </th>
+                  <th>
+                    Actions
+                  </th>
+                </tr>
+              </ng-template>
+  
+              <ng-template pTemplate="body" let-request>
+                <tr>
+                  <td>{{request.itemCode}}</td>
+                  <td>{{request.department}}</td>
+                  <td>{{request.requestedBy}}</td>
+                  <td>{{request.dateRequest | date:'short'}}</td>
+                  <td>
+                    <span [class]="'status-pill ' + getStatusClass(request.status)">
+                      {{request.status}}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex gap-2">
+                      <!-- View Details button for all users -->
+                      <button type="button" 
+                        class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                        (click)="viewDetails(request)"
+                        pTooltip="View Details">
+                        <i class="pi pi-eye text-blue-500"></i>
+                      </button>
+                      
+                      <!-- Management buttons only for supply users -->
+                      @if (!isEndUser) {
+                        @if (request.status === 'Pending') {
+                        <button type="button"
+                          class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                            (click)="approveRequest(request.id!, $event)"
+                            pTooltip="Approve">
+                          <i class="pi pi-check text-green-500"></i>
+                        </button>
+                        <button type="button"
+                          class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                            (click)="openReturnDialog(request.id!, $event)"
+                          pTooltip="Return Request">
+                          <i class="pi pi-reply text-orange-500"></i>
+                        </button>
+                        }
+                        @if (request.status === 'Approved') {
+                      <button type="button" 
+                        class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                            (click)="issueRequest(request)"
+                        pTooltip="Issue Items">
+                            <i class="pi pi-send text-orange-500"></i>
+                      </button>
+                        }
+                        @if (request.status === 'Issued') {
+                      <button type="button" 
+                        class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                            (click)="deliverRequest(request, $event)"
+                            [pTooltip]="request.isBeingDelivered ? 'Item is being delivered' : 'Deliver Items'">
+                            <i [class]="request.isBeingDelivered ? 'pi pi-truck text-blue-500' : 'pi pi-truck text-green-500'"></i>
+                      </button>
+                        }
+                        @if (request.status === 'Returned') {
+                      <button type="button" 
+                        class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                            (click)="deleteRequest(request.id!, $event)"
+                        pTooltip="Delete Request">
+                        <i class="pi pi-trash text-red-500"></i>
+                      </button>
+                        }
+                      }
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+  
+          <!-- Similar modifications for borrow tab... -->
+                    </div>
+      </mat-card-content>
+    </mat-card>
+  
+<!-- View Details Dialog -->
+  <p-dialog 
+      [(visible)]="showDetailsDialog" 
+  [header]="'Request Details'"
+      [modal]="true" 
+  [style]="{width: '90vw', maxWidth: '900px'}"
+  [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+  styleClass="p-fluid"
+      [draggable]="false"
+      [resizable]="false">
+      
+      <div class="grid gap-4" *ngIf="selectedRequest">
+        <!-- Return Alert - Only show for returned requests -->
+        <div class="col-12" *ngIf="selectedRequest.status === 'Returned'">
+            <div class="bg-red-50 border-l-4 border-red-500 p-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="pi pi-exclamation-triangle text-red-500 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-red-800 font-medium">This request has been returned</h3>
+                        <div class="text-red-700 mt-2">
+                            <p>{{selectedRequest.remarks}}</p>
+                        </div>
+                        <!-- Only show edit button for end users -->
+                        <div *ngIf="isEndUser" class="mt-4">
+                            <button 
+                                pButton
+                                [label]="isEditingReturnedRequest ? 'Cancel Editing' : 'Edit and Resubmit'" 
+                                [icon]="isEditingReturnedRequest ? 'pi pi-times' : 'pi pi-pencil'"
+                                (click)="toggleReturnedRequestEditMode()"
+                                class="p-button-sm"
+                                [class]="isEditingReturnedRequest ? 'p-button-outlined p-button-danger' : 'p-button-outlined p-button-primary'">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+  
+        <!-- Edit Form (only shown when editing a returned request) -->
+        <div class="col-12" *ngIf="isEditingReturnedRequest">
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h3 class="text-lg font-medium text-blue-700 mb-4">Edit Request Details</h3>
+                <form [formGroup]="editedRequestForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="field">
+                            <label for="department" class="font-medium mb-2 block">Department*</label>
+                            <p-dropdown id="department" 
+                                formControlName="department" 
+                                [options]="departments" 
+                                optionLabel="name"
+                                optionValue="name"
+                                [filter]="true" 
+                                placeholder="Select Department" 
+                                styleClass="w-full">
+                            </p-dropdown>
+                            <small class="text-red-500" *ngIf="editedRequestForm.get('department')?.invalid && editedRequestForm.get('department')?.touched">
+                                Department is required
+                            </small>
+                    </div>
+                        <div class="field">
+                            <label for="requestedBy" class="font-medium mb-2 block">Requested By*</label>
+                            <input pInputText id="requestedBy" formControlName="requestedBy" class="w-full" placeholder="Enter name">
+                            <small class="text-red-500" *ngIf="editedRequestForm.get('requestedBy')?.invalid && editedRequestForm.get('requestedBy')?.touched">
+                                Name is required
+                            </small>
+                        </div>
+                        <div class="field">
+                            <label for="deliveryLocation" class="font-medium mb-2 block">Delivery Location</label>
+                            <textarea pInputTextarea id="deliveryLocation" formControlName="deliveryLocation" class="w-full" rows="2" 
+                                      placeholder="Enter delivery address (building, floor, room number)"></textarea>
+                        </div>
+                        <div class="field">
+                            <label for="purpose" class="font-medium mb-2 block">Purpose*</label>
+                            <textarea pInputTextarea id="purpose" formControlName="purpose" class="w-full" rows="2" placeholder="Enter purpose for request"></textarea>
+                            <small class="text-red-500" *ngIf="editedRequestForm.get('purpose')?.invalid && editedRequestForm.get('purpose')?.touched">
+                                Purpose is required
+                            </small>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Requested Items Section (moved inside the blue container for edit mode) -->
+                <div class="mt-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-medium text-blue-700">Requested Items</h3>
+                        <!-- Show Add Item Button only when not in add mode and editing -->
+                        <button *ngIf="!showAddItemFields && (isEditingReturnedRequest || showRequestDialog)" 
+                            pButton 
+                            icon="pi pi-plus" 
+                            label="Add Item" 
+                            class="p-button-sm"
+                            (click)="toggleAddItemFields()">
+                        </button>
+                    </div>
+
+                    <!-- Add Item Fields - Shows when toggled -->
+                    <div class="mb-4 bg-white p-4 border border-blue-200 rounded-lg" *ngIf="showAddItemFields">
+                        <h4 class="text-md font-semibold mb-3">Add New Item</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Item Dropdown -->
+                            <div class="field">
+                                <label for="newItemSelect" class="font-medium mb-2 block">Select Item*</label>
+                                <p-dropdown id="newItemSelect" 
+                                    [(ngModel)]="newItem.selectedItem" 
+                                    [options]="inventoryItems" 
+                                    optionLabel="product" 
+                                    [filter]="true" 
+                                    filterBy="product"
+                                    [appendTo]="'body'"
+                                    placeholder="Select an item" 
+                                    class="w-full"
+                                    (onChange)="onItemSelectionChange($event)">
+                </p-dropdown>
+              </div>
+
+                            <!-- Unit (auto-filled, read-only) -->
+                            <div class="field">
+                                <label for="newUnit" class="font-medium mb-2 block">Unit</label>
+                                <input pInputText id="newUnit" [(ngModel)]="newItem.unit" class="w-full" [readonly]="true" />
+                            </div>
+
+                            <!-- Quantity Input with validation -->
+                            <div class="field">
+                                <label for="newQuantity" class="font-medium mb-2 block">Quantity*</label>
+                                <p-inputNumber id="newQuantity" 
+                                    [(ngModel)]="newItem.quantity" 
+                                    [showButtons]="true" 
+                                    [min]="1" 
+                                    [max]="newItem.availableQuantity" 
+                                    (onInput)="validateQuantity($event, true)"
+                                    buttonLayout="horizontal" 
+                                    class="w-full"
+                                    [disabled]="!newItem.selectedItem">
+                                </p-inputNumber>
+                                <small class="text-gray-500" *ngIf="newItem.selectedItem">
+                                    Available: {{newItem.availableQuantity}}
+                                </small>
+              </div>
+            </div>
+  
+                        <!-- Add and Cancel Buttons -->
+                        <div class="flex justify-end gap-2 mt-4">
+                            <button pButton label="Cancel" icon="pi pi-times" 
+                                (click)="toggleAddItemFields()" 
+                                class="p-button-outlined p-button-secondary">
+                            </button>
+                            <button pButton label="Add" icon="pi pi-check" 
+                                (click)="addItem()"
+                                [disabled]="!newItem.selectedItem || !newItem.quantity || newItem.quantity <= 0">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg overflow-hidden border border-blue-200">
+                        <p-table [value]="editedRequestItems" 
+                                styleClass="p-datatable-sm"
+                                responsiveLayout="stack" 
+                                [breakpoint]="'960px'">
+              <ng-template pTemplate="header">
+                <tr>
+                                    <th style="width: 15%">Stock No.</th>
+                                    <th style="width: 30%">Item Name</th>
+                                    <th style="width: 20%">Type</th>
+                                    <th style="width: 15%">Unit</th>
+                                    <th style="width: 20%" class="text-center">Quantity</th>
+                                    <th style="width: 10%; text-align: center;">Actions</th>
+                </tr>
+              </ng-template>
+                            <ng-template pTemplate="body" let-item let-i="rowIndex">
+                                <tr>
+                                    <td>
+                                        <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Stock No.</span>
+                                        <div class="w-full">
+                                            <input *ngIf="!editedRequestItems[i].selectedItem" pInputText [(ngModel)]="editedRequestItems[i].stockNo" class="w-full" placeholder="Enter stock no." />
+                                            <input *ngIf="editedRequestItems[i].selectedItem" pInputText [value]="editedRequestItems[i].stockNo" class="w-full" readonly />
+                                        </div>
+                  </td>
+                  <td>
+                                        <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Item Name</span>
+                                        
+                                        <!-- Replace input with dropdown when editing -->
+                                        <div class="w-full">
+                                            <p-dropdown 
+                                                [(ngModel)]="editedRequestItems[i].selectedItem" 
+                                                [options]="inventoryItems" 
+                                                optionLabel="product" 
+                                                [filter]="true" 
+                                                filterBy="product"
+                                                [appendTo]="'body'"
+                                                placeholder="Select an item" 
+                                                class="w-full"
+                                                (onChange)="onExistingItemSelectionChange($event, i)">
+                                            </p-dropdown>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Type</span>
+                                        <input pInputText [(ngModel)]="editedRequestItems[i].itemType" class="w-full" placeholder="Enter type" [readonly]="!!editedRequestItems[i].selectedItem" />
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Unit</span>
+                                        <input pInputText [(ngModel)]="editedRequestItems[i].unit" class="w-full" placeholder="Enter unit" [readonly]="!!editedRequestItems[i].selectedItem" />
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Quantity</span>
+                                        
+                                        <!-- Improve quantity input with validation -->
+                                        <div class="w-full min-w-[100px]">
+                                            <p-inputNumber 
+                                                [(ngModel)]="editedRequestItems[i].quantity" 
+                                                [min]="1" 
+                                                [max]="editedRequestItems[i].availableQuantity || 999" 
+                                                [showButtons]="true" 
+                                                buttonLayout="horizontal"
+                                                styleClass="w-full"
+                                                (onInput)="validateExistingItemQuantity($event, i, true)"
+                                                mode="decimal" 
+                                                [useGrouping]="false">
+                                            </p-inputNumber>
+                                            <small *ngIf="editedRequestItems[i].selectedItem" class="text-gray-500 block mt-1">
+                                                Available: {{editedRequestItems[i].availableQuantity || 0}}
+                                            </small>
+                    </div>
+                  </td>
+                                    <td class="text-center">
+                                        <button pButton icon="pi pi-trash" 
+                                            class="p-button-rounded p-button-danger p-button-text"
+                                            (click)="removeItem(i)" 
+                                            pTooltip="Remove Item">
+                                        </button>
+                  </td>
+                </tr>
+              </ng-template>
+                            <ng-template pTemplate="footer">
+                                <tr>
+                                    <td colspan="4" class="text-right font-medium">Total Items:</td>
+                                    <td class="text-center font-medium">
+                                        {{getTotalItems(editedRequestItems)}}
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="6">
+                                        <div class="flex flex-col items-center justify-center py-6">
+                                            <i class="pi pi-inbox text-6xl text-gray-300 mb-4"></i>
+                                            <span>No items added. Add at least one item to submit the request.</span>
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+            </div>
+  </div>
+  
+        <!-- Request Information (read-only when not editing, otherwise hidden) -->
+        <div class="col-12" *ngIf="!isEditingReturnedRequest">
+              <div class="p-4 bg-gray-50 rounded-lg">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <!-- Left Column -->
+                      <div class="space-y-4">
+                          <div>
+                        <label class="block text-sm text-gray-600">RIS Number</label>
+                        <div class="font-medium text-blue-600">{{selectedRequest.itemCode}}</div>
+                          </div>
+                          <div>
+                              <label class="block text-sm text-gray-600">Department</label>
+                              <div class="font-medium">{{selectedRequest.department}}</div>
+                          </div>
+                      </div>
+  
+                      <!-- Right Column -->
+                      <div class="space-y-4">
+                          <div>
+                              <label class="block text-sm text-gray-600">Date Requested</label>
+                              <div class="font-medium">{{selectedRequest.dateRequest | date:'MMM dd, yyyy'}}</div>
+                          </div>
+                          <div>
+                              <label class="block text-sm text-gray-600">Requested By</label>
+                              <div class="font-medium">{{selectedRequest.requestedBy}}</div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+  
+        <!-- Requested Items Table/Edit - Supports both view and edit modes -->
+          <div class="col-12" *ngIf="!isEditingReturnedRequest">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-medium">Requested Items</h3>
+                    <!-- Show Add Item Button only when editing a returned request -->
+                    <button *ngIf="isEditingReturnedRequest && !showAddItemFields" 
+                        pButton 
+                        icon="pi pi-plus" 
+                        label="Add Item" 
+                        class="p-button-sm"
+                        (click)="toggleAddItemFields()">
+                    </button>
+                </div>
+
+                <!-- Add Item Fields - Shows when toggled -->
+                <div class="mb-4 bg-white p-4 border rounded-lg" *ngIf="showAddItemFields && isEditingReturnedRequest">
+                    <h4 class="text-md font-semibold mb-3">Add New Item</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Item Dropdown -->
+                        <div class="field">
+                            <label for="newItemSelect" class="font-medium mb-2 block">Select Item*</label>
+                            <p-dropdown id="newItemSelect" 
+                                [(ngModel)]="newItem.selectedItem" 
+                                [options]="inventoryItems" 
+                                optionLabel="product" 
+                                [filter]="true" 
+                                filterBy="product"
+                                [appendTo]="'body'"
+                                placeholder="Select an item" 
+                                class="w-full"
+                                (onChange)="onItemSelectionChange($event)">
+                            </p-dropdown>
+                        </div>
+
+                        <!-- Unit (auto-filled, read-only) -->
+                        <div class="field">
+                            <label for="newUnit" class="font-medium mb-2 block">Unit</label>
+                            <input pInputText id="newUnit" [(ngModel)]="newItem.unit" class="w-full" [readonly]="true" />
+                        </div>
+
+                        <!-- Quantity Input with validation -->
+                        <div class="field">
+                            <label for="newQuantity" class="font-medium mb-2 block">Quantity*</label>
+                            <p-inputNumber id="newQuantity" 
+                                [(ngModel)]="newItem.quantity" 
+                                [showButtons]="true" 
+                                [min]="1" 
+                                [max]="newItem.availableQuantity" 
+                                (onInput)="validateQuantity($event, true)"
+                                buttonLayout="horizontal" 
+                                class="w-full"
+                                [disabled]="!newItem.selectedItem">
+                            </p-inputNumber>
+                            <small class="text-gray-500" *ngIf="newItem.selectedItem">
+                                Available: {{newItem.availableQuantity}}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Add and Cancel Buttons -->
+                    <div class="flex justify-end gap-2 mt-4">
+                        <button pButton label="Cancel" icon="pi pi-times" 
+                            (click)="toggleAddItemFields()" 
+                            class="p-button-outlined p-button-secondary">
+                        </button>
+                        <button pButton label="Add" icon="pi pi-check" 
+                            (click)="addItem()"
+                            [disabled]="!newItem.selectedItem || !newItem.quantity || newItem.quantity <= 0">
+                        </button>
+                    </div>
+                </div>
+
+                  <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+                    <p-table [value]="selectedRequest.items" 
+                            styleClass="p-datatable-sm"
+                            responsiveLayout="stack" 
+                            [breakpoint]="'960px'">
+                          <ng-template pTemplate="header">
+                              <tr>
+                                  <th style="width: 15%">Stock No.</th>
+                                <th style="width: 30%">Item Name</th>
+                                  <th style="width: 20%">Type</th>
+                                  <th style="width: 15%">Unit</th>
+                                <th style="width: 20%" class="text-center">Quantity</th>
+                              </tr>
+                          </ng-template>
+                          <ng-template pTemplate="body" let-item>
+                              <tr>
+                                <td>
+                                    <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Stock No.</span>
+                                    {{item.stockNo || '-'}}
+                                </td>
+                                <td>
+                                    <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Item Name</span>
+                                    {{item.itemName}}
+                                </td>
+                                <td>
+                                    <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Type</span>
+                                    {{item.itemType}}
+                                </td>
+                                <td>
+                                    <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Unit</span>
+                                    {{item.unit}}
+                                      </td>
+                                      <td class="text-center">
+                                    <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Quantity</span>
+                                    {{item.quantity}}
+                                      </td>
+                              </tr>
+                          </ng-template>
+                          <ng-template pTemplate="footer">
+                              <tr>
+                                <td colspan="4" class="text-right font-medium">Total Items:</td>
+                                  <td class="text-center">{{getTotalItems(selectedRequest.items)}}</td>
+                              </tr>
+                          </ng-template>
+                      </p-table>
+                  </div>
+              </div>
+          </div>
+  
+        <!-- Purpose Section (only show when not editing) -->
+        <div class="col-12" *ngIf="!isEditingReturnedRequest">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Purpose</label>
+                  <div class="p-3 bg-white rounded border border-gray-200">
+                      {{selectedRequest.purpose || 'No purpose specified'}}
+                  </div>
+              </div>
+          </div>
+  
+    <!-- Approval Information - Only show if status is Approved or Issued -->
+    <div class="col-12" *ngIf="(selectedRequest.status == 'Approved' || selectedRequest.status == 'Issued') && !isEditingReturnedRequest">
+              <div class="p-4 bg-gray-50 rounded-lg">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Approval Information</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-white rounded border border-gray-200">
+                <div>
+                    <span class="text-gray-600 text-sm">Approved By:</span>
+                    <div class="font-medium">{{selectedRequest.approvedBy || 'Not specified'}}
+                        <span *ngIf="selectedRequest.approverPosition" class="text-sm text-gray-500"> ({{selectedRequest.approverPosition}})</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-gray-600 text-sm">Date Approved:</span>
+                    <div class="font-medium">{{selectedRequest.dateApproved | date:'MMM dd, yyyy'}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Issue Information - Only show if status is Issued -->
+    <div class="col-12" *ngIf="selectedRequest.status == 'Issued' && !isEditingReturnedRequest">
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Issue Information</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-white rounded border border-gray-200">
+                <div>
+                    <span class="text-gray-600 text-sm">Issued By:</span>
+                    <div class="font-medium">{{selectedRequest.issuedBy || 'Not specified'}}
+                        <span *ngIf="selectedRequest.issuerPosition" class="text-sm text-gray-500"> ({{selectedRequest.issuerPosition}})</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-gray-600 text-sm">Date Issued:</span>
+                    <div class="font-medium">{{selectedRequest.dateIssued | date:'MMM dd, yyyy'}}</div>
+                </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  
+      <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-3">
+            <!-- Show Resubmit button when in edit mode -->
+            <button 
+                *ngIf="isEditingReturnedRequest"
+                pButton
+                [label]="'Resubmit Request'"
+                [icon]="'pi pi-refresh'"
+                (click)="resubmitReturnedRequest()" 
+                [disabled]="!editedRequestForm.valid || editedRequestItems.length === 0"
+                class="p-button-success">
+            </button>
+            
+            <button 
+                pButton
+                  label="Close" 
+                  (click)="closeDetailsDialog()" 
+                class="p-button-outlined p-button-secondary">
+            </button>
+          </div>
+      </ng-template>
+  </p-dialog>
+  
+<p-toast position="bottom-right" />
+  
+<!-- Issue Dialog -->
+  <p-dialog 
+      [(visible)]="showIssueDialog" 
+    header="Issue Items" 
+      [modal]="true" 
+    [style]="{width: '90vw', maxWidth: '950px'}"
+    [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+    styleClass="p-fluid"
+      [draggable]="false"
+    [resizable]="false">
+    <div class="p-4 space-y-4" *ngIf="selectedRequest">
+        <!-- Request Details -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 rounded-lg p-4 border border-gray-200 mx-2">
+                  <div>
+                <div class="text-gray-600 text-sm mb-1">RIS Number</div>
+                <div class="text-blue-600 font-medium">{{selectedRequest.itemCode}}</div>
+                  </div>
+                  <div>
+                <div class="text-gray-600 text-sm mb-1">Requested By</div>
+                <div class="font-medium">{{selectedRequest.requestedBy}}</div>
+                  </div>
+                  <div>
+                      <div class="text-gray-600 text-sm mb-1">Date Requested</div>
+                      <div class="font-medium">{{selectedRequest.dateRequest | date:'MMM dd, yyyy'}}</div>
+                  </div>
+                  <div>
+                <div class="text-gray-600 text-sm mb-1">Approved By</div>
+                <div class="font-medium">{{selectedRequest.approvedBy || 'Not specified'}}
+                    <span *ngIf="selectedRequest.approverPosition" class="text-sm text-gray-500"> ({{selectedRequest.approverPosition}})</span>
+                  </div>
+              </div>
+                  <div>
+                      <div class="text-gray-600 text-sm mb-1">Date Approved</div>
+                      <div class="font-medium">{{selectedRequest.dateApproved | date:'MMM dd, yyyy'}}</div>
+              </div>
+          </div>
+  
+          <!-- Items Section -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-medium ml-4">Items to Issue</h3>
+              <div class="overflow-x-auto">
+                  <p-table [value]="selectedRequest.items" 
+                          styleClass="issue-items-table"
+                        [scrollable]="true"
+                        responsiveLayout="stack" 
+                        [breakpoint]="'960px'">
+                      <ng-template pTemplate="header">
+                          <tr>
+                            <th style="width: 10%;">Stock No.</th>
+                            <th style="width: 15%;">Item Name</th>
+                            <th style="width: 12%;">Type</th>
+                            <th style="width: 8%;">Unit</th>
+                            <th style="width: 10%;" class="text-center">Requested Qty</th>
+                            <th style="width: 10%;" class="text-center">Available Qty</th>
+                            <th style="width: 10%;" class="text-center">Stock Available</th>
+                            <th style="width: 10%;" class="text-center">Issue Qty</th>
+                          </tr>
+                      </ng-template>
+                      <ng-template pTemplate="body" let-item>
+                          <tr>
+                            <td>
+                                <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Stock No.</span>
+                                {{item.stockNo || '-'}}
+                            </td>
+                            <td>
+                                <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Item Name</span>
+                                {{item.itemName}}
+                            </td>
+                            <td>
+                                <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Type</span>
+                                {{item.itemType}}
+                            </td>
+                            <td>
+                                <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Unit</span>
+                                {{item.unit}}
+                            </td>
+                            <td class="text-center">
+                                <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Requested Qty</span>
+                                {{item.quantity}}
+                            </td>
+                            <td class="text-center">
+                                <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Available Qty</span>
+                                {{item.availableQuantity}}
+                            </td>
+                            <td class="text-center">
+                                <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Stock Available</span>
+                                  <p-dropdown 
+                                      [(ngModel)]="item.stockAvailable"
+                                      [options]="stockOptions"
+                                      optionLabel="label"
+                                      optionValue="value"
+                                      (onChange)="onStockAvailabilityChange($event, item)"
+                                      placeholder="Select"
+                                      styleClass="stock-dropdown">
+                                      <ng-template pTemplate="selectedItem">
+                                          <span class="text-sm">{{item.stockAvailable === 'yes' ? 'Yes' : item.stockAvailable === 'no' ? 'No' : ''}}</span>
+                                      </ng-template>
+                                      <ng-template let-option pTemplate="item">
+                                          <span class="text-sm">{{option.label}}</span>
+                                      </ng-template>
+                                  </p-dropdown>
+                              </td>
+                            <td>
+                                <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Issue Qty</span>
+                                <p-inputNumber *ngIf="item.stockAvailable === 'yes' && selectedRequest.status !== 'Issued'"
+                                      [(ngModel)]="item.issueQuantity" 
+                                      [min]="0" 
+                                      [max]="item.availableQuantity"
+                                      [showButtons]="true" 
+                                      buttonLayout="horizontal"
+                                    (onInput)="validateIssueQuantity(item, $event)"
+                                    styleClass="issue-qty-input w-full">
+                                  </p-inputNumber>
+                                <span *ngIf="selectedRequest.status === 'Issued'">{{item.issueQuantity || 0}}</span>
+                                <span *ngIf="item.stockAvailable !== 'yes' && selectedRequest.status !== 'Issued'">0</span>
+                              </td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" class="text-right font-medium">Remarks:</td>
+                            <td colspan="3">
+                                  <input 
+                                      pInputText 
+                                      [(ngModel)]="item.remarks"
+                                      [placeholder]="item.stockAvailable === 'yes' ? 'Item available in stock' : 'Add remarks'"
+                                    class="text-sm w-full">
+                              </td>
+                          </tr>
+                      </ng-template>
+                      <ng-template pTemplate="footer">
+                          <tr>
+                            <td colspan="4" class="text-right font-medium">Total Items:</td>
+                              <td class="text-center">{{getTotalItems(selectedRequest.items)}}</td>
+                              <td></td>
+                              <td></td>
+                              <td class="text-center">{{getTotalIssueItems(selectedRequest.items)}}</td>
+                          </tr>
+                      </ng-template>
+                  </p-table>
+              </div>
+          </div>
+
+        <!-- Issue Form at the bottom -->
+        <form [formGroup]="issueForm" class="bg-gray-50 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="field">
+                    <label for="issuedBy" class="font-medium mb-2 block">Issued By*</label>
+                    <input pInputText id="issuedBy" formControlName="issuedBy" class="w-full" placeholder="Enter name">
+                    <small class="text-red-500" *ngIf="issueForm.get('issuedBy')?.invalid && issueForm.get('issuedBy')?.touched">
+                        Name is required
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="issueDate" class="font-medium mb-2 block">Issue Date*</label>
+                    <p-calendar id="issueDate" formControlName="issueDate" [showIcon]="true" dateFormat="mm/dd/yy" class="w-full"></p-calendar>
+                    <small class="text-red-500" *ngIf="issueForm.get('issueDate')?.invalid && issueForm.get('issueDate')?.touched">
+                        Date is required
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="issuePosition" class="font-medium mb-2 block">Position*</label>
+                    <input pInputText id="issuePosition" formControlName="position" class="w-full" placeholder="Enter position">
+                    <small class="text-red-500" *ngIf="issueForm.get('position')?.invalid && issueForm.get('position')?.touched">
+                        Position is required
+                    </small>
+                </div>
+            </div>
+        </form>
+      </div>
+  
+      <ng-template pTemplate="footer">
+          <div class="flex justify-end gap-3">
+              <button 
+                  pButton 
+                  label="Cancel" 
+                  (click)="closeIssueDialog()" 
+                  class="p-button-text">
+              </button>
+              <button 
+                  pButton 
+                  label="Issue Items" 
+                  icon="pi pi-send"
+                  (click)="confirmIssueItems()" 
+                [disabled]="!isValidIssueQuantities() || issueForm.invalid"
+                  class="p-button-primary">
+              </button>
+          </div>
+      </ng-template>
+  </p-dialog>
+  
+<!-- Approval Dialog -->
+<p-dialog [(visible)]="showApprovalDialog" 
+    header="Approve Request" 
+      [modal]="true" 
+    [style]="{width: '90vw', maxWidth: '800px'}"
+    [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+    styleClass="p-fluid"
+      [draggable]="false"
+      [resizable]="false">
+      
+    <div class="grid gap-4" *ngIf="selectedRequest">
+        <!-- Request Information -->
+          <div class="col-12">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-600">RIS Number</label>
+                            <div class="font-medium text-blue-600">{{selectedRequest.itemCode}}</div>
+              </div>
+                        <div>
+                            <label class="block text-sm text-gray-600">Department</label>
+                            <div class="font-medium">{{selectedRequest.department}}</div>
+              </div>
+          </div>
+  
+                    <!-- Right Column -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-600">Date Requested</label>
+                            <div class="font-medium">{{selectedRequest.dateRequest | date:'MMM dd, yyyy'}}</div>
+              </div>
+                        <div>
+                            <label class="block text-sm text-gray-600">Requested By</label>
+                            <div class="font-medium">{{selectedRequest.requestedBy}}</div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600">Purpose</label>
+                            <div class="font-medium">{{selectedRequest.purpose || 'Not specified'}}</div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+          </div>
+  
+        <!-- Requested Items Table -->
+          <div class="col-12">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <h3 class="text-lg font-medium mb-3">Requested Items</h3>
+                <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+                    <p-table [value]="selectedRequest.items" 
+                             styleClass="p-datatable-sm"
+                             responsiveLayout="stack" 
+                             [breakpoint]="'960px'">
+                      <ng-template pTemplate="header">
+                          <tr>
+                          <th style="width: 15%">Stock No.</th>
+                          <th style="width: 30%">Item Name</th>
+                          <th style="width: 20%">Type</th>
+                          <th style="width: 15%">Unit</th>
+                          <th style="width: 20%" class="text-center">Quantity</th>
+                          </tr>
+                      </ng-template>
+                        <ng-template pTemplate="body" let-item>
+                          <tr>
+                              <td>
+                              <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Stock No.</span>
+                              {{item.stockNo || '-'}}
+                              </td>
+                              <td>
+                              <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Item Name</span>
+                              {{item.itemName}}
+                              </td>
+                              <td>
+                              <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Type</span>
+                              {{item.itemType}}
+                          </td>
+                          <td>
+                              <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Unit</span>
+                              {{item.unit}}
+                              </td>
+                              <td class="text-center">
+                              <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Quantity</span>
+                              {{item.quantity}}
+                              </td>
+                          </tr>
+                      </ng-template>
+                  </p-table>
+              </div>
+          </div>
+          </div>
+  
+        <!-- Approval Form at the bottom -->
+        <form [formGroup]="approvalForm" class="bg-gray-50 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div class="field">
+                    <label for="approvedBy" class="font-medium mb-2 block">Approved By*</label>
+                    <input pInputText id="approvedBy" formControlName="approvedBy" class="w-full" placeholder="Enter name">
+                    <small class="text-red-500" *ngIf="approvalForm.get('approvedBy')?.invalid && approvalForm.get('approvedBy')?.touched">
+                        Name is required
+                    </small>
+              </div>
+              <div class="field">
+                    <label for="approvalDate" class="font-medium mb-2 block">Approval Date*</label>
+                    <p-calendar id="approvalDate" formControlName="approvalDate" [showIcon]="true" dateFormat="mm/dd/yy" class="w-full"></p-calendar>
+                    <small class="text-red-500" *ngIf="approvalForm.get('approvalDate')?.invalid && approvalForm.get('approvalDate')?.touched">
+                        Date is required
+                    </small>
+              </div>
+              <div class="field">
+                    <label for="position" class="font-medium mb-2 block">Position*</label>
+                    <input pInputText id="position" formControlName="position" class="w-full" placeholder="Enter position">
+                    <small class="text-red-500" *ngIf="approvalForm.get('position')?.invalid && approvalForm.get('position')?.touched">
+                        Position is required
+                    </small>
+              </div>
+              </div>
+      </form>
+          </div>
+  
+      <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-3">
+            <button 
+                pButton
+                label="Cancel" 
+                (click)="showApprovalDialog = false" 
+                class="p-button-text">
+                              </button>
+            <button 
+                pButton
+                label="Approve" 
+                icon="pi pi-check"
+                (click)="submitApproval()" 
+                [disabled]="approvalForm.invalid"
+                class="p-button-primary">
+            </button>
+          </div>
+      </ng-template>
+  </p-dialog>
+  
+  <!-- Return Request Dialog -->
+  <p-dialog 
+      [(visible)]="showReturnDialog" 
+      header="Return Request"
+      [modal]="true" 
+      [style]="{width: '90vw', maxWidth: '800px'}"
+      [breakpoints]="{'960px': '95vw', '640px': '100vw'}"
+      styleClass="p-fluid"
+      [draggable]="false"
+      [resizable]="false">
+      
+      <div class="grid gap-4" *ngIf="selectedRequest">
+          <!-- Request Information -->
+          <div class="col-12">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <!-- Left Column -->
+                      <div class="space-y-4">
+                          <div>
+                            <label class="block text-sm text-gray-600">RIS Number</label>
+                            <div class="font-medium text-blue-600">{{selectedRequest.itemCode}}</div>
+                          </div>
+                          <div>
+                              <label class="block text-sm text-gray-600">Department</label>
+                              <div class="font-medium">{{selectedRequest.department}}</div>
+                          </div>
+                      </div>
+  
+                      <!-- Right Column -->
+                      <div class="space-y-4">
+                          <div>
+                              <label class="block text-sm text-gray-600">Date Requested</label>
+                              <div class="font-medium">{{selectedRequest.dateRequest | date:'MMM dd, yyyy'}}</div>
+                          </div>
+                          <div>
+                              <label class="block text-sm text-gray-600">Requested By</label>
+                              <div class="font-medium">{{selectedRequest.requestedBy}}</div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+  
+          <!-- Requested Items Table -->
+          <div class="col-12">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                  <h3 class="text-lg font-medium mb-3">Requested Items</h3>
+                  <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
+                      <p-table [value]="selectedRequest.items" 
+                               styleClass="p-datatable-sm"
+                               responsiveLayout="stack" 
+                               [breakpoint]="'960px'">
+                          <ng-template pTemplate="header">
+                              <tr>
+                                <th style="width: 15%">Stock No.</th>
+                                  <th style="width: 35%">Item Name</th>
+                                  <th style="width: 25%">Type</th>
+                                <th style="width: 15%">Unit</th>
+                                <th style="width: 10%" class="text-center">Quantity</th>
+                              </tr>
+                          </ng-template>
+                          <ng-template pTemplate="body" let-item>
+                              <tr>
+                                <td>
+                                    <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Stock No.</span>
+                                    {{item.stockNo || '-'}}
+                                </td>
+                                  <td>
+                                      <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Item Name</span>
+                                      {{item.itemName}}
+                                  </td>
+                                  <td>
+                                      <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Type</span>
+                                      {{item.itemType}}
+                                  </td>
+                                  <td>
+                                      <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Unit</span>
+                                      {{item.unit}}
+                                  </td>
+                                  <td class="text-center">
+                                      <span class="p-column-title md:hidden lg:hidden xl:hidden font-medium">Quantity</span>
+                                      {{item.quantity}}
+                                  </td>
+                              </tr>
+                          </ng-template>
+                          <ng-template pTemplate="footer">
+                              <tr>
+                                <td colspan="4" class="text-right font-medium">Total Items:</td>
+                                  <td class="text-center font-medium">
+                                      {{getTotalItems(selectedRequest.items)}}
+                                  </td>
+                              </tr>
+                          </ng-template>
+                      </p-table>
+                  </div>
+              </div>
+          </div>
+  
+          <!-- Purpose Section -->
+          <div class="col-12">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Purpose</label>
+                  <div class="p-3 bg-white rounded border border-gray-200">
+                      {{selectedRequest.purpose || 'No purpose specified'}}
+                  </div>
+              </div>
+          </div>
+  
+          <!-- Remarks Input Section -->
+          <div class="col-12">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                  <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">Return Remarks</label>
+                  <textarea 
+                      pInputTextarea
+                      id="remarks" 
+                      rows="3" 
+                      class="w-full"
+                      [(ngModel)]="returnRemarks"
+                      placeholder="Enter remarks explaining why this request is being returned..."
+                      required>
+                  </textarea>
+                  <small class="text-gray-500">These remarks will be visible to the requester and explain why their request was returned.</small>
+              </div>
+          </div>
+      </div>
+  
+      <ng-template pTemplate="footer">
+          <div class="flex justify-end gap-3">
+              <button 
+                  pButton
+                  label="Cancel" 
+                (click)="showReturnDialog = false; selectedRequest = null; selectedRequestId = null;" 
+                  class="p-button-outlined p-button-secondary">
+              </button>
+              <button 
+                  pButton
+                  label="Return" 
+                  icon="pi pi-reply"
+                  (click)="submitReturn()" 
+                  [disabled]="!returnRemarks.trim()"
+                  class="p-button-warning">
+              </button>
+          </div>
+      </ng-template>
+  </p-dialog>
+  
+<!-- Delivery Location Dialog -->
+<!-- <p-dialog header="Enter Delivery Location" [(visible)]="showDeliveryLocationDialog" [style]="{width: '40vw'}" [modal]="true">
+      <div class="p-4">
+    <form [formGroup]="deliveryLocationForm">
+      <div class="field mb-4">
+        <label for="deliveryLocation" class="block text-sm font-medium text-gray-700 mb-1">Delivery Location<span class="text-red-500">*</span></label>
+        <textarea id="deliveryLocation" pInputTextarea formControlName="deliveryLocation" class="w-full" rows="3" 
+                  placeholder="Enter the complete delivery address including building, floor, room number, etc."></textarea>
+        <small class="text-red-500" *ngIf="deliveryLocationForm.get('deliveryLocation')?.invalid && deliveryLocationForm.get('deliveryLocation')?.touched">
+          Delivery location is required
+        </small>
+                  </div>
+              </form>
+  
+    <div class="flex justify-end gap-2 mt-4 pt-4 border-t">
+              <p-button 
+                  label="Cancel" 
+          icon="pi pi-times" 
+          (click)="closeDeliveryLocationDialog()"
+          [outlined]="true"
+          styleClass="p-button-secondary">
+              </p-button>
+              <p-button 
+          label="Continue to Delivery" 
+                  icon="pi pi-check"
+          (click)="submitDeliveryLocation()"
+          [disabled]="!deliveryLocationForm.valid"
+                  styleClass="p-button-success">
+              </p-button>
+          </div>
+                          </div>
+  </p-dialog> -->
+  
+<!-- Delivery Confirmation Dialog -->
+<p-dialog [(visible)]="showDeliveryConfirmationDialog" 
+    header="Confirm Delivery" 
+      [modal]="true" 
+    [style]="{width: '90vw', maxWidth: '400px'}"
+    [breakpoints]="{'640px': '95vw'}"
+    styleClass="p-fluid"
+      [draggable]="false"
+      [resizable]="false">
+    <div class="p-4">
+        <p class="mb-2 mx-4">Are you sure you want to mark this request for delivery?</p>
+                          </div>
+      <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-3">
+              <button 
+                  pButton
+                  label="Cancel" 
+                (click)="showDeliveryConfirmationDialog = false" 
+                  class="p-button-text">
+              </button>
+              <button 
+                  pButton
+                  label="Confirm" 
+                  icon="pi pi-check"
+                (click)="confirmDelivery()" 
+                  class="p-button-primary">
+              </button>
+          </div>
+      </ng-template>
+  </p-dialog>
+  
+<style>
+.status-pill {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: normal;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+.status-approved {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.status-issued {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.status-returned {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.status-cancelled {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+</style>

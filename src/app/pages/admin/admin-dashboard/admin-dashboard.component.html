@@ -1,0 +1,50 @@
+<section class="w-full h-screen">
+    <div class="flex flex-col gap-3.5 w-full h-full">
+        <div class="w-full h-full flex flex-row gap-5">
+            <!-- First Chart (RFQ Data) -->
+            <p-card [style]="{ height: '50vh', width: '80vh', display: 'flex', flexDirection: 'column' }">
+              <apx-chart
+                [series]="lineChartOptions.series"
+                [chart]="lineChartOptions.chart"
+                [xaxis]="lineChartOptions.xaxis"
+                [yaxis]="lineChartOptions.yaxis"
+                [stroke]="lineChartOptions.stroke"
+                [title]="lineChartOptions.title">
+              </apx-chart>
+              <div *ngIf="!lineChartOptions.series">Loading RFQ chart data...</div>
+            </p-card>
+          
+            <!-- Second Chart (Purchase Request Data) -->
+            <p-card [style]="{ height: '50vh', width: '80vh', display: 'flex', flexDirection: 'column' }">
+              <apx-chart
+                [series]="purchaseRequestChartOptions.series"
+                [chart]="purchaseRequestChartOptions.chart"
+                [xaxis]="purchaseRequestChartOptions.xaxis"
+                [yaxis]="purchaseRequestChartOptions.yaxis"
+                [stroke]="purchaseRequestChartOptions.stroke"
+                [title]="purchaseRequestChartOptions.title">
+              </apx-chart>
+              <div *ngIf="!purchaseRequestChartOptions.series">Loading Purchase Request chart data...</div>
+            </p-card>
+        </div>
+  
+        <div class="h-1/2 w-full flex flex-row gap-5">
+            <p-card [style]="{ height: '50vh', width: '80vh', display: 'flex', flexDirection: 'column' }">
+                <apx-chart
+                  [series]="budgetChartOptions.series"
+                  [chart]="budgetChartOptions.chart"
+                  [xaxis]="budgetChartOptions.xaxis"
+                  [yaxis]="budgetChartOptions.yaxis"
+                  [stroke]="budgetChartOptions.stroke"
+                  [title]="budgetChartOptions.title">
+                </apx-chart>
+                <div *ngIf="!budgetChartOptions.series">Loading Purchase Request chart data...</div>
+              </p-card>
+  
+            <div class="flex flex-col gap-2 w-full h-full mb-5">
+                    
+            </div>
+  
+        </div>
+    </div>  
+</section>

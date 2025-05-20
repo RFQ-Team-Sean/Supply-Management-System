@@ -1,0 +1,142 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title class="mb-4">Fixed Asset Receiving</mat-card-title>
+    <p class="text-gray-600 mb-4">Record and manage fixed assets such as equipment, machinery, furniture, and other long-term assets.</p>
+
+    <div class="flex justify-between items-center mb-4">
+      <span class="p-input-icon-left w-full max-w-72">
+        <i class="pi pi-search"></i>
+        <input class="w-full" pInputText [(ngModel)]="searchValue" (input)="dt.filterGlobal(searchValue,'contains')" placeholder="Search assets..." />
+      </span>
+
+      <p-button label="Add New Asset" icon="pi pi-plus" styleClass="p-button-success" (onClick)="openNewDialog()"></p-button>
+    </div>
+
+    <p-table #dt [value]="assets" [rows]="10" [paginator]="true" [globalFilterFields]="['assetName','serialNumber','category']"
+      [rowHover]="true" dataKey="id" [rowsPerPageOptions]="[10,25,50]"
+      styleClass="p-datatable-sm p-datatable-gridlines">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Asset Name</th>
+          <th>Serial Number</th>
+          <th>Model</th>
+          <th>Category</th>
+          <th>Purchase Date</th>
+          <th>Purchase Price</th>
+          <th>Condition</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-asset>
+        <tr>
+          <td>{{asset.itemName}}</td>
+          <td>{{asset.serialNumber}}</td>
+          <td>{{asset.model}}</td>
+          <td>{{asset.category}}</td>
+          <td>{{asset.purchaseDate | date:'shortDate'}}</td>
+          <td>{{asset.purchasePrice | currency:'PHP'}}</td>
+          <td>{{asset.condition}}</td>
+          <td>
+            <p-tag [severity]="asset.status === 'approved' ? 'success' : asset.status === 'rejected' ? 'danger' : 'warn'"
+              [value]="asset.status"></p-tag>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <p-button icon="pi pi-pencil" (onClick)="editAsset(asset)" 
+                styleClass="p-button-rounded p-button-text"></p-button>
+              <p-button icon="pi pi-trash" (onClick)="deleteAsset($event, asset)"
+                styleClass="p-button-rounded p-button-text p-button-danger"></p-button>
+              <p-button *ngIf="asset.status === 'pending'" icon="pi pi-check" (onClick)="approveAsset(asset)"
+                styleClass="p-button-rounded p-button-text p-button-success"
+                pTooltip="Approve"></p-button>
+              <p-button *ngIf="asset.status === 'pending'" icon="pi pi-times" (onClick)="rejectAsset(asset)"
+                styleClass="p-button-rounded p-button-text p-button-danger"
+                pTooltip="Reject"></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="text-center p-4">No assets found.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+<!-- Add/Edit Dialog -->
+<p-dialog [(visible)]="showAssetDialog" [header]="isEditing ? 'Edit Asset' : 'Add New Asset'"
+  [modal]="true" [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">
+  <form [formGroup]="assetForm" (ngSubmit)="saveAsset()">
+    <div class="grid grid-cols-2 gap-4">
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Asset Name*</label>
+        <input type="text" pInputText formControlName="assetName" class="w-full" />
+      </div>
+
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+        <textarea pInputTextarea formControlName="description" class="w-full" rows="3"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Serial Number*</label>
+        <input type="text" pInputText formControlName="serialNumber" class="w-full" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Model*</label>
+        <input type="text" pInputText formControlName="model" class="w-full" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Manufacturer*</label>
+        <input type="text" pInputText formControlName="manufacturer" class="w-full" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Category*</label>
+        <p-dropdown [options]="categoryOptions" formControlName="category" placeholder="Select Category"
+          [style]="{'width':'100%'}"></p-dropdown>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Received Date*</label>
+        <p-calendar formControlName="receivedDate" [showIcon]="true" [style]="{'width':'100%'}"
+          dateFormat="yy-mm-dd"></p-calendar>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Purchase Price*</label>
+        <p-inputNumber formControlName="purchasePrice" mode="currency" currency="PHP" locale="en-US"
+          [minFractionDigits]="2" class="w-full"></p-inputNumber>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Condition*</label>
+        <p-dropdown [options]="conditionOptions" formControlName="condition" placeholder="Select Condition"
+          [style]="{'width':'100%'}"></p-dropdown>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Location*</label>
+        <input type="text" pInputText formControlName="location" class="w-full" />
+      </div>
+
+      <div class="col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+        <textarea pInputTextarea formControlName="remarks" class="w-full" rows="2"></textarea>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" (onClick)="hideDialog()" styleClass="p-button-text"></p-button>
+    <p-button label="Save" icon="pi pi-check" (onClick)="saveAsset()" [disabled]="!assetForm.valid"></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmPopup></p-confirmPopup>

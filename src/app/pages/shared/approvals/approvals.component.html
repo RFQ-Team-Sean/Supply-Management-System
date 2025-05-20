@@ -1,0 +1,283 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+
+    <mat-card-title>Requisition</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      View requisitions assigned to you for approval.
+    </mat-card-subtitle>
+  
+
+    <!-- Filters and Actions -->
+    <div class="flex justify-between items-center mt-4">
+      <div class="flex gap-2">
+        <div class="relative w-[300px]">
+          <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+          <input
+            pInputText
+            type="text"
+            #searchInput
+            (input)="dt.filterGlobal(searchInput.value, 'contains')"
+            placeholder="Search Requisitions"
+            style="text-indent: 1.5rem;"
+            class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:ml-6"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Requisitions Table -->
+    <p-table
+      #dt
+      [value]="requisitions"
+      [rows]="10"
+      [paginator]="true"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [loading]="loading"
+      [globalFilterFields]="['id','title', 'description', 'approvalStatus', 'departmentName']"
+      responsiveLayout="scroll"
+      styleClass="p-datatable-sm mt-4"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="id">Code <p-sortIcon field="id"></p-sortIcon></th>
+          <th pSortableColumn="title">Title <p-sortIcon field="title"></p-sortIcon></th>
+          <th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>
+          <th pSortableColumn="approvalSequenceDetails.level">Level <p-sortIcon field="approvalSequenceDetails.level"></p-sortIcon></th>
+          <th pSortableColumn="approvalSequieceDetails.name">Status <p-sortIcon field="approvalSequieceDetails.name"></p-sortIcon></th>
+          <th pSortableColumn="dateCreated">Date Created <p-sortIcon field="dateCreated"></p-sortIcon></th>
+          <th pSortableColumn="approvalSequenceDetails.departmentName">Department <p-sortIcon field="approvalSequenceDetails.departmentName"></p-sortIcon></th>
+          <th>Attachments</th>
+     
+            <th>Actions</th>
+     
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-req>
+        <tr (click)="openPurchaseReqDialog(req.id)">
+          <td>{{ req.id }}</td>
+          <td>{{ req.title }}</td>
+          <td>{{ req.description }}</td>
+          <td>Level {{ req.approvalSequenceDetails?.level }}</td>
+          <td>
+            <span class="text-yellow-600">
+              Under {{ req.approvalSequenceDetails?.name }}...
+            </span>
+          </td>
+          <td>{{ req.dateCreated | date: 'short' }}</td>
+          <td>{{ req.approvalSequenceDetails?.departmentName || 'N/A' }}</td>
+          <!-- Attachments Column -->
+          <td>
+            <!-- PPMP Attachment -->
+            <button
+              *ngIf="req.ppmpAttachment"
+              pButton
+              icon="pi pi-file-pdf"
+              class="p-button-rounded p-button-secondary p-button-sm"
+              (click)="viewAttachment(req.ppmpAttachment, 'PPMP'); $event.stopPropagation()" 
+              pTooltip="View PPMP"
+            ></button>
+
+            <!-- Purchase Request Attachment -->
+            <button
+  *ngIf="req.purchaseRequestAttachment && req.approvalSequenceDetails?.level >= 2"
+  pButton
+  icon="pi pi-file-pdf"
+  class="p-button-rounded p-button-secondary p-button-sm ml-2"
+  (click)="openPurchaseReqDialog(req.id); $event.stopPropagation()"
+  pTooltip="View Purchase Request"
+></button>
+          </td>
+          @if(currentUser?.role != 'enduser' || (req.approvalSequenceDetails?.roleCode  == currentUser?.role ) ){
+            <td>
+              <div class="flex gap-2">
+                @if(currentUser?.role != 'supply' || req.approvalSequenceDetails?.roleCode  == currentUser?.role ){
+                  <!-- Approve Button -->
+<button
+  pButton
+  icon="pi pi-check"
+  class="p-button-rounded p-button-success p-button-sm"
+  (click)="openSignatureDialog(req); $event.stopPropagation()"
+  pTooltip="Approve"
+></button>
+                  <button
+                    pButton
+                    icon="pi pi-times"
+                    class="p-button-rounded p-button-danger p-button-sm"
+                    (click)="onReject(req)"
+                    [outlined]="false"
+                    pTooltip="Reject"
+                  ></button>
+                }@else{
+                  <span>Pending</span>
+                }
+              </div>
+            </td>
+          }@else{
+            <td>
+              <div class="flex gap-2"><span>Processing...</span></div>
+            </td>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9">
+            <div class="flex flex-col w-full items-center justify-center py-8">
+              <span>No requisitions found.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+
+<!-- Signature Dialog -->
+<!-- Signature Dialog -->
+<p-dialog
+  header="Approve Request"
+  [(visible)]="displaySignatureDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '600px' }"
+  [resizable]="false"
+>
+  <div class="flex flex-col gap-4">
+    <p class="text-sm text-gray-600">Please provide your signature before approving the request.</p>
+
+    <!-- Signature Section -->
+    <div class="p-4 bg-white border border-gray-300 rounded-lg shadow-md">
+      <h4 class="text-sm font-medium text-gray-700 mb-2">Signature</h4>
+      <canvas
+        #signatureCanvas
+        width="500"
+        height="150"
+        class="border border-gray-300 rounded-lg w-full"
+      ></canvas>
+      <div class="flex justify-end mt-2">
+        <button
+          pButton
+          label="Clear Signature"
+          icon="pi pi-refresh"
+          class="p-button-secondary"
+          [outlined]="true"
+          size="small"
+          (click)="clearSignature()"
+        ></button>
+      </div>
+    </div>
+
+    <!-- Comment Field -->
+    <div class="p-4 bg-white border border-gray-300 rounded-lg shadow-md">
+      <h4 class="text-sm font-medium text-gray-700 mb-2">Comments</h4>
+      <textarea
+        [(ngModel)]="approvalComment"
+        class="w-full p-2 border border-gray-300 rounded-md"
+        placeholder="Enter your comments here..."
+      ></textarea>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-between gap-4">
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-times"
+        class="p-button-danger"
+        [outlined]="true"
+        size="small"
+        (click)="closeSignatureDialog()"
+      ></button>
+      <button
+        pButton
+        label="Submit Approval"
+        icon="pi pi-check"
+        class="p-button-success"
+        [outlined]="true"
+        size="small"
+        (click)="submitApproval()"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Preview Dialog -->
+<p-dialog
+  header="Preview Purchase Request"
+  [(visible)]="displayPreviewDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '800px' }"
+  [resizable]="false"
+>
+  <div class="preview-content">
+    <h2 class="text-xl font-bold mb-4">Purchase Request Details</h2>
+    <div class="mb-4">
+      <p><strong>Title:</strong> {{ selectedRequest?.title }}</p>
+      <p><strong>Description:</strong> {{ selectedRequest?.description }}</p>
+      <p><strong>Department:</strong> {{ departmentName }}</p>
+      <p><strong>Office:</strong> {{ officeName }}</p>
+      <p><strong>Date Created:</strong> {{ selectedRequest?.dateCreated | date: 'short' }}</p>
+    </div>
+
+    <h3 class="text-lg font-bold mb-2">Signature</h3>
+    <div class="signature-preview">
+      <img *ngIf="signatureDataUrl" [src]="signatureDataUrl" alt="Signature" class="w-48 h-24 border border-gray-300" />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-between gap-4">
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-times"
+        class="p-button-secondary"
+        [outlined]="true"
+        size="small"
+        (click)="closePreviewDialog()"
+      ></button>
+      <button
+        pButton
+        label="Confirm Approval"
+        icon="pi pi-check"
+        class="p-button-success"
+        [outlined]="true"
+        size="small"
+        (click)="confirmApproval()"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- PDF Preview Dialog -->
+<p-dialog
+  header="Attachment Preview"
+  [(visible)]="displayPdfDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '800px' }"
+  [resizable]="false"
+>
+  <iframe
+    *ngIf="selectedPdfUrl"
+    [src]="selectedPdfUrl"
+    width="100%"
+    height="500px"
+    style="border: none;"
+  ></iframe>
+</p-dialog>
+
+<!-- Purchase Request Dialog -->
+
+<p-dialog
+  header="Purchase Request"
+  [(visible)]="displayPurchaseReqDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '800px' }"
+  [resizable]="false"
+  (onHide)="closePurchaseReqDialog()" 
+>
+  <app-purchase-req *ngIf="selectedRequisitionId" [requisitionId]="selectedRequisitionId"></app-purchase-req>
+</p-dialog>

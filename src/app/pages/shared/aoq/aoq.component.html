@@ -1,0 +1,59 @@
+<div class="p-10 ml-10 bg-white shadow-md rounded-lg w-full" style="width: 390mm; height: 350mm;">
+    <h1 class="text-2xl font-bold mb-4 flex justify-center">ABSTRACT OF QUOTATIONS</h1>
+    
+    <div class="mb-4 text-xl">
+      <div class="flex flex-row justify-between">
+        <p><strong>DATE:</strong> {{ currentDate | date }}</p>
+        <p><strong>MODE OF PROCUREMENT:</strong> {{ requisitionData?.title }} Small</p>
+      </div>
+    </div>
+  
+    <table class="w-full border-collapse border border-gray-300 text-xl" style="table-layout: fixed;">
+      <thead>
+        <tr class="bg-gray-200">
+          <th class="border border-gray-300 p-4" style="width: 5%;">Lot</th>
+          <th class="border border-gray-300 p-4" style="width: 10%;">Unit of Measurement</th>
+          <th class="border border-gray-300 p-4" style="width: 20%;">Item Description</th>
+          <th class="border border-gray-300 p-4" style="width: 15%;">ABC</th>
+          <th class="border border-gray-300 p-4" style="width: 15%;">Supplier Name</th>
+          <th class="border border-gray-300 p-4" style="width: 15%;">Supplier Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of requisitionData?.products">
+          <td class="border border-gray-300 p-4">{{ 1 }}</td>
+          <td class="border border-gray-300 p-4">lot</td>
+          <td class="border border-gray-300 p-4">{{ requisitionData?.title }}</td>
+          <td class="border border-gray-300 p-4">{{ (product.quantity * product.price) | number: '1.2-2' }}</td>
+          <td class="border border-gray-300 p-4">{{ getWinner()?.supplierName || 'N/A' }}</td>
+          <td class="border border-gray-300 p-4">P{{getWinner()?.biddingPrice || 'N/A' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mt-4 text-xl">
+      <p><strong>RESOLVED,</strong> that based on the above Abstract of Quotations, the BAC recommends to the Head that the contract be awarded in favor of {{ getWinner()?.supplierName }} as the single calculated and responsive bidder/quotation.</p>
+      <p><strong>RESOLVED,</strong> this {{ currentDate | date }} in Davao.</p>
+    </div>
+
+    <div class="mt-4 text-xl">
+      <div class="flex flex-row justify-between">
+        <p><strong>Purchase Requisition No. {{ requisitionData?.id }}</strong></p>
+        <p><strong>Purchase Order No. {{ rfqData?.purchase_order }}</strong></p>
+      </div>
+      <div class="flex flex-row justify-between">
+        <p><strong>PREPARED BY:</strong> {{ requisitionData?.createdByUserName }}</p>
+      </div>
+    </div>
+
+    <div class="mt-4 text-xl">
+      <p><strong>Recommending Approval:</strong></p>
+      <p>Admin - Chairperson, BAC</p>
+      <p>Manager - BAC Member</p>
+    </div>
+
+    <div class="mt-4 text-xl">
+      <p><strong>APPROVED:</strong></p>
+      <p>Head of Procuring Entity </p>
+    </div>
+  </div>

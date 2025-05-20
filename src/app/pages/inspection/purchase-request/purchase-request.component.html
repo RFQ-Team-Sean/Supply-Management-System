@@ -1,0 +1,473 @@
+@if(loading){
+  <div class="pr-container">
+    <div class="a4-container">
+      <div class="rounded border border-surface-200 dark:border-surface-700 p-6 bg-surface-0 dark:bg-surface-900">
+          <div class="flex justify-between w-full mb-4">
+              <p-skeleton shape="circle" size="4rem" styleClass="mr-2" />
+              <div class="items-center flex flex-col">
+                  <p-skeleton width="20rem" styleClass="mb-2" />
+                  <p-skeleton width="16rem" styleClass="mb-2" />
+                  <p-skeleton width="22rem" styleClass="mb-2" />
+                  <p-skeleton width="10rem" styleClass="mb-2" />
+              </div>
+              <div class="flex gap-3">
+                  <p-skeleton shape="circle" size="4rem" styleClass="mr-2" />
+                  <p-skeleton shape="circle" size="4rem" styleClass="mr-2" />
+              </div>
+          </div>
+          <p-skeleton width="100%" height="70px"  />
+          <p-skeleton width="100%" height="80px" styleClass="mt-2" />
+          <p-skeleton width="100%" height="180px" styleClass="mt-2" />
+          <p-skeleton width="100%" height="250px" styleClass="mt-2" />
+          <div class="flex justify-end mt-4">
+              <p-skeleton width="4rem" height="2rem" />
+              <p-skeleton width="4rem" height="2rem" />
+          </div>
+      </div>
+    </div>
+</div>
+}@else{
+  <p-card>
+    <!-- Main Container -->
+    <div class="pr-container">
+      <!-- A4 Container with proper pagination -->
+      <div class="a4-container">
+        <!-- First page with all content -->
+        <div class="a4-page first-page">
+          <!-- Header Section -->
+          <div class="header non-editable no-break">
+            <div class="logo-section">
+              <img src="../../../../assets/images/logos/qby.png" alt="DACSU Logo" class="logo"/>
+              <div class="header-text">
+                <h3>DON ANTON CAESAR STATE UNIVERSITY</h3>
+                <p>Brgy. Barangahawon, Tabaco</p>
+                <p>Purchase Request {{currentRequest.requisitioningOffice.toUpperCase()}}, 4th Quarter</p>
+                <p>Calendar Year 2025</p>
+              </div>
+              <div class="right-logos">
+                <img src="../../../../assets/images/logos/BP.png" alt="Bagong Pilipinas Logo" class="logo"/>
+                <img src="../../../../assets/images/logos/ISO.png" alt="ISO Certified Logo" class="logo"/>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Vendor Information -->
+          <div *ngIf="currentRequest.vendor" class="vendor-info-section no-break">
+            <div class="vendor-header">VENDOR INFORMATION</div>
+            <div class="vendor-details-container">
+              <!-- Left Side (2/5): TEL/FAX and EMAIL -->
+              <div class="vendor-left-column">
+                <div class="vendor-field">
+                  <div class="label">TEL. NO./FAX NO.:</div>
+                  <div class="value">
+                    <span *ngIf="!isEditMode">{{currentRequest.vendor?.telFax || 'N/A'}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="currentRequest.vendor!.telFax" 
+                          class="p-inputtext-sm"/>
+                  </div>
+                </div>
+                <div class="vendor-field">
+                  <div class="label">EMAIL:</div>
+                  <div class="value">
+                    <span *ngIf="!isEditMode">{{currentRequest.vendor?.email || 'N/A'}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="currentRequest.vendor!.email" 
+                          class="p-inputtext-sm"/>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Right Side (3/5): COMPANY NAME, TIN, ADDRESS -->
+              <div class="vendor-right-column">
+                <div class="vendor-field">
+                  <div class="label">COMPANY NAME:</div>
+                  <div class="value">
+                    <span *ngIf="!isEditMode">{{currentRequest.vendor?.companyName || 'N/A'}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="currentRequest.vendor!.companyName" 
+                          class="p-inputtext-sm"/>
+                  </div>
+                </div>
+                <div class="vendor-field">
+                  <div class="label">TIN:</div>
+                  <div class="value">
+                    <span *ngIf="!isEditMode">{{currentRequest.vendor?.tin || 'N/A'}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="currentRequest.vendor!.tin" 
+                          class="p-inputtext-sm"/>
+                  </div>
+                </div>
+                <div class="vendor-field">
+                  <div class="label">ADDRESS:</div>
+                  <div class="value">
+                    <span *ngIf="!isEditMode">{{currentRequest.vendor?.address || 'N/A'}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="currentRequest.vendor!.address" 
+                          class="p-inputtext-sm"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> 
+          
+          <!-- Purchase Request Form -->
+          <div class="pr-form">
+            <div class="pr-header no-break">
+              <div class="pr-title">PURCHASE REQUEST</div>
+              <div class="pr-annex">
+                <div class="editable-field">
+                  <p *ngIf="!isEditMode">{{currentRequest.coaInfo?.annexNo || 'Annex G-6'}}</p>
+                  <input *ngIf="isEditMode && currentRequest.coaInfo" 
+                        pInputText 
+                        [(ngModel)]="currentRequest.coaInfo.annexNo" 
+                        class="p-inputtext-sm"/>
+                </div>
+                <div class="editable-field">
+                  <p *ngIf="!isEditMode">{{currentRequest.coaInfo?.circularNo || 'COA Circular No. 2001-04, S. 2001'}}</p>
+                  <input *ngIf="isEditMode && currentRequest.coaInfo" 
+                        pInputText 
+                        [(ngModel)]="currentRequest.coaInfo.circularNo" 
+                        class="p-inputtext-sm"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="pr-details no-break">
+              <div class="requisition-office">
+                <p><strong>REQUISITIONING OFFICE:</strong></p>
+                <div class="editable-field">
+                  <span *ngIf="!isEditMode">{{currentRequest.requisitioningOffice.toUpperCase()}}</span>
+                  <input *ngIf="isEditMode" 
+                        pInputText 
+                        [(ngModel)]="currentRequest.requisitioningOffice" 
+                        class="p-inputtext-sm"/>
+                </div>
+              </div>
+              <div class="pr-numbers">
+                <div class="labels">
+                  <p>P.R. No.:</p>
+                  <p>SAI No.:</p>
+                  <p>ALOBS No.:</p>
+                </div>
+                <div class="values">
+                  <div class="editable-field">
+                    <span *ngIf="!isEditMode">{{currentRequest.prNo}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="currentRequest.prNo" 
+                          class="p-inputtext-sm"/>
+                  </div>
+                  <div class="editable-field">
+                    <span *ngIf="!isEditMode">{{currentRequest.sai?.no || 'N/A'}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="currentRequest.sai!.no" 
+                          class="p-inputtext-sm"/>
+                  </div>
+                  <div class="editable-field">
+                    <span *ngIf="!isEditMode">{{currentRequest.alobs?.no || 'N/A'}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="currentRequest.alobs!.no" 
+                          class="p-inputtext-sm"/>
+                  </div>
+                </div>
+                <div class="dates">
+                  <div class="editable-field">
+                    <span *ngIf="!isEditMode">Date: {{currentRequest.request_date | date}}</span>
+                    <p-calendar *ngIf="isEditMode" 
+                              [(ngModel)]="currentRequest.request_date" 
+                              [showIcon]="true"
+                              dateFormat="mm/dd/yy"
+                              class="p-calendar-sm"></p-calendar>
+                  </div>
+                  <div class="editable-field">
+                    <span *ngIf="!isEditMode">Date: {{currentRequest.sai?.date | date}}</span>
+                    <p-calendar *ngIf="isEditMode" 
+                              [(ngModel)]="saiDate" 
+                              [showIcon]="true"
+                              dateFormat="mm/dd/yy"
+                              class="p-calendar-sm"></p-calendar>
+                  </div>
+                  <div class="editable-field">
+                    <span *ngIf="!isEditMode">Date: {{currentRequest.alobs?.date | date }}</span>
+                    <p-calendar *ngIf="isEditMode" 
+                              [(ngModel)]="alobsDate" 
+                              [showIcon]="true"
+                              dateFormat="mm/dd/yy"
+                              class="p-calendar-sm"></p-calendar>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Items Table -->
+            <p-table [value]="currentRequest.items" [scrollable]="true" [responsive]="true" styleClass="auto-paginate-table">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>ITEM NO.</th>
+                  <th>UNIT</th>
+                  <th>ITEM / DESCRIPTION</th>
+                  <th>QTY.</th>
+                  <th>ESTIMATED UNIT COST</th>
+                  <th>ESTIMATED TOTAL</th>
+                  <th *ngIf="isEditMode" style="width: 6rem">ACTIONS</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-item let-index="rowIndex">
+                <tr class="table-row">
+                  <td>
+                    <span>{{index + 1}}</span>
+                  </td>
+                  <td>
+                    <span *ngIf="!isEditMode">{{item.unit_of_measurement}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="item.unit_of_measurement" 
+                          class="p-inputtext-sm w-full"/>
+                  </td>
+                  <td>
+                    <span *ngIf="!isEditMode">{{item.technical_specification}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          [(ngModel)]="item.technical_specification" 
+                          class="p-inputtext-sm w-full"/>
+                  </td>
+                  <td>
+                    <span *ngIf="!isEditMode">{{item.quantity_required}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          type="number" 
+                          [(ngModel)]="item.quantity_required" 
+                          (ngModelChange)="onQuantityOrCostChange()"
+                          class="p-inputtext-sm w-full"/>
+                  </td>
+                  <td>
+                    <span *ngIf="!isEditMode">{{item.estimated_unit_cost | number:'1.2-2'}}</span>
+                    <input *ngIf="isEditMode" 
+                          pInputText 
+                          type="number" 
+                          [(ngModel)]="item.estimated_unit_cost" 
+                          (ngModelChange)="onQuantityOrCostChange()"
+                          class="p-inputtext-sm w-full"/>
+                  </td>
+                  <td>{{item.estimated_total_cost | number:'1.2-2'}}</td>
+                  <td *ngIf="isEditMode" class="action-buttons">
+                    <button pButton 
+                            icon="pi pi-pencil" 
+                            class="p-button-rounded p-button-info p-button-sm mr-2"
+                            (click)="editItem(item)"></button>
+                    <button pButton 
+                            icon="pi pi-trash" 
+                            class="p-button-rounded p-button-danger p-button-sm"
+                            (click)="removeItem(index)"></button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="footer">
+                <tr>
+                  <td colspan="5" class="text-right"><strong>TOTAL</strong></td>
+                  <td><strong>₱ {{currentRequest.totalAmount | number:'1.2-2'}}</strong></td>
+                  <td *ngIf="isEditMode"></td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+            <!-- Add Item Button (Edit mode only) -->
+            <div *ngIf="isEditMode" class="flex justify-content-end mt-2">
+              <button pButton 
+                      label="Add Item" 
+                      icon="pi pi-plus" 
+                      class="p-button-sm"
+                      (click)="addNewItem()"></button>
+            </div>
+
+            <!-- Purpose Section -->
+            <div class="purpose-section mt-3 no-break">
+              <p><strong>Purpose:</strong></p>
+              <div class="editable-field">
+                <span *ngIf="!isEditMode">{{currentRequest.purpose}}</span>
+                <textarea *ngIf="isEditMode" 
+                        pInputTextarea 
+                        [(ngModel)]="currentRequest.purpose"
+                        [rows]="3" 
+                        class="w-full"></textarea>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Signatures Section (will be moved to page 2 automatically if it doesn't fit) -->
+          <div class="signature-section">
+            <div class="flex justify-between items-start flex-wrap gap-2">
+              <!-- Requester Signature Block -->
+              <div class="text-center signature-block">
+                <p>Requested by:</p>
+                <div class="signature-container">
+                  <div class="signature-image-container">
+                    <img *ngIf="currentRequest.signature" 
+                        [src]="currentRequest.signature" 
+                        alt="Signature" 
+                        class="signature-image" />
+                    
+                    <div *ngIf="isSigning && currentRequest.current_approver_level == 0 && currentRequest.user_id == user?.id" class="signature-actions">
+                      <button pButton 
+                              type="button" 
+                              icon="pi pi-upload" 
+                              class="p-button-rounded p-button-outlined p-button-sm"
+                              pTooltip="Upload Signature"
+                              (click)="openSignatureUpload('requester')"
+                              *ngIf="!currentRequest.signature"
+                              ></button>
+                      <div *ngIf="currentRequest.signature" class="mt-1 flex gap-1">
+                        <button pButton 
+                                type="button" 
+                                icon="pi pi-refresh" 
+                                class="p-button-rounded p-button-outlined p-button-sm"
+                                pTooltip="Change Signature"
+                                (click)="openSignatureUpload('requester')"></button>
+                        
+                        <button pButton 
+                                type="button" 
+                                icon="pi pi-trash" 
+                                class="p-button-rounded p-button-outlined p-button-danger p-button-sm"
+                                pTooltip="Remove Signature"
+                                (click)="removeSignature('requester')"></button>
+                      </div>
+    
+                    </div>
+                  </div>
+                  
+                  <!-- Signature line and name -->
+                  <div class="signature-line-container">
+                    <div class="editable-field non-editable ">
+                      <p class="name pdf-uppercase" >{{currentRequest.requestedBy.name}}</p>
+                    </div>
+                    <div class="editable-field non-editable ">
+                      <p class="designation" >{{currentRequest.requestedBy.designation}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Approvers -->
+              @for(approver of approvers; track approver.id){
+              <div class="text-center signature-block">
+                <p>Approved by:</p>
+                <div class="signature-container">
+                  <div class="signature-image-container">
+                    <img *ngIf="approver.signature" 
+                        [src]="approver.signature" 
+                        alt="Signature" 
+                        class="signature-image" />
+                    
+                    <div *ngIf="isSigning && currentRequest.current_approver_level == approver.approval_order && approver.user_id == user?.id" class="signature-actions">
+                      <button pButton 
+                              type="button" 
+                              icon="pi pi-upload" 
+                              class="p-button-rounded p-button-outlined p-button-sm"
+                              pTooltip="Upload Signature"
+                              (click)="openSignatureUpload('approver', approver)"
+                              *ngIf="!approver.signature"></button>
+                      
+                      <div *ngIf="approver.signature" class="mt-1 flex gap-1">
+                        <button pButton 
+                                type="button" 
+                                icon="pi pi-refresh" 
+                                class="p-button-rounded p-button-outlined p-button-sm"
+                                pTooltip="Change Signature"
+                                (click)="openSignatureUpload('approver', approver)"></button>
+                        
+                        <button pButton 
+                                type="button" 
+                                icon="pi pi-trash" 
+                                class="p-button-rounded p-button-outlined p-button-danger p-button-sm"
+                                pTooltip="Remove Signature"
+                                (click)="removeSignature('approver', approver.id)"></button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Signature line and name -->
+                  <div class="signature-line-container">
+                    <div class="editable-field non-editable">
+                      <p class="name pdf-uppercase">{{approver.approver}}</p>
+                    </div>
+                    <div class="editable-field non-editable">
+                      <p class="designation " >{{approver.name}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+          
+          <!-- Page number (gets updated during pagination) -->
+          <div class="page-number">Page 1</div>
+        </div>
+        
+        <!-- Additional pages will be created automatically if content overflows -->
+      </div>
+      
+      <!-- Action Buttons - Outside of the A4 pages -->
+      <div class="action-buttons flex justify-content-end gap-2 mt-3">
+        @if((currentRequest.current_approver_level == 0 && currentRequest.user_id == user?.id)
+        || currentApprover()?.user_id == user?.id
+        ){
+          <button pButton 
+          [label]="isSigning ? 'Cancel' : currentRequest.current_approver_level == 0 ? 'Finalize':'Approve'" 
+          [icon]="isSigning ? 'pi pi-times' : 'pi pi-check'"
+          [class]="isSigning ? 'p-button-secondary' : 'p-button-success'"
+          (click)="toggleSign()"></button>
+        }
+        @if(!isSigning){
+          <button pButton 
+                label="Export to PDF" 
+                icon="pi pi-file-pdf" 
+                [disabled]="isEditMode"
+                class="export-button"
+                (click)="exportToPDF()"></button>
+          @if(currentRequest.status == 'Draft'){
+            <button pButton 
+                  [label]="isEditMode ? 'Save Changes' : 'Edit'" 
+                  [icon]="isEditMode ? 'pi pi-save' : 'pi pi-pencil'"
+                  [class]="isEditMode ? 'p-button-success' : 'p-button-secondary'"
+                  (click)="toggleEditMode()"></button>
+                }
+        }
+       
+        <button pButton 
+                icon="pi pi-arrow-left" 
+                label="Back" 
+                class="p-button-secondary"
+                (click)="goBack()"></button>
+      </div>
+    </div>
+  </p-card>
+}
+
+<!-- Dialogs remain unchanged -->
+<p-dialog [(visible)]="itemDialogVisible" 
+          [style]="{width: '450px'}" 
+          header="Item Details" 
+          [modal]="true" 
+          styleClass="p-fluid">
+  <!-- Item dialog content -->
+</p-dialog>
+
+
+
+<p-toast position="bottom-right"></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+@if(approvedSignature.show){
+  <app-signature-modal [config]="approvedSignature" ></app-signature-modal>
+}
+@if(requestedSignature.show){
+  <app-signature-modal [config]="requestedSignature" ></app-signature-modal>
+}

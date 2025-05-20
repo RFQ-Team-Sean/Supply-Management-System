@@ -1,0 +1,137 @@
+<mat-toolbar class="topbar select-none">
+  <!-- Mobile Menu -->
+  @if(!showToggle) {
+  <button mat-mini-fab color="inherit" (click)="toggleMobileNav.emit()" class="d-flex justify-content-center">
+    <i class="iconify icon-20 d-flex" data-icon="solar:hamburger-menu-line-duotone"></i>
+  </button>
+  }
+  <!-- --------------------------------------------------------------- -->
+  <!-- Breadcrumps -->
+  <!-- --------------------------------------------------------------- -->
+
+  <div class="card mt-3 text-[1rem] font-normal px-2 py-2 flex justify-center">
+    <p-breadcrumb class="max-w-full" [model]="items">
+      <ng-template #item let-item>
+        <ng-container *ngIf="item.route; else elseBlock">
+          <a [routerLink]="item.route" class="p-breadcrumb-item-link transition-all hover:text-purple-700">
+            <span [ngClass]="[item.icon ? item.icon : '', 'text-color']"></span>
+            <span class="text-primaryfont-semibold">{{ item.label }}</span>
+          </a>
+        </ng-container>
+        <ng-template #elseBlock>
+          <a [href]="item.url" class="transition-all hover:text-purple-700">
+            <span class="text-color">{{ item.label }}</span>
+          </a>
+        </ng-template>
+      </ng-template>
+    </p-breadcrumb>
+  </div>
+
+  <span class="flex-1-auto"></span>
+  <p-iconfield fluid class="w-full max-w-60" [iconPosition]="'left'">
+    <p-autocomplete inputId="search" fluid placeholder="Find..." pSize="small"
+      [(ngModel)]="searchValue" [suggestions]="filteredSuggestions" (completeMethod)="search($event)">
+      <ng-template let-se #item>
+        <div class="flex justify-center flex-col">
+            <small >{{ se.value }}</small>
+            <small class="text-xs font-thin">{{ se.location }}</small>
+        </div>
+      </ng-template>
+    </p-autocomplete>
+    <p-inputicon styleClass="pi pi-search z-10"  />
+  </p-iconfield>
+  <!-- Notifications -->
+  <button mat-fab extended color="inherit" (click)="markNotificationsAsRead()" [matMenuTriggerFor]="notification"
+    aria-label="Notifications" class="d-flex justify-content-center profile-btn-dd">
+    @if(getUnreadCount()>0){
+    <p-overlaybadge badgeSize="small" [value]="getUnreadCount()" severity="danger">
+      <i class="pi pi-bell"></i>
+    </p-overlaybadge>
+    }@else{
+    <i class="pi pi-bell"></i>
+    }
+  </button>
+  @if(environment.use=='local'){
+    <button mat-fab extended color="inherit" (click)="clearCache()" 
+      aria-label="Notifications" class="d-flex justify-content-center profile-btn-dd">
+      <i class="pi pi-spinner"></i>
+    </button>
+  }
+  <mat-menu #notification="matMenu" class="topbar-dd cardWithShadow !pb-0 !mb-0">
+    <mat-card class="!pb-0 !mb-0">
+      <div class="px-6 py-2 flex items-end text-lg">
+        Notifications
+      </div>
+      @if(notifications.length <= 0){ <div class=" rounded-lg mx-2 my-2 px-4 py-2">
+        <div class="flex items-center gap-4">
+          <i class="pi pi-inbox text-2xl ml-2"></i>
+          <p-divider layout="vertical" />
+          <p class="text-left text-sm pb-2">No notifications yet.</p>
+        </div>
+        </div>
+        }@else{
+        <p-scrollpanel [style]="{ width: '100%', height: '200px' }">
+          @for(notification of notifications; track notification.id){
+          <div
+            class=" rounded-lg mx-2 my-2 px-4 py-2 cursor-pointer hover:bg-gray-50 border-b-2 border-gray-100 overflow-x-auto">
+            <div class="flex items-center gap-4">
+              @if(notification.type == 'success'){
+              <i class="pi pi-check-circle text-2xl ml-2 text-green-500"></i>
+              }@else if(notification.type == 'error'){
+              <i class="pi pi-times-circle text-2xl ml-2 text-red-500"></i>
+              }@else if(notification.type == 'warning'){
+              <i class="pi pi-exclamation-triangle text-2xl ml-2 text-orange-500"></i>
+              }@else if(notification.type == 'info'){
+              <i class="pi pi-arrow-circle-right text-2xl ml-2"></i>
+              }
+              <p-divider layout="vertical" />
+              <p class="text-left text-sm">{{notification.message}}</p>
+            </div>
+          </div>
+          }
+        </p-scrollpanel>
+        }
+    </mat-card>
+  </mat-menu>
+
+  <!-- Name -->
+  <small class="font-light"> {{greeting}}</small>
+  <div class="py-10">
+    <p-divider layout="vertical" />
+  </div>
+  <small class="font-light hover:text-purple-700 hover:cursor-pointer">{{user?.fullname}}</small>
+  <!-- --------------------------------------------------------------- -->
+  <!-- profile Dropdown -->
+  <!-- --------------------------------------------------------------- -->
+  <button mat-fab extended color="inherit" [matMenuTriggerFor]="profilemenu" aria-label="Notifications"
+    class="d-flex justify-content-center profile-btn-dd">
+    <img src="/assets/images/profile/user-1.jpg" class="rounded-circle object-cover icon-35 profile-dd" width="35" />
+  </button>
+  <mat-menu #profilemenu="matMenu" class="topbar-dd cardWithShadow">
+    <button mat-menu-item (click)="navigateToProfile()">
+      <mat-icon class="d-flex align-items-center">
+        <i data-icon="solar:shield-user-line-duotone" class="iconify icon-22"></i>
+      </mat-icon>
+      My Profile
+    </button>
+    <button mat-menu-item>
+      <mat-icon class="d-flex align-items-center">
+        <i data-icon="solar:user-id-line-duotone" class="iconify icon-22"></i>
+      </mat-icon>
+      My Account
+    </button>
+    <button mat-menu-item>
+      <mat-icon class="d-flex align-items-center">
+        <i data-icon="solar:checklist-minimalistic-line-duotone" class="iconify icon-22"></i>
+      </mat-icon>
+      My Task
+    </button>
+  
+    <div class="p-x-12 m-t-12">
+      <button (click)="confirmLogout($event)" mat-stroked-button color="primary" class="w-100">Logout</button>
+    </div>
+  </mat-menu>
+</mat-toolbar>
+
+<p-confirmdialog />
+<p-toast />

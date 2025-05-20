@@ -1,0 +1,30 @@
+
+<mat-card class="cardWithShadow">
+
+    <mat-card-content>
+      <div class="hstack align-items-center flex-column flex-lg-row">
+        <div class="w-100">
+          <mat-card-title>PRs Assigned by Month</mat-card-title>
+        </div>  
+      </div>
+      
+      <!-- chart -->
+      <div class="m-t-16" style="height: 250px">
+        <apx-chart
+          [series]="revenueForecastChart.series"
+          [chart]="revenueForecastChart.chart"
+          [colors]="revenueForecastChart.colors"
+          [plotOptions]="revenueForecastChart.plotOptions"
+          [dataLabels]="revenueForecastChart.dataLabels"
+          [legend]="revenueForecastChart.legend"
+          [grid]="revenueForecastChart.grid"
+          [yaxis]="revenueForecastChart.yaxis"
+          [xaxis]="revenueForecastChart.xaxis"
+          [tooltip]="revenueForecastChart.tooltip"
+        ></apx-chart>
+      </div>
+  
+     
+    </mat-card-content>
+  </mat-card>
+  

@@ -1,0 +1,70 @@
+<p-card class="p-4 shadow-lg rounded-lg">
+    <h1 class="font-semibold text-xl">Obligation Request and Status</h1>
+    <div class="flex justify-between mb-4 items-center">
+        <p>Review and certify fund availability for Obligation Requests</p>
+        <div class="relative w-[300px]">
+            <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+            <input  
+                #searchInput
+                type="text"
+                placeholder="Search Requests"
+                class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:ml-6"
+                (input)="filterRequests(searchInput.value)"            
+            />
+        </div>
+    </div>
+
+    <p-table
+        [value]="filteredRequests"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[10, 25, 50]"
+    >
+        <ng-template pTemplate="header">
+            <tr>
+            <th>ORS Number</th>
+            <th>Date</th>
+            <th>End-User Unit</th>
+            <th>Description</th>
+            <th>Amount Obligated</th>
+            <th>Status</th>
+            <th>Actions</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-request>
+            <tr>
+            <td>{{ request.orsNumber }}</td>
+            <td>{{ request.date | date: 'MM/dd/yyyy' }}</td>
+            <td>{{ request.endUserUnit }}</td>
+            <td>{{ request.description }}</td>
+            <td>{{ request.amountObligated | currency: 'PHP' }}</td>
+            <td class="text-white"> 
+                <span [ngClass]="{
+                        'bg-green-300 text-white': request.status === 'Certified',
+                        'bg-yellow-300 text-white':  request.status === 'Pending',
+                        'bg-red-300 text-white':  request.status === 'Rejected'
+                    }" class="px-2 py-1 rounded-full text-sm">
+                    {{ request.status }}
+                </span>
+            </td>
+            <td>
+                <div class="flex flex-row gap-2">
+                    <button pButton pTooltip="Certify Request" tooltipPosition="top"
+                        icon="pi pi-check" class="p-button-sm" [rounded]="true" severity="success" [disabled]="request.status !== 'Pending'" [outlined]="true"
+                        (click)="certifyRequest(request)">
+                    </button>
+                    <button pButton pTooltip="Reject Request" tooltipPosition="top"
+                            icon="pi pi-times" class="p-button-sm" [rounded]="true" severity="danger" [disabled]="request.status !== 'Pending'" [outlined]="true"
+                            (click)="rejectRequest(request)">
+                    </button>
+                </div>
+            </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+
+<p-toast key="orsToast" position="bottom-right"></p-toast>

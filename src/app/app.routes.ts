@@ -1,148 +1,123 @@
-import { RouterModule, Routes } from '@angular/router';
-import { NgModule } from '@angular/core';
-import { AuthGuard } from './core/services/auth-guard/auth.guard';
-
-import { AuthLayoutComponent } from './features/auth-layout/auth-layout.component';
-
-import { UserLayoutComponent } from './features/user-layout/user-layout.component';
-import { UDashboardComponent } from './features/user-layout/u-dashboard/u-dashboard.component';
-import { AdminLayoutComponent } from './features/admin-layout/admin-layout.component';
-import { ADashboardComponent } from './features/admin-layout/a-dashboard/a-dashboard.component';
-import { UPpmpmanagement } from './features/user-layout/u-ppmpmanagement/u-ppmpmanagement.component';
-import { UPurchaserequestComponent } from './features/user-layout/u-purchaserequest/u-purchaserequest.component';
-import { USupplymanagement } from './features/user-layout/u-supplymanagement/u-supplymanagement.component';
-import { UReports } from './features/user-layout/u-reports/u-reports.component';
-import { AActivitylogsComponent } from './features/admin-layout/user-management/a-activitylogs/a-activitylogs.component';
-import { ANotification } from './features/admin-layout/a-notification/a-notification.component';
-import { UserManagementComponent } from './features/admin-layout/user-management/user-management.component';
-import { AReportsComponent } from './features/admin-layout/a-reports/a-reports.component';
-import { UInventorymanagement } from './features/user-layout/u-inventorymanagement/u-inventorymanagement.component';
-import { CreateUserComponent } from './features/admin-layout/user-management/create-user/create-user.component';
-import { UNotification } from './features/user-layout/u-notification/u-notificationcomponent';
-import { USystemsetting } from './features/user-layout/u-systemsetting/u-systemsetting.component';
-import { UProfileComponent } from './features/user-layout/u-profile/u-profile.component';
-import { AProfileComponent } from './features/admin-layout/a-profile/a-profile.component';
-
-//GSO
-import { GsoDashboardComponent } from './features/gso-layout/gso-dashboard/gso-dashboard.component';
-import { GsoPurchaserequestComponent } from './features/gso-layout/gso-purchaserequest/gso-purchaserequest.component';
-import { GsoInventorymanagementComponent } from './features/gso-layout/gso-inventorymanagement/gso-inventorymanagement.component';
-import { GsoReportsComponent } from './features/gso-layout/gso-reports/gso-reports.component';
-import { GsoNotificationsComponent } from './features/gso-layout/gso-notifications/gso-notifications.component';
-import { GsoSystemsettingsComponent } from './features/gso-layout/gso-systemsettings/gso-systemsettings.component';
-import { GsoNewitemComponent } from './features/gso-layout/gso-inventorymanagement/gso-newitem/gso-newitem.component';
-import { GsoInventoryeditComponent } from './features/gso-layout/gso-inventorymanagement/gso-inventoryedit/gso-inventoryedit.component';
-import { AReportsdetailsComponent } from './features/admin-layout/a-reports/a-reportsdetails/a-reportsdetails.component';
-import { GsoSuppliermanagemnetComponent } from './features/gso-layout/gso-suppliermanagemnet/gso-suppliermanagemnet.component';
-import { UCreateprmComponent } from './features/user-layout/u-purchaserequest/u-createprm/u-createprm.component';
-import { DCreateppmpComponent } from './features/user-layout/u-ppmpmanagement/d-createppmp/d-createppmp.component';
-import { DViewppmpprocurementComponent } from './features/user-layout/u-ppmpmanagement/d-viewppmpprocurement/d-viewppmpprocurement.component';
-import { DUpdateppmpprocurementComponent } from './features/user-layout/u-ppmpmanagement/d-updateppmpprocurement/d-updateppmpprocurement.component';
-import { GsoPpmpentryComponent } from './features/gso-layout/gso-ppmpentry/gso-ppmpentry.component';
-import { GsoBiddingmanagementComponent } from './features/gso-layout/gso-biddingmanagement/gso-biddingmanagement.component';
-import { GsoprapprovedrequestTrackingComponent } from './features/gso-layout/gso-purchaserequest/gsopurchaserequest-approvedrequest/gsoprapprovedrequest-tracking/gsoprapprovedrequest-tracking.component';
-
-//BAC
-import { BacDashboardComponent } from './features/bac-layout/bac-dashboard/bac-dashboard.component';
-import { BacLayoutComponent } from './features/bac-layout/bac-layout.component';
-import { GsoLayoutComponent } from './features/gso-layout/gso-layout.component';
-import { BacBidmanagementComponent } from './features/bac-layout/bac-bidmanagement/bac-bidmanagement.component';
-import { GsoProfileComponent } from './features/gso-layout/gso-profile/gso-profile.component';
-import { BacBidevaluationComponent } from './features/bac-layout/bac-bidevaluation/bac-bidevaluation.component';
-import { BacSuppliermanagementComponent } from './features/bac-layout/bac-suppliermanagement/bac-suppliermanagement.component';
+import { Routes } from '@angular/router';
+import { BlankComponent } from './layouts/blank/blank.component';
+import { FullComponent } from './layouts/full/full.component';
+import { authGuard } from './guards/auth.guard';
+import { dashboardGuard } from './guards/dashboard.guard';
+import { ProfileComponent } from './pages/shared/profile/profile.component';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/login',
-    pathMatch: 'full',
-  },
-  {
-    path: 'login',
-    component: AuthLayoutComponent,
-  },
-  {
-    path: 'user',
-    component: UserLayoutComponent,
-    canActivate: [AuthGuard], // Protect user layout
-    data: { role: 'user' }, // Only allow users with 'user' role
+    component: FullComponent,
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: UDashboardComponent },
-      { path: 'u-ppmpmanagement', component: UPpmpmanagement },
-      { path: 'u-ppmpmanagement/create', component: DCreateppmpComponent },
-      { path: 'u-purchasemanagement', component: UPurchaserequestComponent },
-      { path: 'u-supplymanagement', component: USupplymanagement },
-      { path: 'u-inventorymanagement', component: UInventorymanagement},
-      { path: 'u-reports', component: UReports },
-      { path: 'u-systemsetting', component: USystemsetting },
-      { path: 'u-notification', component: UNotification },
-      { path: 'u-createprm', component: UCreateprmComponent },
-      { path: 'u-profile', component: UProfileComponent },
-      { path: 'd-viewppmprocurement/:id', component: DViewppmpprocurementComponent },
-      { path: 'd-updateppmprocurement/:id', component: DUpdateppmpprocurementComponent },
+      {
+        path: '',
+        redirectTo: '/dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        loadChildren: () =>
+          import('./pages/pages.routes').then((m) => m.PagesRoutes),
+        data: { breadcrumb: 'Dashboard' },
+      },
+      {
+        path: 'ui-components',
+        loadChildren: () =>
+          import('./pages/ui-components/ui-components.routes').then(
+            (m) => m.UiComponentsRoutes
+          ),
+        data: { breadcrumb: 'UI Components' },
+      },
+      {
+        path: 'inspection',
+        loadChildren: () =>
+          import('./pages/inspection/inspection.routes').then(
+            (m) => m.InspectionRoutes
+          ),
+        data: { breadcrumb: 'Inspection' },
+      },
+      {
+        path: 'supply-management',
+        data: { breadcrumb: 'Supply Management' },
+        loadChildren: () =>
+          import('./pages/supply-unit/supply-unit.routes').then(
+            (m) => m.SupplyUnitRoutes
+          ),
+      },
+      {
+        path: 'shared',
+        loadChildren: () =>
+          import('./pages/shared/shared.routes').then((m) => m.SharedRoutes),
+        data: { breadcrumb: 'Views' },
+      },
+      {
+        path: 'extra',
+        loadChildren: () =>
+          import('./pages/extra/extra.routes').then((m) => m.ExtraRoutes),
+        data: { breadcrumb: 'Extra' },
+      },
+      {
+        path: 'admin',
+        data: { breadcrumb: 'Admin' },
+        loadChildren: () =>
+          import('./pages/admin/admin.routes').then((m) => m.AdminRoutes),
+      },
+      {
+        path: 'bac',
+        data: { breadcrumb: 'BAC' },
+        loadChildren: () =>
+          import('./pages/bac/bac.routes').then((m) => m.bacRoutes),
+      },
+      {
+        path: 'enduser',
+        data: { breadcrumb: 'End User' },
+        loadChildren: () =>
+          import('./pages/enduser/enduser.routes').then((m) => m.enduserRoutes),
+      },
+      {
+        path: 'accounting',
+        data: { breadcrumb: 'Accounting' },
+        loadChildren: () =>
+          import('./pages/accounting/accounting.routes').then((m) => m.AccountingRoutes), 
+      },
+      {
+        path: 'supplier',
+        data: { breadcrumb: 'Supplier' },
+        loadChildren: () =>
+          import('./pages/supplier/supplier.routes').then((m) => m.SupplierRoutes), 
+      },
+      // Add the profile route here at the root level
+      {
+        path: 'profile',
+        component: ProfileComponent, // Directly reference the ProfileComponent
+        data: {
+          title: 'Profile',
+          urls: [
+            { title: 'Dashboard', url: '/dashboard' },
+            { title: 'Profile' },
+          ],
+        },
+      },
     ],
+    canActivate: [dashboardGuard], // Apply dashboardGuard to all child routes
   },
   {
-    path: 'admin',
-    component: AdminLayoutComponent,
-    canActivate: [AuthGuard],
-    data: { role: 'admin' },
+    path: '',
+    component: BlankComponent,
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: ADashboardComponent },
-      { path: 'a-activitylogs', component: AActivitylogsComponent },
-      { path: 'a-reports', component: AReportsComponent },
-      { path: 'a-notification', component: ANotification },
-      { path: 'user-management', component: UserManagementComponent },
-      { path: 'create-user', component: CreateUserComponent },
-      { path: 'a-reportsdetails/:reportCode', component: AReportsdetailsComponent },
-      { path: 'a-profile', component: AProfileComponent },
-    ],
-  },
-  {
-    path: 'gso',
-    component: GsoLayoutComponent,
-    canActivate: [AuthGuard],
-    data: { role: 'gso' },
-    children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: GsoDashboardComponent },
-      { path: 'gso-ppmpentry', component: GsoPpmpentryComponent },
-      { path: 'gso-biddingmanagement', component: GsoBiddingmanagementComponent },
-      { path: 'gso-purchaserequest', component: GsoPurchaserequestComponent },
-      { path: 'gso-purchaserequest/approved-tracking/:pr_id', component: GsoprapprovedrequestTrackingComponent },
-      { path: 'gso-inventorymanagement', component: GsoInventorymanagementComponent },
-      { path: 'gso-suppliermanagement', component: GsoSuppliermanagemnetComponent },
-      { path: 'gso-reports', component: GsoReportsComponent },
-      { path: 'gso-notifications', component: GsoNotificationsComponent },
-      { path: 'gso-systemsettings', component: GsoSystemsettingsComponent },
-      { path: 'gso-newitem', component: GsoNewitemComponent },
-      { path: 'gso-inventoryvedit/:id', component: GsoInventoryeditComponent },
-      { path: 'a-profile', component: AProfileComponent },
-    ],
-  },
-  {
-    path: 'bac',
-    component: BacLayoutComponent,
-    canActivate: [AuthGuard],
-    data: { role: 'bac' },
-    children: [
-        { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-        { path: 'dashboard', component: BacDashboardComponent },
-        { path: 'bac-bidevaluation', component: BacBidevaluationComponent},
-        { path: 'bac-bidmanagement', component: BacBidmanagementComponent },
-        { path: 'bac-suppliermanagement', component: BacSuppliermanagementComponent },
+      {
+        path: 'authentication',
+        loadChildren: () =>
+          import('./pages/authentication/authentication.routes').then(
+            (m) => m.AuthenticationRoutes
+          ),
+        canActivate: [authGuard], // Apply authGuard to authentication routes
+      },
     ],
   },
   {
     path: '**',
-    redirectTo: '/login', // or a 404 page
+    redirectTo: '/dashboard',
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

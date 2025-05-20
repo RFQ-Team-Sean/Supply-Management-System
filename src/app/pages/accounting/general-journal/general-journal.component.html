@@ -1,0 +1,231 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>General Journal</mat-card-title>
+    <mat-card-subtitle class="mat-body-1 mb-10 !flex justify-between items-center">
+      <span> Review and manage journal entries. </span>
+      <p-iconfield fluid class="w-full max-w-72">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          fluid
+          class="w-full"
+          pSize="small"
+          [(ngModel)]="searchValue"
+          (input)="dt.filterGlobal(searchValue, 'contains')"
+          type="text"
+          pInputText
+          placeholder="Search"
+        />
+      </p-iconfield>
+    </mat-card-subtitle>
+
+    <!-- General Journal Table -->
+    <p-table
+      #dt
+      [value]="filteredJournalEntries"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [globalFilterFields]="['entryNo', 'description']"
+      [tableStyle]="{ 'min-width': '50rem' }"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Entry No</th>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Debit Total</th>
+          <th>Credit Total</th>
+          <th style="width: 5rem">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-entry>
+        <tr>
+          <td>{{ entry.entryNo }}</td>
+          <td>{{ entry.date | date: 'MM/dd/yyyy' }}</td>
+          <td>{{ entry.description }}</td>
+          <td>{{ entry.debitTotal | currency }}</td>
+          <td>{{ entry.creditTotal | currency }}</td>
+          <td>
+            <div class="flex gap-3">
+              <p-button
+                severity="secondary"
+                pTooltip="Click to edit entry"
+                [outlined]="true"
+                size="small"
+                icon="pi pi-pencil"
+                rounded
+                (click)="editEntry(entry)"
+              ></p-button>
+              <p-button
+                severity="danger"
+                pTooltip="Click to delete entry"
+                [outlined]="true"
+                size="small"
+                icon="pi pi-trash"
+                rounded
+                (click)="confirmDeleteEntry($event, entry.entryNo)"
+              ></p-button>
+              <p-button
+                severity="info"
+                pTooltip="Export to PDF"
+                [outlined]="true"
+                size="small"
+                icon="pi pi-file-pdf"
+                rounded
+                (click)="exportToPDF(entry)"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="6">
+            <div class="flex flex-col w-full items-center justify-center mb-8">
+              <div class="overflow-hidden h-52 w-52 mr-8">
+                <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+              </div>
+              <span>No journal entries found.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+<!-- Add/Edit Journal Entry Modal -->
+<p-dialog
+  [(visible)]="showAddEntryModal"
+  [modal]="true"
+  [style]="{ width: '50rem', 'max-height': '90vh', overflow: 'auto' }"
+>
+  <ng-template #header>
+    <h3 class="text-lg font-semibold text-gray-700">
+      {{ isEditing ? 'Edit Journal Entry' : 'Add Journal Entry' }}
+    </h3>
+  </ng-template>
+  <form [formGroup]="journalEntryForm" (ngSubmit)="saveEntry()" class="space-y-4">
+    <!-- Date Field -->
+    <div class="form-group">
+      <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+      <p-calendar
+        formControlName="date"
+        [showIcon]="true"
+        class="w-full"
+      ></p-calendar>
+      <small
+        *ngIf="journalEntryForm.get('date')?.invalid && journalEntryForm.get('date')?.touched"
+        class="text-red-500"
+      >
+        Date is required.
+      </small>
+    </div>
+
+    <!-- Description Field -->
+    <div class="form-group">
+      <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+      <input
+        type="text"
+        pInputText
+        formControlName="description"
+        placeholder="Enter description"
+        class="w-full"
+      />
+      <small
+        *ngIf="journalEntryForm.get('description')?.invalid && journalEntryForm.get('description')?.touched"
+        class="text-red-500"
+      >
+        Description is required.
+      </small>
+    </div>
+
+    <!-- Transactions Section -->
+    <div>
+      <h4 class="text-md font-medium text-gray-600 mb-2">Transactions</h4>
+      <div
+        *ngFor="let transaction of transactions.controls; let i = index"
+        class="grid grid-cols-12 gap-3 items-center mb-3"
+        [formGroupName]="i"
+      >
+        <!-- Account Dropdown -->
+        <p-dropdown
+          class="col-span-5"
+          [options]="accounts"
+          optionLabel="name"
+          formControlName="account"
+          placeholder="Select Account"
+        ></p-dropdown>
+
+        <!-- Debit Input -->
+        <input
+          type="number"
+          pInputText
+          formControlName="debit"
+          placeholder="Debit Amount"
+          class="col-span-3"
+        />
+
+        <!-- Credit Input -->
+        <input
+          type="number"
+          pInputText
+          formControlName="credit"
+          placeholder="Credit Amount"
+          class="col-span-3"
+        />
+
+        <!-- Remove Button -->
+        <button
+          pButton
+          icon="pi pi-minus"
+          class="p-button-danger col-span-1"
+          (click)="removeTransaction(i)"
+          pTooltip="Remove transaction"
+        ></button>
+      </div>
+
+      <!-- Validation Error for Transactions -->
+      <small
+        *ngIf="transactions.invalid && transactions.touched"
+        class="text-red-500"
+      >
+        Ensure all transactions are valid and balanced.
+      </small>
+    </div>
+
+    <!-- Add Transaction Button -->
+    <div>
+      <button
+        pButton
+        icon="pi pi-plus"
+        label="Add Transaction"
+        class="p-button-outlined w-full"
+        (click)="addTransaction()"
+      ></button>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="flex justify-end space-x-3 mt-4">
+      <button
+        pButton
+        label="Save"
+        icon="pi pi-check"
+        type="submit"
+        class="p-button-success"
+        [disabled]="journalEntryForm.invalid"
+      ></button>
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-times"
+        class="p-button-secondary"
+        (click)="showAddEntryModal = false"
+      ></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-toast position="bottom-right" />

@@ -1,0 +1,297 @@
+<div class="p-fluid">
+    <!-- Table of Return Requests -->
+    <p-card header="Return Requests" styleClass="p-shadow-3 mb-4">
+        <div class="flex flex-row items-center justify-between">
+            <p>Manage and track return requests for items and equipment.</p>
+            <div class="p-field" style="text-align: right; margin-top: 1rem">
+                <p-button
+                    *ngIf="canCreateRequest()"
+                    label="Create Return Request"
+                    (onClick)="showDialog()"
+                    styleClass="p-button-success"
+                    [size]="'small'"
+                    [outlined]="true"
+                    icon="pi pi-plus"
+                ></p-button>
+            </div>
+        </div>
+        <p-table [value]="returnRequests" [paginator]="true" [rows]="5" [responsive]="true">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Request No.</th>
+                    <th>Requested By</th>
+                    <th>Department</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-request>
+                <tr>
+                    <td>{{ request.requestNo }}</td>
+                    <td>{{ request.requestedBy }}</td>
+                    <td>{{ request.department }}</td>
+                    <td>{{ request.dateRequested | date: 'mediumDate' }}</td>
+                    <td>
+                        <p-tag [value]="request.status" [severity]="getStatusSeverity(request.status)" [style]="{ 'font-size': '0.875rem' }"></p-tag>
+                    </td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button 
+                                icon="pi pi-pencil" 
+                                (click)="editRequest(request)"
+                                [disabled]="!canEditRequest(request)"
+                                styleClass="p-button-rounded p-button-text p-button-primary"
+                                pTooltip="Edit Request"
+                            ></p-button>
+                            <p-button 
+                                icon="pi pi-trash" 
+                                (click)="deleteRequest(request)"
+                                [disabled]="!canDeleteRequest(request)"
+                                styleClass="p-button-rounded p-button-text p-button-danger"
+                                pTooltip="Delete Request"
+                            ></p-button>
+                            <p-button 
+                                *ngIf="canApproveRequest() && request.status === 'Pending'"
+                                icon="pi pi-check" 
+                                (click)="approveRequest(request)"
+                                styleClass="p-button-rounded p-button-text p-button-success"
+                                pTooltip="Approve Request"
+                            ></p-button>
+                            <p-button 
+                                *ngIf="canApproveRequest() && request.status === 'Pending'"
+                                icon="pi pi-times" 
+                                (click)="rejectRequest(request)"
+                                styleClass="p-button-rounded p-button-text p-button-warning"
+                                pTooltip="Reject Request"
+                            ></p-button>
+                            <p-button 
+                                *ngIf="canCompleteReturn() && request.status === 'Approved'"
+                                icon="pi pi-check-circle" 
+                                (click)="completeReturn(request)"
+                                styleClass="p-button-rounded p-button-text p-button-success"
+                                pTooltip="Complete Return"
+                            ></p-button>
+                            <p-button 
+                                icon="pi pi-history" 
+                                (click)="showAuditLogs(request)"
+                                styleClass="p-button-rounded p-button-text p-button-info"
+                                pTooltip="View Audit Logs"
+                            ></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6" class="text-center p-4">No return requests found.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+
+    <!-- Return Request Dialog -->
+    <p-dialog
+        header="{{ editingIndex === -1 ? 'Create' : 'Edit' }} Return Request"
+        [(visible)]="displayDialog"
+        [modal]="true"
+        [style]="{ width: '80vw', maxWidth: '1200px' }"
+        [draggable]="false"
+        [resizable]="false"
+        appendTo="body"
+    >
+        <form [formGroup]="returnForm" class="p-4" (ngSubmit)="saveRequest()">
+            <!-- Main Form Section -->
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <!-- Left Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Request No.</label>
+                        <input type="text" pInputText formControlName="requestNo" class="w-full p-inputtext-sm" readonly />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Requested By</label>
+                        <input type="text" pInputText formControlName="requestedBy" class="w-full p-inputtext-sm" />
+                    </div>
+                </div>
+
+                <!-- Middle Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" pInputText formControlName="department" class="w-full p-inputtext-sm" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date Requested</label>
+                        <input type="date" pInputText formControlName="dateRequested" class="w-full p-inputtext-sm" />
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <input type="text" pInputText formControlName="status" class="w-full p-inputtext-sm" readonly />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+                        <textarea pInputTextarea formControlName="remarks" class="w-full p-inputtext-sm" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reason Section -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Reason for Return</label>
+                <textarea pInputTextarea formControlName="reason" class="w-full p-inputtext-sm" rows="3"></textarea>
+            </div>
+
+            <!-- Items Section -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-lg font-medium text-gray-700">Items to Return</label>
+                    <p-button 
+                        label="Add Item" 
+                        icon="pi pi-plus" 
+                        styleClass="p-button-sm p-button-success"
+                        (onClick)="showItemDialog()"
+                    ></p-button>
+                </div>
+                <p-table [value]="items" [scrollable]="true" [scrollHeight]="'300px'" styleClass="p-datatable-sm p-datatable-gridlines">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Property No.</th>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Condition</th>
+                            <th>Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item let-i="rowIndex">
+                        <tr>
+                            <td>{{item.propertyNo}}</td>
+                            <td>{{item.description}}</td>
+                            <td>{{item.quantity}}</td>
+                            <td>{{item.condition}}</td>
+                            <td>{{item.remarks}}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <button pButton icon="pi pi-pencil" class="p-button-sm p-button-text" (click)="editItem(i)"></button>
+                                    <button pButton icon="pi pi-trash" class="p-button-sm p-button-text p-button-danger" (click)="deleteItem(i)"></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="6" class="text-center p-4">No items added yet.</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex justify-end gap-2 mt-4">
+                <p-button
+                    label="Cancel"
+                    icon="pi pi-times"
+                    styleClass="p-button-secondary p-button-sm"
+                    (onClick)="displayDialog = false"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    icon="pi pi-check"
+                    styleClass="p-button-success p-button-sm"
+                    type="submit"
+                    [disabled]="returnForm.invalid || items.length === 0"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+
+    <!-- Item Dialog -->
+    <p-dialog
+        header="{{ editingItemIndex === -1 ? 'Add' : 'Edit' }} Item"
+        [(visible)]="displayItemDialog"
+        [modal]="true"
+        [style]="{ width: '50vw' }"
+        [draggable]="false"
+        [resizable]="false"
+        appendTo="body"
+    >
+        <form [formGroup]="itemForm" class="p-4" (ngSubmit)="saveItem()">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Property No.</label>
+                    <input type="text" pInputText formControlName="propertyNo" class="w-full p-inputtext-sm" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" pInputText formControlName="quantity" class="w-full p-inputtext-sm" />
+                </div>
+                <div class="col-span-2 mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea pInputTextarea formControlName="description" class="w-full p-inputtext-sm" rows="2"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Condition</label>
+                    <p-dropdown 
+                        [options]="conditions" 
+                        formControlName="condition"
+                        [style]="{'width':'100%'}"
+                        placeholder="Select Condition"
+                    ></p-dropdown>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+                    <input type="text" pInputText formControlName="remarks" class="w-full p-inputtext-sm" />
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex justify-end gap-2 mt-4">
+                <p-button
+                    label="Cancel"
+                    icon="pi pi-times"
+                    styleClass="p-button-secondary p-button-sm"
+                    (onClick)="displayItemDialog = false"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    icon="pi pi-check"
+                    styleClass="p-button-success p-button-sm"
+                    type="submit"
+                    [disabled]="itemForm.invalid"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+
+    <!-- Audit Logs Dialog -->
+    <p-dialog
+        header="Audit Logs"
+        [(visible)]="displayAuditDialog"
+        [modal]="true"
+        [style]="{ width: '60vw' }"
+        [draggable]="false"
+        [resizable]="false"
+        appendTo="body"
+    >
+        <div class="p-4" *ngIf="selectedRequest">
+            <p-timeline [value]="selectedRequest.auditLogs" align="alternate">
+                <ng-template pTemplate="content" let-log>
+                    <div class="flex flex-col gap-2">
+                        <div class="font-medium text-xl mb-1">{{log.action}}</div>
+                        <div class="text-sm text-gray-500">{{log.timestamp | date:'medium'}}</div>
+                        <div class="text-sm">{{log.details}}</div>
+                        <div class="text-sm text-blue-600">Performed by: {{log.performedBy}}</div>
+                    </div>
+                </ng-template>
+            </p-timeline>
+        </div>
+    </p-dialog>
+
+    <!-- Toast for notifications -->
+    <p-toast></p-toast>
+</div> 

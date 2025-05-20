@@ -1,0 +1,297 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Supplier Management</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      View and manage suppliers in this section.
+    </mat-card-subtitle>
+
+    <div class="flex justify-between items-center mt-4">
+      <p-button
+        pTooltip="Add Supplier"
+        (click)="openNewSupplierDialog()"
+        [outlined]="true"
+        size="small"
+        label="Add Supplier"
+        icon="pi pi-plus"
+      ></p-button>
+
+          <p-button
+      pTooltip="Reset Data"
+      (click)="resetData()"
+      [outlined]="true"
+      severity="danger"
+      size="small"
+      label="Reset Data"
+      icon="pi pi-refresh"
+    ></p-button>
+
+      <div class="relative w-[300px]">
+        <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+        <input
+          pInputText
+          type="text"
+          #searchInput
+          (input)="dt1.filterGlobal(searchInput.value, 'contains')"
+          placeholder="Search Suppliers"
+          style="text-indent: 1.5rem;"
+          class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:ml-6"
+        />
+      </div>
+    </div>
+
+    <p-table
+      #dt1
+      [value]="suppliers"
+      [rows]="10"
+      [paginator]="true"
+      [globalFilterFields]="['name', 'contactPerson', 'email']"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [loading]="loading"
+      [showCurrentPageReport]="false"
+      [responsive]="true"
+      [rowHover]="true"
+      [scrollable]="true"
+      scrollHeight="600px"
+      styleClass="p-datatable-sm"
+      [tableStyle]="{'min-width': '60rem'}"
+      dataKey="id"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="contactPerson">Contact Person <p-sortIcon field="contactPerson"></p-sortIcon></th>
+          <th pSortableColumn="contactNumber">Contact Number <p-sortIcon field="contactNumber"></p-sortIcon></th>
+          <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+          <th>Products Supplied</th>
+          <th class="w-[100px]">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-supplier>
+        <tr>
+          <td>{{ supplier.name }}</td>
+          <td>{{ supplier.contactPerson }}</td>
+          <td>{{ supplier.contactNumber }}</td>
+          <td>{{ supplier.email }}</td>
+<td>{{ getProductNames(supplier.productsSupplied) }}</td>
+          <td>
+            <div class="flex gap-2">
+              <button
+                pButton
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-primary p-button-sm"
+                [outlined]="true"
+                (click)="editSupplier(supplier)"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-danger p-button-sm"
+                [outlined]="true"
+                (click)="deleteSupplier(supplier)"
+              ></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6">
+            <div class="flex flex-col w-full items-center justify-center py-8">
+              <span>No suppliers found.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+  
+   <p-dialog
+  [(visible)]="supplierDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '450px' }"
+  [header]="isEditMode ? 'Edit Supplier' : 'Add New Supplier'"
+  styleClass="p-fluid"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [position]="'center'"
+  [contentStyle]="{ overflow: 'visible' }"
+>
+  <form [formGroup]="supplierForm" class="w-full">
+    <!-- Supplier Name -->
+    <div class="flex items-center gap-4 mb-4">
+      <label for="name" class="font-semibold w-24">Name</label>
+      <div class="flex-auto flex-col flex">
+        <input
+          type="text"
+          pInputText
+          id="name"
+          formControlName="name"
+          placeholder="Enter supplier name"
+          class="w-full"
+          required
+          autofocus
+        />
+        <small
+          class="self-end text-red-500 mt-1"
+          *ngIf="submitted && supplierForm.get('name')?.errors?.['required']"
+        >
+          Name is required.
+        </small>
+      </div>
+    </div>
+
+    <!-- Contact Person -->
+    <div class="flex items-center gap-4 mb-4">
+      <label for="contactPerson" class="font-semibold w-24">Contact Person</label>
+      <div class="flex-auto flex-col flex">
+        <input
+          type="text"
+          pInputText
+          id="contactPerson"
+          formControlName="contactPerson"
+          placeholder="Enter contact person"
+          class="w-full"
+          required
+        />
+        <small
+          class="self-end text-red-500 mt-1"
+          *ngIf="submitted && supplierForm.get('contactPerson')?.errors?.['required']"
+        >
+          Contact Person is required.
+        </small>
+      </div>
+    </div>
+
+    <!-- Contact Number -->
+    <div class="flex items-center gap-4 mb-4">
+      <label for="contactNumber" class="font-semibold w-24">Contact Number</label>
+      <div class="flex-auto flex-col flex">
+        <input
+          type="text"
+          pInputText
+          id="contactNumber"
+          formControlName="contactNumber"
+          placeholder="Enter contact number"
+          class="w-full"
+          required
+        />
+        <small
+          class="self-end text-red-500 mt-1"
+          *ngIf="submitted && supplierForm.get('contactNumber')?.errors?.['required']"
+        >
+          Contact Number is required.
+        </small>
+        <small
+          class="self-end text-red-500 mt-1"
+          *ngIf="submitted && supplierForm.get('contactNumber')?.errors?.['pattern']"
+        >
+          Contact Number must be at least 10 digits.
+        </small>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div class="flex items-center gap-4 mb-4">
+      <label for="email" class="font-semibold w-24">Email</label>
+      <div class="flex-auto flex-col flex">
+        <input
+          type="email"
+          pInputText
+          id="email"
+          formControlName="email"
+          placeholder="Enter email"
+          class="w-full"
+          required
+        />
+        <small
+          class="self-end text-red-500 mt-1"
+          *ngIf="submitted && supplierForm.get('email')?.errors?.['required']"
+        >
+          Email is required.
+        </small>
+        <small
+          class="self-end text-red-500 mt-1"
+          *ngIf="submitted && supplierForm.get('email')?.errors?.['email']"
+        >
+          Enter a valid email address.
+        </small>
+      </div>
+    </div>
+
+    <!-- Products Dropdown -->
+    <div class="flex items-center gap-4 mb-4">
+      <label for="productsSupplied" class="font-semibold w-24">Products</label>
+      <div class="flex-auto flex-col flex">
+       <p-multiSelect
+  formControlName="productsSupplied"
+  [options]="productOptions"
+  optionLabel="name"
+  [dataKey]="'id'"
+  placeholder="Select Products"
+  class="w-full"
+  [virtualScroll]="true"
+  [virtualScrollItemSize]="43"
+  [showToggleAll]="true"
+  [maxSelectedLabels]="3"
+  [panelStyle]="{ maxHeight: '250px', overflowY: 'auto', zIndex: '1050' }"
+  [filter]="true"
+>
+  <ng-template #headercheckboxicon let-allSelected let-partialSelected="partialSelected">
+    <i class="pi pi-check" *ngIf="allSelected"></i>
+    <i
+      class="pi pi-minus"
+      *ngIf="partialSelected"
+      [ngStyle]="{ color: 'var(--text-color)' }"
+    ></i>
+  </ng-template>
+</p-multiSelect>
+
+        <small
+          class="self-end text-red-500 mt-1"
+          *ngIf="submitted && supplierForm.get('productsSupplied')?.errors?.['required']"
+        >
+          At least one product must be selected.
+        </small>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="hideDialog()"
+        size="small"
+      ></button>
+      <button
+        pButton
+        label="Save"
+        icon="pi pi-check"
+        class="p-button-primary"
+        (click)="saveSupplier()"
+        size="small"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+
+
+
+  </mat-card-content>
+</mat-card>
+<p-confirmDialog 
+    header="Confirmation" 
+    icon="pi pi-exclamation-triangle"
+    [style]="{width: '450px'}"
+    acceptButtonStyleClass="p-button-danger"
+    rejectButtonStyleClass="p-button-text"
+    acceptLabel="Delete"
+    rejectLabel="Cancel">
+</p-confirmDialog>

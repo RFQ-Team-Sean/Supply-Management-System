@@ -1,0 +1,952 @@
+/* Base styles */
+.pr-container {
+  padding: 20px;
+  background: white;
+  font-family: Arial, sans-serif;
+  position: relative;
+}
+
+/* A4 Page Layout Styles */
+.a4-container {
+  width: 100%;
+  max-width: 210mm;
+  margin: 0 auto;
+  position: relative;
+}
+
+.a4-page {
+  width: 210mm;
+  height: 297mm;
+  padding: 10mm;
+  margin: 10mm auto;
+  background: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+  border: 1px solid #ddd;
+}
+
+/* First page has initial content */
+.first-page {
+  overflow: visible;
+}
+
+/* Continuation page styles */
+.continuation-page {
+  padding-top: 20mm;
+}
+
+/* Signature page specific styling */
+.signature-page, .signatures-page {
+  height: 297mm;
+  padding-top: 30mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Make tables in continuation pages take up more space */
+.continuation-table {
+  margin-top: 0 !important;
+  border-top: none;
+}
+
+/* Page numbering */
+.page-number {
+  position: absolute;
+  bottom: 5mm;
+  right: 5mm;
+  font-size: 9pt;
+  color: #666;
+  font-style: italic;
+}
+
+/* Hide page in edit mode */
+.edit-mode-container .a4-page {
+  min-height: auto;
+  height: auto !important;
+  margin-bottom: 30px;
+  overflow-y: visible;
+}
+
+/* Prevent content breaking across pages */
+.no-break {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* No print breaks class */
+.no-print-breaks {
+  page-break-inside: avoid;
+  page-break-after: auto;
+}
+
+/* Edit mode banner */
+.edit-mode-banner {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 10px;
+  text-align: center;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  border: 1px solid #ffeeba;
+}
+
+/* Continuation header */
+.continuation-header {
+  text-align: center;
+  margin-bottom: 15px;
+  padding: 5px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.continuation-header h3 {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Header Styles */
+.header {
+  margin-bottom: 5mm;
+  
+  .logo-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .logo {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+
+    .header-text {
+      text-align: center;
+      flex: 1;
+      margin: 0 20px;
+
+      h3 {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0 0 5px 0;
+      }
+
+      p {
+        margin: 2px 0;
+        font-size: 14px;
+      }
+    }
+
+    .right-logos {
+      display: flex;
+      gap: 10px;
+      
+      .logo {
+        width: 60px;
+        height: 60px;
+      }
+    }
+  }
+}
+
+/* Non-editable elements */
+.non-editable {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Vendor Information Styles - Two-Column Layout with 3:2 Ratio */
+.vendor-info-section {
+  border: 1px solid #000;
+  margin-bottom: 5mm;
+  
+  .vendor-header {
+    background-color: #f0f0f0;
+    padding: 4px 8px;
+    font-weight: bold;
+    border-bottom: 1px solid #000;
+    font-size: 14px;
+  }
+  
+  .vendor-details-container {
+    display: flex;
+    padding: 0;
+    
+    /* Left column for TEL/FAX and EMAIL (2 parts) */
+    .vendor-left-column {
+      flex: 2;
+      padding: 8px;
+      border-right: 1px solid #ddd;
+    }
+    
+    /* Right column for COMPANY NAME, TIN, ADDRESS (3 parts) */
+    .vendor-right-column {
+      flex: 3;
+      padding: 8px;
+    }
+    
+    .vendor-field {
+      margin-bottom: 4px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .label {
+        font-weight: bold;
+        font-size: 11px;
+        margin-bottom: 3px;
+      }
+      
+      .value {
+        font-size: 11px;
+        
+        input {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+/* Purchase Request Form Styles */
+.pr-form {
+  border: 1px solid #000;
+  margin-top: 5mm;
+  overflow: visible;
+}
+
+/* PR Header styles */
+.pr-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  border-bottom: 1px solid #000;
+  background-color: #f8f8f8;
+
+  .pr-title {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .pr-annex {
+    text-align: right;
+    font-size: 12px;
+    
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.pr-details {
+  display: flex;
+  padding: 5px;
+  border-bottom: 1px solid #000;
+
+  .requisition-office {
+    flex: 1;
+    p {
+      margin: 0;
+    }
+  }
+
+  .pr-numbers {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 20px;
+
+    .labels p, .values p, .dates p {
+      margin: 2px 0;
+      font-size: 11px;
+    }
+  }
+}
+
+/* Table styles for automatic pagination */
+.auto-paginate-table {
+  width: 100%;
+  
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  tbody {
+    page-break-inside: auto;
+  }
+  
+  tr td {
+    min-height: 32px;
+    padding: 6px;
+  }
+}
+
+/* Fixed row heights for better pagination calculation */
+.p-datatable-tbody > tr {
+  height: 30px !important; /* Force consistent height */
+}
+
+/* Ensure tables don't force page breaks */
+.p-datatable {
+  page-break-inside: auto !important;
+}
+
+/* Different background tint for continuation pages to visually differentiate */
+.a4-page.continuation-page {
+  background-color: #fcfcfc;
+}
+
+/* Purpose Section */
+.purpose-section {
+  padding: 4px;
+  border-top: 1px solid #000;
+  
+  p {
+    margin: 0;
+    font-size: 11px;
+  }
+}
+
+/* Signature Section Improvements */
+.signature-section {
+  margin-top: 5mm;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* Signature rows for organized layout */
+  .flex {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    width: 100%;
+    gap: 2mm;
+  }
+}
+
+/* Make sure signatures have consistent spacing */
+.signatures-page .signature-section {
+  margin-top: 20mm;
+}
+
+/* Signature styling */
+.signature-block {
+  position: relative;
+  padding: 5px;
+  flex: 1;
+  min-width: 40mm;
+  max-width: 40mm;
+  margin-bottom: 0;
+  text-align: center;
+  
+  .signature-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+    min-height: 10mm;
+    
+    .signature-image-container {
+      position: relative;
+      height: 10mm;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 3px;
+      
+      .signature-image {
+        max-width: 120px;
+        max-height: 15mm;
+        position: absolute;
+        bottom: 0;
+      }
+    }
+    
+    .signature-line-container {
+      position: relative;
+      width: 100%;
+      border-top: 1px solid #000;
+      padding-top: 2px;
+      margin-top: 2px;
+      text-align: center;
+      
+      .name {
+        margin-top: 2px;
+        margin-bottom: 2px;
+        font-weight: bold;
+        border-top: none;
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 10px;
+      }
+      
+      .designation {
+        font-style: italic;
+        text-align: center;
+        margin-top: 0;
+        font-size: 9px;
+      }
+    }
+  }
+  
+  .signature-actions {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    z-index: 3;
+  }
+}
+
+/* Action Buttons */
+.action-buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Table action buttons */
+td.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* Editable Fields Styles */
+.editable-field {
+  position: relative;
+  min-height: 24px;
+
+  input, textarea {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: inherit;
+    font-family: inherit;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #2196F3;
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    }
+  }
+
+  .p-calendar {
+    width: 100%;
+    
+    .p-inputtext {
+      width: 100%;
+    }
+  }
+}
+
+/* Box sizing for inputs */
+.editable-field input,
+.editable-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: inherit;
+  height: inherit;
+}
+
+/* Edit mode specific styles for host component */
+:host.editing {
+  .editable-field:not(.non-editable) {
+    background-color: #f8f9fa;
+    transition: background-color 0.3s ease;
+    
+    &:hover {
+      background-color: #e9ecef;
+    }
+  }
+}
+
+/* Add page markers for visual separation during development */
+.a4-page::after {
+  content: '';
+  position: absolute;
+  bottom: 10mm;
+  left: 10mm;
+  right: 10mm;
+  height: 1px;
+  background: #f0f0f0;
+  display: none; /* Hidden by default, can be shown for debugging */
+}
+
+/* PrimeNG Table Custom Styles */
+:host ::ng-deep {
+  .p-datatable {
+    overflow: visible;
+    
+    .p-datatable-thead > tr > th {
+      background: #f5f5f5;
+      border: 1px solid #000;
+      font-weight: bold;
+      padding: 4px;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .p-datatable-tbody > tr > td {
+      border: 1px solid #000;
+      padding: 4px;
+      font-size: 10px;
+      vertical-align: middle;
+      height: 24px;
+
+      input {
+        width: 100%;
+        padding: 2px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+
+        &:focus {
+          outline: none;
+          border-color: #2196F3;
+        }
+      }
+    }
+    
+    /* Fixed column widths for better alignment */
+    th:nth-child(1), td:nth-child(1) { width: 8%; } /* Item No */
+    th:nth-child(2), td:nth-child(2) { width: 10%; } /* Unit */
+    th:nth-child(3), td:nth-child(3) { width: 40%; } /* Description */
+    th:nth-child(4), td:nth-child(4) { width: 10%; } /* Qty */
+    th:nth-child(5), td:nth-child(5) { width: 16%; } /* Unit Cost */
+    th:nth-child(6), td:nth-child(6) { width: 16%; } /* Total */
+    
+    /* Ensure consistent row styling */
+    .p-datatable-tbody > tr {
+      page-break-inside: avoid;
+      height: 24px;
+    }
+    
+    /* Table footer styling */
+    .p-datatable-tfoot {
+      tr {
+        border-top: 2px solid #000;
+      }
+      
+      td {
+        border: 1px solid #000;
+        padding: 4px;
+        font-size: 10px;
+      }
+      
+      .total-amount-cell {
+        font-weight: bold;
+        text-align: right;
+      }
+    }
+  }
+
+  /* Description cell with overflow handling */
+  .description-cell {
+    position: relative;
+    max-width: 300px;
+    
+    .technical-specification-cell {
+      max-height: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+  }
+
+  /* Make table scrollable only in edit mode */
+  .isEditMode .p-datatable-wrapper {
+    overflow-y: auto;
+    max-height: 400px;
+  }
+
+  /* Normal view shows whole table */
+  .p-datatable-wrapper:not(.isEditMode) {
+    overflow: visible !important;
+  }
+  
+  /* PrimeNG Button styling */
+  .p-button-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+  }
+  
+  .p-buttonset .p-button {
+    margin: 0;
+  }
+  
+  .p-dropdown {
+    width: 100%;
+  }
+  
+  .p-inputtextarea {
+    width: 100%;
+  }
+  
+  /* Dialog styling */
+  .p-dialog {
+    .p-dialog-header {
+      padding: 1rem;
+      background-color: #f8f8f8;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .p-dialog-content {
+      padding: 1.5rem;
+      
+      .field {
+        margin-bottom: 1rem;
+        
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+        }
+      }
+    }
+    
+    .p-dialog-footer {
+      padding: 1rem;
+      border-top: 1px solid #e9ecef;
+      text-align: right;
+    }
+  }
+}
+
+/* Special class to handle overflowing content in edit mode */
+.edit-mode {
+  .a4-page {
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+/* Animation for success message */
+:host ::ng-deep {
+  .p-toast {
+    .p-toast-message.p-toast-message-success {
+      animation: fadeInOut 5s ease-in-out;
+    }
+  }
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  10%, 90% { opacity: 1; }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  
+  span {
+    margin-top: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .a4-page {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 !important;
+    padding: 10mm;
+    box-shadow: none;
+    border: none;
+    page-break-after: always;
+    page-break-before: avoid;
+    overflow: hidden;
+  }
+  
+  .edit-mode-banner,
+  .action-buttons,
+  .p-button,
+  .export-button,
+  .signature-actions,
+  button {
+    display: none !important;
+  }
+
+  .pr-container {
+    padding: 0 !important;
+  }
+
+  .editable-field input,
+  .editable-field textarea {
+    border: none !important;
+    padding: 0 !important;
+    background-color: transparent !important;
+  }
+
+  /* Force background colors to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  /* Ensure no breaks within elements */
+  tr, td, th, .signature-block, .header, .vendor-info-section {
+    page-break-inside: avoid !important;
+  }
+  
+  /* Fix for proper page breaks */
+  .a4-page {
+    page-break-after: always;
+    page-break-before: avoid;
+  }
+  
+  /* Hide any PrimeNG controls during print */
+  .p-button, .p-dropdown, .p-calendar button, .p-inputnumber-button {
+    display: none !important;
+  }
+  
+  /* Handle table breaks properly in print */
+  table.p-datatable-table {
+    page-break-inside: auto;
+  }
+  
+  /* Ensure rows don't break across pages */
+  tr {
+    page-break-inside: avoid;
+  }
+  
+  /* Removes visual markers in print */
+  .a4-page::after {
+    display: none !important;
+  }
+  
+  /* Continuation header print styling */
+  .continuation-header {
+    margin-top: 0 !important;
+    padding-top: 5mm !important;
+  }
+}
+
+/* Optimize content to fit A4 pages */
+.optimize-for-a4 {
+  .signature-section {
+    margin-top: 2mm; /* Reduce margin to fit more content */
+  }
+  
+  .pr-form {
+    margin-top: 3mm;
+  }
+  
+  /* Scale header for better space usage */
+  .header {
+    margin-bottom: 3mm;
+    
+    .logo-section {
+      .logo {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  }
+  
+  /* More compact table rows */
+  .p-datatable-tbody > tr > td {
+    padding: 3px !important;
+    font-size: 9px !important;
+  }
+}
+
+/* Compact layout for fitting more content on a page */
+.compact-layout {
+  .signature-block {
+    min-width: 35mm;
+    padding: 3px;
+    
+    .signature-container {
+      min-height: 8mm;
+    }
+  }
+  
+  .purpose-section {
+    padding: 3px;
+  }
+}
+
+/* Template content container (hidden) */
+.template-content {
+  display: none;
+  visibility: hidden;
+  position: absolute;
+  left: -9999px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .a4-container {
+    width: 100%;
+  }
+  
+  .a4-page {
+    width: 100%;
+    padding: 5mm;
+    margin: 5mm auto;
+  }
+  
+  .pr-details {
+    flex-direction: column;
+  }
+  
+  .vendor-details-container {
+    flex-direction: column;
+    
+    .vendor-left-column {
+      border-right: none;
+      border-bottom: 1px solid #ddd;
+    }
+  }
+  
+  .signature-section {
+    .flex {
+      flex-direction: column;
+      align-items: center;
+      
+      .signature-block {
+        width: 100%;
+        max-width: 250px;
+      }
+    }
+  }
+}
+
+/* Utility Classes */
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.font-bold, strong {
+  font-weight: bold;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
+}
+
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-content-end {
+  justify-content: flex-end;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+/* Input Sizes */
+.p-inputtext-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Calendar Specific Styles */
+:host ::ng-deep .p-calendar-sm {
+  .p-inputtext {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .p-button {
+    padding: 0.25rem;
+  }
+}
+
+/* Signature upload dialog styles */
+.signature-upload-content {
+  padding: 1rem 0;
+  
+  .upload-note {
+    color: #6c757d;
+    margin-top: 1rem;
+  }
+}
+
+/* Fixed positioning for the page number */
+.page-number {
+  position: absolute;
+  bottom: 5mm;
+  right: 10mm;
+  font-size: 8pt;
+  color: #666;
+}

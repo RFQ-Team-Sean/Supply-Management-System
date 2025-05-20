@@ -1,0 +1,47 @@
+// Custom styles for the PPMP preview
+#ppmpPreview {
+  // Example: Adjust table font size for better readability
+  table {
+    font-size: 0.875rem; // text-sm
+  }
+
+  // Example: Style for the milestone schedule blocks
+  .milestone-block {
+    @apply w-4 h-4 border border-gray-400 rounded;
+  }
+
+  // Example: Highlight scheduled milestones
+  .milestone-scheduled {
+    @apply bg-yellow-400;
+  }
+}
+
+@keyframes slide-in {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.2s ease-out forwards;
+}
+
+.animate-slide-out {
+  animation: slide-out 0.2s ease-out forwards;
+}

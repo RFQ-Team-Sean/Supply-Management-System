@@ -1,0 +1,50 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@import "primeicons/primeicons.css";
+
+
+
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+html{
+    font-size: 14px;
+}
+
+
+.p-menuitem-danger * {
+    color:  var(--p-red-400) !important;
+}
+
+.p-menuitem-success *{
+    color: var(--p-green-400)!important;
+}
+
+.p-menuitem-secondary * {
+    color: var(--p-gray-400)!important;
+}
+
+.p-menuitem-info * {
+    color: var(--p-blue-400)!important;
+}
+
+.p-menuitem-warning * {
+    color: var(--p-orange-400)!important;
+}
+
+.p-menuitem-help * {
+    color: var(--p-purple-400)!important;
+}
+
+.p-menuitem-primary * {
+    color: var(--p-primary-500)!important; /* Using your theme's primary color */
+}
+
+.p-menuitem-contrast * {
+    color: var(--p-white)!important;
+}

@@ -1,0 +1,170 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Journal Entry Vouchers</mat-card-title>
+    <mat-card-subtitle class="mat-body-1 mb-10 !flex justify-between items-center">
+      <span> Review and manage journal entry vouchers in this section. </span>
+      <div class="flex gap-3">
+        <p-iconfield fluid class="w-full max-w-72">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            fluid
+            class="w-full"
+            pSize="small"
+            [(ngModel)]="searchValue"
+            (input)="dt.filterGlobal(searchValue, 'contains')"
+            type="text"
+            pInputText
+            placeholder="Search"
+          />
+        </p-iconfield>
+      </div>
+    </mat-card-subtitle>
+
+    <!-- Journal Entry Voucher Table -->
+    <p-table
+      #dt
+      [value]="journalEntries"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [globalFilterFields]="['voucherNo', 'supplierName']"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Voucher Number</th>
+          <th>Supplier Name</th>
+          <th>Date</th>
+          <th>Debit (Dr)</th>
+          <th>Credit (Cr)</th>
+          <th>Total Amount</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-entry>
+        <tr>
+          <td>{{ entry.voucherNo }}</td>
+          <td>{{ entry.supplierName }}</td>
+          <td>{{ entry.date | date: 'mediumDate' }}</td>
+          <td>
+            <ul>
+              <li *ngFor="let debit of entry.debitEntries">
+                {{ debit.accountCode }} - {{ debit.accountName }}: {{ debit.amount | currency: 'PHP' }}
+              </li>
+            </ul>
+          </td>
+          <td>
+            <ul>
+              <li *ngFor="let credit of entry.creditEntries">
+                {{ credit.accountCode }} - {{ credit.accountName }}: {{ credit.amount | currency: 'PHP' }}
+              </li>
+            </ul>
+          </td>
+          <td>{{ entry.totalAmountDue | currency: 'PHP' }}</td>
+          <td>
+            <div class="flex gap-2">
+              <p-button
+                severity="secondary"
+                pTooltip="View Detailed Information"
+                [outlined]="true"
+                size="small"
+                icon="pi pi-info-circle"
+                rounded
+                (click)="viewDetailedInfo(entry)"
+              ></p-button>
+              <p-button
+                severity="primary"
+                pTooltip="Export to PDF"
+                [outlined]="true"
+                size="small"
+                icon="pi pi-file-pdf"
+                rounded
+                (click)="exportPdf(entry)"
+              ></p-button>
+              <p-button
+                severity="primary"
+                pTooltip="Generate Journal & Ledger Entries"
+                [outlined]="true"
+                size="small"
+                icon="pi pi-sync"
+                rounded
+                [disabled]="entry.status !== 'recorded' || accountingService.isVoucherProcessed(entry.voucherNo)"
+                (click)="generateAccountingEntries(entry)"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+<!-- Detailed Information Modal -->
+<p-dialog [(visible)]="showDetailedInfoModal" [modal]="true" [style]="{ width: '50rem' }" [header]="'Detailed Information'">
+  <div *ngIf="selectedEntry" class="p-4">
+    <!-- Disbursement Voucher Section -->
+    <div class="mb-6">
+      <h3 class="text-xl font-semibold mb-4">Disbursement Voucher Details</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p><strong>Voucher Number:</strong> {{ selectedEntry.voucherNo }}</p>
+          <p><strong>Date:</strong> {{ selectedEntry.date | date: 'mediumDate' }}</p>
+          <p><strong>Supplier Name:</strong> {{ selectedEntry.supplierName }}</p>
+          <p><strong>Payment Method:</strong> {{ selectedEntry.paymentMethod }}</p>
+        </div>
+        <div>
+          <p><strong>Total Amount:</strong> {{ selectedEntry.totalAmountDue | currency: 'PHP' }}</p>
+          <p><strong>Status:</strong> {{ selectedEntry.status }}</p>
+          <p><strong>Notes:</strong> {{ selectedEntry.notes || 'N/A' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery Receipt Section -->
+    <div class="mb-6" *ngIf="selectedEntry.deliveryReceipt">
+      <h3 class="text-xl font-semibold mb-4">Delivery Receipt Details</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p><strong>Receipt Number:</strong> {{ selectedEntry.deliveryReceipt.receipt_number }}</p>
+          <p><strong>Supplier Name:</strong> {{ selectedEntry.deliveryReceipt.supplier_name }}</p>
+          <p><strong>Delivery Date:</strong> {{ selectedEntry.deliveryReceipt.delivery_date | date: 'mediumDate' }}</p>
+        </div>
+        <div>
+          <p><strong>Total Amount:</strong> {{ selectedEntry.deliveryReceipt.total_amount | currency: 'PHP' }}</p>
+          <p><strong>Status:</strong> {{ selectedEntry.deliveryReceipt.status }}</p>
+          <p><strong>Notes:</strong> {{ selectedEntry.deliveryReceipt.notes || 'N/A' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Journal Entries Section -->
+    <div>
+      <h3 class="text-xl font-semibold mb-4">Journal Entries</h3>
+      <table class="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="p-2 border">Account</th>
+            <th class="p-2 border">Debit</th>
+            <th class="p-2 border">Credit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Debit Entries -->
+          <tr *ngFor="let entry of selectedEntry.debitEntries">
+            <td class="p-2 border">{{ entry.accountCode }} - {{ entry.accountName }}</td>
+            <td class="p-2 border text-right">{{ entry.amount | currency: 'PHP' }}</td>
+            <td class="p-2 border"></td>
+          </tr>
+          <!-- Credit Entries -->
+          <tr *ngFor="let entry of selectedEntry.creditEntries">
+            <td class="p-2 border">{{ entry.accountCode }} - {{ entry.accountName }}</td>
+            <td class="p-2 border"></td>
+            <td class="p-2 border text-right">{{ entry.amount | currency: 'PHP' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</p-dialog>
+
+<p-toast position="bottom-right" />
+<p-confirmpopup />

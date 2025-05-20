@@ -1,0 +1,92 @@
+.document-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background: white;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+
+  .logos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .logo-left, .logo-right {
+      width: 80px;
+      height: auto;
+    }
+    
+    .header-text {
+      text-align: center;
+      
+      h1 {
+        font-size: 18px;
+        font-weight: bold;
+      }
+      
+      h2 {
+        font-size: 16px;
+        color: gray;
+      }
+    }
+  }
+}
+
+.ppmp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 20px;
+
+  th, td {
+    border: 1px solid black;
+    padding: 6px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #f8f8f8;
+    font-weight: bold;
+  }
+
+  .amount {
+    text-align: right;
+  }
+}
+
+.footer {
+  margin-top: 30px;
+  font-size: 12px;
+
+  .signatories {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    
+    p {
+      margin: 5px 0;
+    }
+  }
+}
+
+.export-btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.export-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+  
+  &:hover {
+    background-color: #0056b3;
+  }
+}

@@ -1,0 +1,47 @@
+:host ::ng-deep {
+  .product-badge {
+    border-radius: 2px;
+    padding: 0.25em 0.5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    
+    &.status-instock {
+      background: #C8E6C9;
+      color: #256029;
+    }
+    
+    &.status-lowstock {
+      background: #FEEDAF;
+      color: #8A5340;
+    }
+    
+    &.status-outofstock {
+      background: #FFCDD2;
+      color: #C63737;
+    }
+  }
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.card-header {
+  padding: 1rem;
+  border-bottom: 1px solid #efefef;
+}
+
+.card-body {
+  padding: 0;
+}
+
+.p-dialog-content {
+  padding: 2rem;
+}
+
+

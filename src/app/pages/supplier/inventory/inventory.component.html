@@ -1,0 +1,518 @@
+<div class="card">
+  <p-toast></p-toast>
+  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+  
+  <mat-card class="cardWithShadow">
+    <mat-card-content>
+      <mat-card-title>Inventory Management</mat-card-title>
+      <mat-card-subtitle class="text-sm text-gray-500">
+        View and manage your supplier inventory items in this section.
+      </mat-card-subtitle>
+
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex gap-2 justify-center">
+          <p-button
+            pTooltip="Add New Item" 
+            (click)="openNew()" 
+            [outlined]="true" 
+            size="small" 
+            label="Add New Item" 
+            icon="pi pi-plus"
+            class="mt-4">
+          </p-button>
+        </div>
+        
+        <div class="flex gap-4 items-center">
+          <!-- Search Bar -->
+          <div class="relative w-full max-w-[300px]">
+            <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-500"></i>
+            <input class="w-full p-inputtext p-component pl-10" 
+              pInputText [(ngModel)]="searchValue" 
+              (input)="onSearchInput($event)" 
+              type="text"
+              placeholder="Search items..." 
+              style="text-indent: 1.5rem;"/>
+          </div>
+          
+          <!-- Export Button -->
+          <div class="flex gap-2">
+            <p-button 
+              icon="pi pi-download"
+              pTooltip="Export Inventory" 
+              (click)="exportCSV()" 
+              [outlined]="true" 
+              size="small">
+            </p-button>
+          </div>
+          
+          <!-- Refresh Button -->
+          <div class="flex gap-2">
+            <p-button 
+              icon="pi pi-refresh"
+              pTooltip="Refresh Inventory" 
+              (click)="loadItems()" 
+              [outlined]="true" 
+              size="small">
+            </p-button>
+          </div>
+    </div>
+    </div>
+  
+      <!-- Table -->
+    <p-table 
+      #dt 
+      [value]="items" 
+      [rows]="10" 
+      [paginator]="true" 
+      [globalFilterFields]="['product','category','barcode','status']"
+      [loading]="loading"
+      [rowHover]="true" 
+      dataKey="id"
+      [exportFilename]="'inventory'"
+        styleClass="p-datatable-striped"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [showCurrentPageReport]="true">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="product">Product <p-sortIcon field="product"></p-sortIcon></th>
+            <th pSortableColumn="barcode">Property Code <p-sortIcon field="barcode"></p-sortIcon></th>
+          <th pSortableColumn="category">Category <p-sortIcon field="category"></p-sortIcon></th>
+          <th pSortableColumn="quantity">Quantity <p-sortIcon field="quantity"></p-sortIcon></th>
+          <th>Status</th>
+            <th pSortableColumn="dateAdded">Date Added <p-sortIcon field="dateAdded"></p-sortIcon></th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-item>
+        <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <img [src]="item.imageUrl || defaultImage" 
+                  [alt]="item.product"
+                  class="w-12 h-12 object-cover rounded-lg shadow-sm" />
+                <span>{{item.product}}</span>
+              </div>
+            </td>
+            <td>{{ item.barcode }}</td>
+          <td>{{ item.category }}</td>
+          <td>{{ item.quantity }}</td>
+            <td>
+              <span [ngClass]="{
+                'bg-red-100 text-red-800': item.quantity === 0,
+                'bg-yellow-100 text-yellow-800': item.quantity < item.minimumQty && item.quantity > 0,
+                'bg-green-100 text-green-800': item.quantity >= item.minimumQty
+              }" class="px-3 py-1 rounded-full text-sm font-medium">
+                {{item.quantity === 0 ? 'Out of Stock' : (item.quantity < item.minimumQty ? 'Low Stock' : 'In Stock')}}
+              </span>
+          </td>
+            <td>{{ item.dateAdded | date: 'MM/dd/yy, hh:mm a' }}</td>
+            <td>
+              <div class="flex gap-2 justify-center">
+                <button pButton pRipple icon="pi pi-eye" 
+                  class="p-button-rounded p-button-info p-button-text"
+                  (click)="viewItemDetails(item)"
+                  pTooltip="View Details">
+                </button>
+                <button pButton pRipple icon="pi pi-pencil"
+                  class="p-button-rounded p-button-warning p-button-text"
+                  (click)="editItem(item)"
+                  pTooltip="Edit">
+                </button>
+                <button pButton pRipple icon="pi pi-trash"
+                  class="p-button-rounded p-button-danger p-button-text"
+                  (click)="deleteItem(item)"
+                  pTooltip="Delete">
+                </button>
+              </div>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="7">
+              <div class="flex flex-col items-center justify-center py-6">
+                <i class="pi pi-inbox text-6xl text-gray-300 mb-4"></i>
+                <span>No inventory items found</span>
+              </div>
+            </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- Item Details Dialog -->
+<p-dialog header="Item Details" [(visible)]="showDetailsModal" 
+  [modal]="true" [style]="{width: '800px'}" [draggable]="false" [resizable]="false">
+  <div *ngIf="selectedItem" class="p-4">
+    <!-- Add Image Display -->
+    <div class="mb-4">
+      <img [src]="selectedItem.imageUrl || defaultImage" 
+           [alt]="selectedItem.product"
+           class="w-full max-w-md mx-auto rounded-lg shadow-lg object-cover" />
+    </div>
+    
+    <!-- Details Grid -->
+    <div class="grid grid-cols-2 gap-4">
+      <div class="border rounded p-3">
+        <div class="font-bold mb-2">Product</div>
+        <div>{{selectedItem.product}}</div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="font-bold mb-2">Category</div>
+        <div>{{selectedItem.category}}</div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="font-bold mb-2">Property Code</div>
+        <div>{{selectedItem.barcode}}</div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="font-bold mb-2">Unit</div>
+        <div>{{selectedItem.unit}}</div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="font-bold mb-2">Minimum Qty</div>
+        <div>{{selectedItem.minimumQty}}</div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="font-bold mb-2">Quantity</div>
+        <div>{{selectedItem.quantity}}</div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="font-bold mb-2">Status</div>
+        <div>
+          <span [ngClass]="{
+            'bg-red-100 text-red-800': selectedItem.quantity === 0,
+            'bg-yellow-100 text-yellow-800': selectedItem.quantity < selectedItem.minimumQty && selectedItem.quantity > 0,
+            'bg-green-100 text-green-800': selectedItem.quantity >= selectedItem.minimumQty
+          }" class="px-3 py-1 rounded-full text-sm font-medium">
+            {{selectedItem.quantity === 0 ? 'Out of Stock' : (selectedItem.quantity < selectedItem.minimumQty ? 'Low Stock' : 'In Stock')}}
+          </span>
+        </div>
+      </div>
+      <div class="border rounded p-3">
+        <div class="font-bold mb-2">Date Added</div>
+        <div>{{selectedItem.dateAdded | date: 'MM/dd/yy, hh:mm a'}}</div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="border rounded p-3 mt-4">
+      <div class="font-bold mb-2">Description</div>
+      <div>{{selectedItem.description || 'No description available'}}</div>
+    </div>
+</div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end">
+      <p-button label="Close" icon="pi pi-times" 
+        (click)="showDetailsModal = false" 
+        [outlined]="true">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Item Dialog -->
+<p-dialog [(visible)]="itemDialog" [style]="{width: '800px'}" [header]="newItem.id ? 'Edit Item' : 'Add New Item'" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Left Column - Image Upload -->
+      <div class="md:col-span-1">
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Product Image</h3>
+          <!-- Image Preview -->
+          <div class="relative w-full aspect-square mb-3">
+            <img [src]="imagePreview || newItem.imageUrl || defaultImage" 
+                 alt="Product Image" 
+                 class="w-full h-full object-cover rounded-lg shadow-sm"/>
+            
+            <!-- Remove Image Button -->
+            <button *ngIf="selectedImage || newItem.imageUrl !== defaultImage"
+                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                    type="button"
+                    (click)="removeImage()">
+              <i class="pi pi-times text-sm"></i>
+            </button>
+          </div>
+
+          <!-- Upload Button -->
+          <p-fileUpload #fileUpload
+                      [customUpload]="true"
+                      (uploadHandler)="onImageSelect($event)"
+                      [auto]="true"
+                      chooseLabel="Upload Image"
+                      [showUploadButton]="false"
+                      [showCancelButton]="false"
+                      accept="image/*"
+                      [maxFileSize]="1000000"
+                      styleClass="w-full">
+            <ng-template pTemplate="content">
+              <div class="text-xs text-gray-500 mt-2">
+                Max size: 1MB (JPG, PNG, GIF)
+              </div>
+            </ng-template>
+          </p-fileUpload>
+        </div>
+      </div>
+
+      <!-- Right Column - Form Fields -->
+      <div class="md:col-span-2 space-y-4">
+        <!-- Basic Information -->
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Basic Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="field">
+              <label for="product" class="font-medium mb-1 block">Product Name*</label>
+              <input type="text" pInputText id="product" [(ngModel)]="newItem.product" required class="w-full" />
+            </div>
+            <div class="field">
+              <label for="barcode" class="font-medium mb-1 block">Property Code</label>
+              <input type="text" pInputText id="barcode" [(ngModel)]="newItem.barcode" class="w-full" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Category and Unit -->
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Category & Unit</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="field">
+              <label for="category" class="font-medium mb-1 block">Category*</label>
+              <p-dropdown [options]="supplierCategories" [(ngModel)]="newItem.category" 
+                         optionLabel="name" optionValue="value" 
+                         placeholder="Select Category" class="w-full"></p-dropdown>
+            </div>
+            <div class="field">
+              <label for="unit" class="font-medium mb-1 block">Unit*</label>
+              <p-dropdown [options]="supplierUnits" [(ngModel)]="newItem.unit" 
+                         optionLabel="name" optionValue="value" 
+                         placeholder="Select Unit" class="w-full"></p-dropdown>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quantity Information -->
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Quantity Details</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="field">
+              <label for="quantity" class="font-medium mb-1 block">Current Quantity*</label>
+              <p-inputNumber id="quantity" [(ngModel)]="newItem.quantity" 
+                            [showButtons]="true" buttonLayout="horizontal" 
+                            [min]="0" [step]="1" class="w-full"
+                            decrementButtonClass="p-button-danger" 
+                            incrementButtonClass="p-button-success"></p-inputNumber>
+            </div>
+            <div class="field">
+              <label for="minimumQty" class="font-medium mb-1 block">Minimum Quantity*</label>
+              <p-inputNumber id="minimumQty" [(ngModel)]="newItem.minimumQty" 
+                            [showButtons]="true" buttonLayout="horizontal" 
+                            [min]="0" [step]="1" class="w-full"
+                            decrementButtonClass="p-button-danger" 
+                            incrementButtonClass="p-button-success"></p-inputNumber>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Description</h3>
+          <div class="field">
+            <textarea pInputTextarea id="description" [(ngModel)]="newItem.description" 
+                      rows="3" class="w-full" 
+                      placeholder="Enter product description..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" icon="pi pi-times" (click)="hideDialog()" 
+                [outlined]="true" severity="secondary"></p-button>
+      <p-button label="Save" icon="pi pi-check" (click)="saveItem()" 
+                [disabled]="!validateItem()" severity="primary"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Delete Item Dialog -->
+<p-dialog [(visible)]="deleteItemDialog" header="Confirm" [modal]="true" [style]="{width:'450px'}">
+  <div class="flex align-items-center justify-content-center">
+    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+    <span *ngIf="selectedItem">Are you sure you want to delete <b>{{selectedItem.product}}</b>?</span>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button icon="pi pi-times" class="p-button-text" label="No" [outlined]="true" 
+        (click)="deleteItemDialog = false"></p-button>
+      <p-button icon="pi pi-check" class="p-button-text" label="Yes" 
+        (click)="confirmDelete()"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Edit Dialog -->
+<p-dialog [(visible)]="editDialog" [style]="{width: '800px'}" header="Edit Item" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Left Column - Image Upload -->
+      <div class="md:col-span-1">
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Product Image</h3>
+          <!-- Image Preview -->
+          <div class="relative w-full aspect-square mb-3">
+            <img [src]="editingItem?.imageUrl || defaultImage" 
+                 alt="Product Image" 
+                 class="w-full h-full object-cover rounded-lg shadow-sm"/>
+            
+            <!-- Remove Image Button -->
+            <button *ngIf="editingItem?.imageUrl && editingItem.imageUrl !== defaultImage"
+                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                    type="button"
+                    (click)="removeEditImage()">
+              <i class="pi pi-times text-sm"></i>
+            </button>
+          </div>
+
+          <!-- Upload Button -->
+          <p-fileUpload #fileUpload
+                      [customUpload]="true"
+                      (uploadHandler)="onEditImageSelect($event)"
+                      [auto]="true"
+                      chooseLabel="Upload Image"
+                      [showUploadButton]="false"
+                      [showCancelButton]="false"
+                      accept="image/*"
+                      [maxFileSize]="1000000"
+                      styleClass="w-full">
+            <ng-template pTemplate="content">
+              <div class="text-xs text-gray-500 mt-2">
+                Max size: 1MB (JPG, PNG, GIF)
+              </div>
+            </ng-template>
+          </p-fileUpload>
+        </div>
+      </div>
+
+      <!-- Right Column - Form Fields -->
+      <div class="md:col-span-2 space-y-4">
+        <!-- Basic Information -->
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Basic Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="field">
+              <label for="edit-product" class="font-medium mb-1 block">Product Name*</label>
+              <input type="text" pInputText id="edit-product" 
+                     [(ngModel)]="editingItem.product" 
+                     required class="w-full" />
+            </div>
+            <div class="field">
+              <label for="edit-barcode" class="font-medium mb-1 block">Property Code</label>
+              <input type="text" pInputText id="edit-barcode" 
+                     [(ngModel)]="editingItem.barcode" 
+                     class="w-full" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Category and Unit -->
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Category & Unit</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="field">
+              <label for="edit-category" class="font-medium mb-1 block">Category*</label>
+              <p-dropdown [options]="supplierCategories" 
+                         [(ngModel)]="editingItem.category" 
+                         optionLabel="name" 
+                         optionValue="value" 
+                         placeholder="Select Category" 
+                         class="w-full">
+              </p-dropdown>
+            </div>
+            <div class="field">
+              <label for="edit-unit" class="font-medium mb-1 block">Unit*</label>
+              <p-dropdown [options]="supplierUnits" 
+                         [(ngModel)]="editingItem.unit" 
+                         optionLabel="name" 
+                         optionValue="value" 
+                         placeholder="Select Unit" 
+                         class="w-full">
+              </p-dropdown>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quantity Information -->
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Quantity Details</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="field">
+              <label for="edit-quantity" class="font-medium mb-1 block">Current Quantity*</label>
+              <p-inputNumber id="edit-quantity" 
+                            [(ngModel)]="editingItem.quantity" 
+                            [showButtons]="true" 
+                            buttonLayout="horizontal" 
+                            [min]="0" 
+                            [step]="1" 
+                            class="w-full"
+                            decrementButtonClass="p-button-danger" 
+                            incrementButtonClass="p-button-success">
+              </p-inputNumber>
+            </div>
+            <div class="field">
+              <label for="edit-minimumQty" class="font-medium mb-1 block">Minimum Quantity*</label>
+              <p-inputNumber id="edit-minimumQty" 
+                            [(ngModel)]="editingItem.minimumQty" 
+                            [showButtons]="true" 
+                            buttonLayout="horizontal" 
+                            [min]="0" 
+                            [step]="1" 
+                            class="w-full"
+                            decrementButtonClass="p-button-danger" 
+                            incrementButtonClass="p-button-success">
+              </p-inputNumber>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Description</h3>
+          <div class="field">
+            <textarea pInputTextarea 
+                      id="edit-description" 
+                      [(ngModel)]="editingItem.description" 
+                      rows="3" 
+                      class="w-full" 
+                      placeholder="Enter product description...">
+            </textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" 
+                icon="pi pi-times" 
+                (click)="hideEditDialog()" 
+                [outlined]="true" 
+                severity="secondary">
+      </p-button>
+      <p-button label="Update" 
+                icon="pi pi-check" 
+                (click)="updateItem()" 
+                [disabled]="!validateEditItem()" 
+                severity="primary">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

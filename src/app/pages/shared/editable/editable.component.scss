@@ -1,0 +1,76 @@
+/* === Global Styling === */
+.btn {
+  @apply px-4 py-2 rounded shadow-md font-semibold transition;
+}
+.btn-add {
+  @apply bg-blue-600 text-white hover:bg-blue-800 flex items-center;
+}
+.btn-edit {
+  @apply bg-yellow-500 text-white hover:bg-yellow-700;
+}
+.btn-save {
+  @apply bg-green-500 text-white hover:bg-green-700;
+}
+.btn-cancel {
+  @apply bg-gray-500 text-white hover:bg-gray-700;
+}
+.btn-delete {
+  @apply bg-red-600 text-white hover:bg-red-800;
+}
+.btn-submit {
+  @apply bg-blue-500 text-white hover:bg-blue-700;
+}
+.btn-approve {
+  @apply bg-green-600 text-white hover:bg-green-800;
+}
+.btn-return {
+  @apply bg-orange-500 text-white hover:bg-orange-700;
+}
+.btn-deny {
+  @apply bg-red-500 text-white hover:bg-red-700;
+}
+
+/* === Table Styling === */
+table {
+  @apply w-full border-collapse shadow-md rounded-lg bg-white;
+}
+th {
+  @apply bg-blue-900 text-white p-4 text-left text-sm uppercase font-semibold;
+}
+td {
+  @apply p-4 border-b border-gray-200 text-sm text-gray-700;
+}
+
+/* === Status Labels === */
+.status {
+  @apply px-3 py-1 rounded-full text-white font-semibold text-xs;
+}
+.status-draft {
+  @apply bg-yellow-500;
+}
+.status-submitted {
+  @apply bg-blue-500;
+}
+.status-approved {
+  @apply bg-green-500;
+}
+.status-returned {
+  @apply bg-gray-500;
+}
+.status-denied {
+  @apply bg-red-500;
+}
+
+/* === Modal Styling === */
+.modal-overlay {
+  @apply fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50;
+}
+.modal-content {
+  @apply bg-white p-6 rounded-lg shadow-lg w-1/3 text-center;
+}
+.modal-header {
+  @apply text-lg font-bold mb-4;
+}
+.modal-footer {
+  @apply mt-4 flex justify-center space-x-2;
+}

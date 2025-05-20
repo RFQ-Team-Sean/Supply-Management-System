@@ -1,0 +1,23 @@
+[
+    {
+      "id": "1",
+      "department_id": "1",
+      "office_id": "1",
+      "project_title": "Building Renovation",
+      "fiscal_year": 2025,
+      "start_date": "2025-06-01",
+      "end_date": "2025-12-31",
+      "prepared_by": "John Doe",
+      "date_prepared": "2025-02-01",
+      "item_description": "Renovation of office spaces",
+      "unit_of_measurement": "Square Meter",
+      "quantity_required": 1000,
+      "estimated_unit_cost": 500,
+      "estimated_total_cost": 500000,
+      "procurement_mode_id": "1",
+      "funding_source_id": "1",
+      "approval_status": "Pending",
+      "current_approval_stage": "Department Head"
+    }
+  ]
+  

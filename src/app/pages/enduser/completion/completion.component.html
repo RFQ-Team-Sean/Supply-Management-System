@@ -1,0 +1,203 @@
+<p-card>
+    <h1 class="text-xl font-semibold">Certificate of Completion and Acceptance</h1>
+  
+    <div class="flex justify-between mb-4 items-center">
+      <p class="text-sm">Manage completion certificates and acceptance status</p>
+      <div class="flex flex-row gap-2">
+        <p-iconfield styleClass="small">
+          <p-inputicon styleClass="pi pi-search small" />
+          <input
+            type="text"
+            pInputText
+            placeholder="Search"
+            [(ngModel)]="searchQuery"
+            (input)="filterCertificates()"
+          />
+        </p-iconfield>
+        <p-button
+          label="New Certificate"
+          icon="pi pi-plus"
+          [outlined]="true"
+          (click)="showDialog()"
+        ></p-button>
+      </div>
+    </div>
+  
+    <p-table
+      [value]="filteredCertificates"
+      responsiveLayout="scroll"
+      [paginator]="true"
+      [rows]="5"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Certificate ID</th>
+          <th>Reference No.</th>
+          <th>Contractor</th>
+          <th>Project Title</th>
+          <th>Contract Amount</th>
+          <th>Completion Date</th>
+          <th>Inspection Date</th>
+          <th>Supporting Docs</th>
+          <th>Status</th>
+          <th>Remarks</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-cert>
+        <tr>
+          <td>{{ cert.id }}</td>
+          <td>{{ cert.referenceNo }}</td>
+          <td>{{ cert.contractorName }}</td>
+          <td>{{ cert.projectTitle }}</td>
+          <td>{{ cert.contractAmount | currency: 'PHP' }}</td>
+          <td>{{ cert.completionDate | date }}</td>
+          <td>{{ cert.inspectionDate | date }}</td>
+          <td>
+            <i *ngIf="cert.supportingDocs" class="pi pi-check text-green-500"></i>
+            <i *ngIf="!cert.supportingDocs" class="pi pi-times text-red-500"></i>
+          </td>
+          <td>
+            <span
+              [ngClass]="getStatusClass(cert.status)"
+              class="px-3 py-1 rounded-lg text-white"
+            >
+              {{ cert.status }}
+            </span>
+          </td>
+          <td>{{ cert.remarks }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+  
+  <p-dialog
+    header="Create Certificate of Completion"
+    [(visible)]="displayDialog"
+    [modal]="true"
+    [style]="{ width: '40vw' }"
+  >
+    <form (ngSubmit)="submitCertificate()">
+      <div class="grid gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="referenceNo">Reference Number</label>
+          <input
+            pInputText
+            id="referenceNo"
+            [(ngModel)]="newCertificate.referenceNo"
+            name="referenceNo"
+            required
+          />
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="contractorName">Contractor Name</label>
+          <input
+            pInputText
+            id="contractorName"
+            [(ngModel)]="newCertificate.contractorName"
+            name="contractorName"
+            required
+          />
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="projectTitle">Project Title</label>
+          <input
+            pInputText
+            id="projectTitle"
+            [(ngModel)]="newCertificate.projectTitle"
+            name="projectTitle"
+            required
+          />
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="contractAmount">Contract Amount</label>
+          <p-inputNumber
+            id="contractAmount"
+            [(ngModel)]="newCertificate.contractAmount"
+            name="contractAmount"
+            mode="currency"
+            currency="PHP"
+            required
+          ></p-inputNumber>
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="completionDate">Completion Date</label>
+          <p-calendar
+            id="completionDate"
+            [(ngModel)]="newCertificate.completionDate"
+            name="completionDate"
+            [showIcon]="true"
+            required
+          ></p-calendar>
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="inspectionDate">Inspection Date</label>
+          <p-calendar
+            id="inspectionDate"
+            [(ngModel)]="newCertificate.inspectionDate"
+            name="inspectionDate"
+            [showIcon]="true"
+            required
+          ></p-calendar>
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="inspectionFindings">Inspection Findings</label>
+          <textarea
+            pTextarea
+            id="inspectionFindings"
+            [(ngModel)]="newCertificate.inspectionFindings"
+            name="inspectionFindings"
+            rows="3"
+            required
+          ></textarea>
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="remarks">Remarks</label>
+          <textarea
+            pTextarea
+            id="remarks"
+            [(ngModel)]="newCertificate.remarks"
+            name="remarks"
+            rows="2"
+          ></textarea>
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label>Supporting Documents</label>
+          <p-fileUpload
+            mode="basic"
+            accept=".pdf,.jpg,.png"
+            chooseLabel="Upload Files"
+            [auto]="true"
+            (onUpload)="onFileUpload($event)"
+          ></p-fileUpload>
+        </div>
+      </div>
+  
+      <div class="flex justify-end gap-2 mt-4">
+        <p-button
+          label="Cancel"
+          icon="pi pi-times"
+          [outlined]="true"
+          severity="secondary"
+          (click)="displayDialog = false"
+        ></p-button>
+        <p-button
+        label="Submit"
+        icon="pi pi-check"
+        type="submit"
+        [outlined]="true"
+        severity="success"
+        [disabled]="!newCertificate.referenceNo || !newCertificate.contractorName || !newCertificate.projectTitle"
+      ></p-button>      
+      </div>
+    </form>
+  </p-dialog>
+  
+  <p-toast position="bottom-right"></p-toast>

@@ -1,0 +1,458 @@
+<!-- conference.component.html -->
+<p-card class="flex flex-col gap-4 p-4">
+  <h1 class="font-semibold text-xl">Conference</h1>
+  <p class="mb-4">Review and create invitations for Procurement and Bidding Conferences</p>
+
+  <p-tabView (onTabChange)="onTabChange($event)">
+    <p-tabPanel header="Pre-Procurement" [style]="{overflow: 'auto', overflowY: 'hidden'}">
+      <div class="flex flex-col gap-4">
+        <div class="flex justify-between items-center">
+          <h1 class="font-semibold text-base">Recent Purchase Requests</h1>
+          <div class="flex flex-row gap-4 items-center">
+            <p-button label="Add Event" icon="pi pi-plus" class="p-button-xs" [outlined]="true" (onClick)="addEvent(0)"></p-button>
+            <p-button label="Create Invitation" icon="pi pi-envelope" class="p-button-xs" [outlined]="true" (onClick)="createInvite(0)"></p-button>
+          </div>
+        </div>
+        <div class="flex flex-row gap-6 overflow-clip overflow-x-auto h-28 mt-2 p-1">
+          <!-- Skeleton Loading State -->
+          <ng-container *ngIf="isLoadingEvents">
+            <div *ngFor="let _ of [1, 2, 3, 4]" class="flex items-center gap-4" [style]="{ height: '5.5rem', width: '20rem' }">
+              <div class="flex flex-row gap-2 w-full">
+                <p-skeleton width="20rem" height="5.5rem"></p-skeleton>
+                <!-- <p-skeleton width="8rem" height="5.5rem"></p-skeleton>
+                <p-skeleton width="6rem" height="5.5rem"></p-skeleton> -->
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Actual Events -->
+          <ng-container *ngIf="!isLoadingEvents">
+            <div *ngIf="preProcurementEvents.length === 0" class="flex items-center justify-center w-full h-full text-gray-500">
+              No events available.
+            </div>
+            <ng-container *ngFor="let event of preProcurementEvents">
+              <p-card (click)="onEventSelect(event, 'edit')" [style]="{ height: '5.5rem', width: getCardWidth(event.ppmp_id), overflow: 'hidden', display: 'flex', alignItems: 'start'}" class="hover:cursor-pointer">
+                <div class="flex items-center gap-4 h-full">
+                  <div class="bg-blue-500 text-white flex items-center justify-center w-12 h-12 rounded mr-2">
+                    <i class="pi pi-calendar text-2xl"></i>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-semibold text-sm">{{ getPPMPProjectTitle(event.ppmp_id) }}</span>
+                    <div class="flex gap-5">
+                      <span class="text-xs font-semibold text-gray-500">{{ event.date | date: 'mediumDate' }}</span>
+                      <span class="text-xs font-semibold text-gray-500">{{ event.event_time | date: 'shortTime' }}</span>
+                    </div>
+                    <div class="flex flex-row gap-6">
+                      <span class="text-xs text-gray-500">
+                        Mode: <span class="font-semibold">{{ event.mode }}</span> -
+                        <span class="font-semibold">{{ event.platform || 'N/A' }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </p-card>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+      <p-divider></p-divider>
+      <div class="flex h-[50vh]">
+        <div class="flex flex-col gap-4 h-full w-full">
+          <h1 class="font-semibold text-base">Recent Events</h1>
+          <div class="flex flex-row gap-6 overflow-x-auto h-full mt-2 p-1 whitespace-nowrap">
+            <ng-container *ngIf="isLoadingInvitations">
+              <div *ngFor="let _ of [1, 2, 3]" class="flex flex-col gap-4" [style]="{ height: '40vh', width: '20rem' }">
+                <p-skeleton width="20rem" height="20rem"></p-skeleton>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="!isLoadingInvitations">
+              <div *ngIf="preProcurementInvitations.length === 0" class="flex items-center justify-center w-full h-full text-gray-500">
+                No invitation yet.
+              </div>
+              <ng-container *ngFor="let invite of preProcurementInvitations">
+                <p-card (click)="editInvite(invite)" class="hover:cursor-pointer" [style]="{ height: '40vh', width: '20rem', overflow: 'hidden', display: 'flex', flexDirection: 'column' }">
+                  <div class="flex flex-col gap-4 pb-1 h-full w-full">
+                    <div class="flex flex-col w-full mb-2">
+                      <span class="font-semibold text-xl text-gray-800 text-wrap w-full">{{ getPPMPProjectTitle(invite.ppmp_id) }}</span>
+                    </div>
+                    <div class="flex flex-row items-center gap-5">
+                      <span class="text-sm font-semibold">{{ invite.date | date: 'mediumDate' }}</span>
+                      <span class="text-sm font-semibold">{{ invite.time | date: 'shortTime' }}</span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <div class="flex flex-row items-center gap-2">
+                        <span class="text-sm text-gray-600">Mode:</span>
+                        <span class="font-semibold text-sm">{{ invite.mode }}</span>
+                      </div>
+                      <div class="flex flex-row items-center gap-2">
+                        <span class="text-sm text-gray-600">Platform:</span>
+                        <span class="font-semibold text-sm">{{ invite.platform || 'N/A' }}</span>
+                      </div>
+                      <div class="flex flex-row items-center gap-2">
+                        <span class="text-sm text-gray-600">Minutes:</span>
+                        <span class="text-sm" [class.font-semibold]="hasMinutes(invite)" [class.text-green-600]="hasMinutes(invite)">
+                          {{ hasMinutes(invite) ? 'Available' : 'No minutes recorded' }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="flex flex-col gap-2 mt-2">
+                      <span class="text-sm text-gray-600">Participants:</span>
+                      <div class="flex flex-row gap-3">
+                        <ng-container *ngFor="let participantId of invite.participants; let i = index">
+                          <div *ngIf="i < 3" 
+                              class="bg-blue-500 text-white flex items-center justify-center w-8 h-8 rounded-full relative"
+                              pTooltip="{{ getParticipantName(participantId) }}"
+                              tooltipPosition="top">
+                            <i class="pi pi-user text-xl"></i>
+                          </div>
+                          <div *ngIf="i === 3" 
+                              class="bg-blue-500 text-white flex items-center justify-center w-8 h-8 rounded-full relative"
+                              pTooltip="{{ getAllParticipantNames(invite.participants) }}"
+                              tooltipPosition="top">
+                            <ng-container *ngIf="invite.participants.length <= 4">
+                              <i class="pi pi-user text-xl"></i>
+                            </ng-container>
+                            <ng-container *ngIf="invite.participants.length > 4">
+                              <span class="text-sm">+{{invite.participants.length - 3}}</span>
+                            </ng-container>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </div>
+                  </div>
+                </p-card>
+              </ng-container>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </p-tabPanel>
+    
+    <p-tabPanel header="Pre-Bidding">
+      <div class="flex flex-col gap-4">
+        <div class="flex justify-between items-center">
+          <h1 class="font-semibold text-base">Pre-Bidding Conference Events</h1>
+          <div class="flex flex-row gap-4 items-center">
+            <!-- <p-button label="Add Event" icon="pi pi-plus" class="p-button-xs" [outlined]="true" (onClick)="addEvent(1)"></p-button>-->
+            <p-button label="Create Event Invitation" icon="pi pi-envelope" class="p-button-xs" [outlined]="true" (onClick)="createInvite(1)"></p-button>
+          </div>
+        </div>
+        <div class="flex flex-row gap-6 overflow-clip overflow-x-auto h-28 mt-2 p-1">
+          <ng-container *ngIf="isLoadingEvents">
+            <div *ngFor="let _ of [1, 2, 3, 4]" class="flex items-center gap-4" [style]="{ height: '5.5rem', width: '20rem' }">
+              <div class="flex flex-row gap-2 w-full">
+                <p-skeleton width="20rem" height="5.5rem"></p-skeleton>
+                <!-- <p-skeleton width="8rem" height="5.5rem"></p-skeleton>
+                <p-skeleton width="6rem" height="5.5rem"></p-skeleton> -->
+              </div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!isLoadingEvents">
+            <div *ngIf="preBiddingEvents.length === 0" class="flex items-center justify-center w-full h-full text-gray-500">
+              No events available.
+            </div>
+            <ng-container *ngFor="let event of preBiddingEvents">
+              <p-card (click)="onEventSelect(event, 'edit')" [style]="{ height: '5.5rem', width: '20rem', overflow: 'hidden', display: 'flex', alignItems:'start'}" class="hover:cursor-pointer">
+                <div class="flex items-center gap-4 h-full">
+                  <div class="bg-blue-500 text-white flex items-center justify-center w-12 h-12 rounded mr-2">
+                    <i class="pi pi-calendar text-2xl"></i>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="font-semibold text-sm">{{ getPPMPProjectTitle(event.ppmp_id) }}</span>
+                    <div class="flex gap-5">
+                      <span class="text-xs font-semibold text-gray-500">{{ event.date | date: 'mediumDate' }}</span>
+                      <span class="text-xs font-semibold text-gray-500">{{ event.event_time | date: 'shortTime' }}</span>
+                    </div>
+                    <div class="flex flex-row gap-6">
+                      <span class="text-xs text-gray-500">
+                        Mode: <span class="font-semibold">{{ event.mode }}</span> -
+                        <span class="font-semibold">{{ event.platform || 'N/A' }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </p-card>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+      <p-divider></p-divider>
+      <div class="flex h-[80vh]">
+        <div class="flex flex-col gap-4 h-full">
+          <h1 class="font-semibold text-base">Recent Invitations</h1>
+          <div class="flex flex-row gap-6 overflow-clip overflow-x-auto h-full mt-2 p-1">
+            <ng-container *ngIf="isLoadingInvitations">
+              <div *ngFor="let _ of [1, 2, 3]" class="flex flex-col gap-4" [style]="{ height: '40vh', width: '20rem' }">
+                <p-skeleton width="20rem" height="20rem"></p-skeleton>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="!isLoadingInvitations">
+              <div *ngIf="preBiddingInvitations.length === 0" class="flex items-center justify-center w-full h-full text-gray-500">
+                No invitation yet.
+              </div>
+              <ng-container *ngFor="let invite of preBiddingInvitations">
+                <p-card (click)="editInvite(invite)" class="hover:cursor-pointer" [style]="{ height: '40vh', width: '20rem', overflow: 'hidden', display: 'flex', flexDirection: 'column' }">
+                  <div class="flex flex-col gap-4 pb-1 h-full w-full">
+                    <div class="flex flex-col w-full mb-2">
+                      <span class="font-semibold text-lg text-gray-800 text-wrap w-full">{{ getPPMPProjectTitle(invite.ppmp_id) }}</span>
+                    </div>
+                    <div class="flex flex-row items-center gap-5">
+                      <span class="text-sm font-semibold">{{ invite.date | date: 'mediumDate' }}</span>
+                      <span class="text-sm font-semibold">{{ invite.time | date: 'shortTime' }}</span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <div class="flex flex-row items-center gap-2">
+                        <span class="text-sm text-gray-600">Mode:</span>
+                        <span class="font-semibold text-sm">{{ invite.mode }}</span>
+                      </div>
+                      <div class="flex flex-row items-center gap-2">
+                        <span class="text-sm text-gray-600">Platform:</span>
+                        <span class="font-semibold text-sm">{{ invite.platform || 'N/A' }}</span>
+                      </div>
+                    </div>
+                    <div class="flex flex-row items-center gap-2">
+                      <span class="text-sm text-gray-600">Minutes:</span>
+                      <span class="text-sm" [class.font-semibold]="hasMinutes(invite)" [class.text-green-600]="hasMinutes(invite)">
+                        {{ hasMinutes(invite) ? 'Available' : 'No minutes recorded' }}
+                      </span>
+                    </div>
+                    <div class="flex flex-col gap-2 mt-2">
+                      <span class="text-sm text-gray-600">Participants:</span>
+                      <div class="flex flex-row gap-3">
+                        <ng-container *ngFor="let participantId of invite.participants; let i = index">
+                          <div *ngIf="i < 3" 
+                              class="bg-blue-500 text-white flex items-center justify-center w-8 h-8 rounded-full relative"
+                              pTooltip="{{ getParticipantName(participantId) }}"
+                              tooltipPosition="top">
+                            <i class="pi pi-user text-xl"></i>
+                          </div>
+                          <div *ngIf="i === 3" 
+                              class="bg-blue-500 text-white flex items-center justify-center w-8 h-8 rounded-full relative"
+                              pTooltip="{{ getAllParticipantNames(invite.participants) }}"
+                              tooltipPosition="top">
+                            <ng-container *ngIf="invite.participants.length <= 4">
+                              <i class="pi pi-user text-xl"></i>
+                            </ng-container>
+                            <ng-container *ngIf="invite.participants.length > 4">
+                              <span class="text-sm">+{{invite.participants.length - 3}}</span>
+                            </ng-container>
+                          </div>
+                        </ng-container>
+                      </div>
+                    </div>
+                  </div>
+                </p-card>
+              </ng-container>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </p-tabPanel>
+  </p-tabView>
+</p-card>
+  
+<p-toast [position]="'bottom-right'"></p-toast>
+  
+<!-- CREATE EVENT MODAL-->
+<p-dialog [(visible)]="eventModal" [modal]="true" [closable]="true" [style]="{ width: '30vw', maxHeight: '100vh', overflow: 'visible'}" [contentStyle]="{ 'overflow': 'visible' }" header="Add Event">
+  <form class="p-fluid flex flex-col">
+      <div class="flex flex-col gap-3 mb-4">
+          <div class="p-field flex flex-col gap-1">
+            <label for="ppmp-name">Project Title</label>
+            <p-dropdown [(ngModel)]="selectedPPMPProject" [options]="ppmpProjectList" optionLabel="project_title" placeholder="Select a PPMP Project" name="selectedPPMPProject" (onChange)="onPPMPChange($event)"></p-dropdown>
+          </div>
+          <div class="p-field flex flex-col gap-1">
+            <label for="event-date">Event Date</label>
+            <input id="event-date" type="date" pInputText [(ngModel)]="eventDate" name="eventDate" />
+          </div>
+          <div class="p-field flex flex-col gap-1">
+            <label for="event-time">Event Time</label>
+            <p-calendar [(ngModel)]="eventTime" timeOnly="true" hourFormat="12" placeholder="Select Time" name="event-time"></p-calendar>
+          </div>
+          <div class="p-field flex flex-col gap-1">
+            <label for="event-mode">Meeting Mode</label>
+            <p-dropdown [(ngModel)]="selectedMode" [options]="meetMode" optionLabel="name" optionValue="code" placeholder="Select a Mode" name="selectedMode" (onChange)="onModeChange($event)"></p-dropdown>
+          </div>
+          <div class="p-field" *ngIf="selectedMode !== 'In-Person'">
+            <div class="flex flex-col gap-1">
+              <label for="event-platform">Platform</label>
+              <p-dropdown [(ngModel)]="selectedPlatform" [options]="getPlatformsForSelectedMode()" optionLabel="name" optionValue="code" placeholder="Select a Platform" name="selectedPlatform"></p-dropdown>
+            </div>
+          </div>
+            <div class="p-field flex flex-col gap-1">
+              <label for="purchase-requests">Purchase Requests</label>
+              <textarea id="purchase-requests" disabled="true" pInputTextarea [(ngModel)]="purchaseRequests" name="purchaseRequests" readonly></textarea>
+            <div *ngIf="purchaseRequests === ''">No purchase requests available for the selected PPMP.</div>
+          </div>
+      </div>
+      <p-footer>
+        <div class="flex justify-end gap-2">
+          <p-button label="Cancel" icon="pi pi-times" severity="secondary" (click)="eventModal = false" class="p-button-xs"></p-button>
+          <p-button label="Save" icon="pi pi-check" severity="success" (click)="saveEvent()" class="p-button-xs"></p-button>
+        </div>
+      </p-footer>
+  </form>
+</p-dialog>
+
+
+<!-- CREATE INVITE -->  
+<p-dialog [(visible)]="inviteModal" [modal]="true" [closable]="true" [style]="{ width: '30vw', maxHeight: '100vh', overflow: 'visible'}" [contentStyle]="{ 'overflow': 'visible' }" header="Create Invitation">
+  <form class="p-fluid flex flex-col gap-3">
+    <div class="p-field flex flex-col gap-1">
+      <label>Project Title</label>
+      <!-- <p-dropdown [options]="availableEvents" [(ngModel)]="selectedEvent" placeholder="Select Project Title" (onChange)="onEventSelect($event, 'invite')">
+        <ng-template let-event pTemplate="item">
+          {{ getPPMPProjectTitle(event.ppmp_id) }}
+        </ng-template>
+      </p-dropdown> -->
+      <p-dropdown 
+        [options]="availableEvents" 
+        [(ngModel)]="selectedEvent" 
+        placeholder="Select Project Title" 
+        (onChange)="onEventSelect($event, 'invite')"
+        name="selectedEvent">
+        <ng-template let-event pTemplate="item">
+          {{ getPPMPProjectTitle(event.ppmp_id) }}
+        </ng-template>
+        <ng-template let-selectedEvent pTemplate="selectedItem">
+          {{ selectedEvent ? getPPMPProjectTitle(selectedEvent.ppmp_id) : 'Select Project Title' }}
+        </ng-template>
+      </p-dropdown>
+    </div>
+    <div class="p-field flex flex-col gap-1">
+      <label>Event Date</label>
+      <input type="text" pInputText [value]="eventDate ? (eventDate | date: 'mediumDate') : ''" readonly />
+    </div>
+    <div class="p-field flex flex-col gap-1">
+      <label for="invitation-time">Event Time</label>
+      <p-calendar [(ngModel)]="eventTime" timeOnly="true" hourFormat="12" name="event-time"></p-calendar>
+    </div>
+    <div class="p-field flex flex-col gap-1">
+      <label>Mode</label>
+      <input type="text" pInputText [value]="selectedEvent?.mode || ''" readonly />
+    </div>
+    <div class="p-field flex flex-col gap-1" *ngIf="selectedEvent?.mode !== 'InPerson'">
+      <label>Platform</label>
+      <input type="text" pInputText [value]="selectedEvent?.platform || ''" readonly />
+    </div>
+    <div class="p-field flex flex-col gap-1 mb-4">
+      <label for="participant-select">Select Participants</label>
+      <p-multiSelect [(ngModel)]="selectedParticipants" [options]="participants" optionLabel="fullname" placeholder="Choose Participants" name="selectedParticipants"></p-multiSelect>
+    </div>
+    <p-footer>
+      <div class="flex justify-end gap-2">
+        <p-button label="Cancel" icon="pi pi-times" severity="secondary" (click)="inviteModal = false"></p-button>
+        <p-button label="Send Invitation" icon="pi pi-check" severity="success" (click)="sendInvite()"></p-button>
+      </div>
+    </p-footer>
+  </form>
+</p-dialog>
+
+<!-- EDIT EVENT MODAL -->  
+<p-dialog header="Edit Event" [(visible)]="editEventModal" [modal]="true" [closable]="true" [style]="{ width: '30vw', maxHeight: '100vh',   overflow: 'visible'}" [contentStyle]="{ 'overflow': 'visible' }">
+  <div class="p-fluid flex-col gap-3">
+    <div class="p-field flex flex-col gap-y-2 mb-1">
+      <label for="projectTitle">Project Title</label>
+      <input id="projectTitle" type="text" pInputText [value]="selectedEvent ? getPPMPProjectTitle(selectedEvent.ppmp_id) : ''" readonly />
+    </div>
+    <div class="flex gap-4 mb-1">
+      <div class="p-field flex flex-col gap-1">
+        <label for="eventDate">Event Date</label>
+        <p-calendar id="eventDate" [(ngModel)]="eventDate" dateFormat="yy-mm-dd"></p-calendar>
+      </div>
+      <div class="p-field flex flex-col gap-1">
+        <label for="eventTime">Event Time</label>
+        <p-calendar id="eventTime" [(ngModel)]="eventTime" timeOnly="true" hourFormat="12"></p-calendar>
+      </div>
+    </div>
+    <div class="p-field flex flex-col gap-1 mb-1">
+      <label for="mode">Mode</label>
+      <p-dropdown id="mode" [options]="meetMode" [(ngModel)]="selectedMode" optionLabel="name" optionValue="code" placeholder="Select Mode" (onChange)="onModeChange($event)"></p-dropdown>
+    </div>
+    <div class="p-field flex flex-col gap-1" *ngIf="selectedMode !== 'In-Person'">
+      <label for="platform">Platform</label>
+      <p-dropdown id="platform" [options]="getPlatformsForSelectedMode()" [(ngModel)]="selectedPlatform" optionLabel="name" optionValue="code" placeholder="Select Platform"></p-dropdown>
+    </div>
+    <div class="p-field flex flex-col gap-1 mb-4">
+      <label for="purchase-requests">Purchase Requests</label>
+      <textarea id="purchase-requests" disabled="true" pInputTextarea [(ngModel)]="purchaseRequests" name="purchaseRequests" readonly></textarea>
+      <div *ngIf="purchaseRequests === ''">No purchase requests available for the selected PPMP.</div>
+    </div>
+    <p-footer class="flex gap-2 justify-end">
+      <p-button 
+          label="Delete" 
+          icon="pi pi-trash" 
+          severity="danger" 
+          (click)="selectedEvent && deleteItem(selectedEvent)" 
+          class="p-button-xs" />
+        <p-button 
+          label="Save" 
+          icon="pi pi-check" 
+          severity="success" 
+          (click)="saveEditedEvent()" 
+          class="p-button-xs" />
+    </p-footer>
+  </div>
+</p-dialog>
+
+<!-- EDIT INVITE MODAL -->
+<p-dialog [(visible)]="editInviteModal" [modal]="true" [closable]="true" [style]="{ width: '50vw', maxHeight: '100vh', overflow: 'auto'}" [contentStyle]="{ 'overflow': 'visible' }" header="Edit Invitation">
+  <form class="p-fluid flex flex-col gap-3">
+    <div class="p-field flex flex-col gap-1">
+      <label>Project Title</label>
+      <input type="text" pInputText [value]="selectedInvite ? getPPMPProjectTitle(selectedInvite.ppmp_id) : ''" readonly placeholder="Select an Invitation" />
+    </div>
+    <div class="p-field flex flex-row gap-3 w-full">
+      <div class="p-field flex flex-col gap-1 w-1/2">
+        <label>Event Date</label>
+        <input type="text" pInputText [value]="eventDate ? (eventDate | date: 'mediumDate') : ''" readonly placeholder="Select an Event" />
+      </div>
+      <div class="p-field flex flex-col gap-1 w-1/2">
+        <label for="edit-invite-time">Event Time</label>
+        <p-calendar [(ngModel)]="eventTime" timeOnly="true" hourFormat="12" placeholder="Select Time" name="edit-invite-time"></p-calendar>
+      </div>
+    </div>
+    <div class="p-field flex flex-row gap-3 w-full">
+      <div class="p-field flex flex-col gap-1 w-1/2">
+        <label>Mode</label>
+        <input type="text" pInputText [value]="selectedInvite?.mode || ''" readonly placeholder="Select an Invitation" />
+      </div>
+      <div class="p-field flex flex-col gap-1 w-1/2" *ngIf="selectedInvite?.mode !== 'InPerson'">
+        <label>Platform</label>
+        <input type="text" pInputText [value]="selectedInvite?.platform || ''" readonly placeholder="Select an Invitation" />
+      </div>
+    </div>
+    <div class="p-field flex flex-col gap-1">
+      <label for="edit-participant-select">Select Participants</label>
+      <p-multiSelect [(ngModel)]="selectedParticipants" [options]="participants" optionLabel="fullname" placeholder="Choose Participants" name="edit-participant-select"></p-multiSelect>
+    </div>
+    <div class="p-field flex flex-col gap-1 mb-4">
+      <label for="edit-invite-content">Minutes of the Event</label>
+      <p-editor 
+        [(ngModel)]="meetingMinutes" 
+        [style]="{ height: '200px' }" 
+        name="edit-invite-content">
+      </p-editor>    
+    </div>
+    <p-footer>
+      <div class="flex justify-end gap-2">
+        <p-button label="Delete" icon="pi pi-trash" severity="danger" (click)="selectedInvite && deleteItem(selectedInvite)" class="p-button-xs"></p-button>
+        <p-button label="Save" icon="pi pi-check" severity="success" (click)="saveEditedInvite()" class="p-button-xs"></p-button>
+      </div>
+    </p-footer>
+  </form>
+</p-dialog>
+
+<!-- DELETE CONFIRMATION -->
+<p-dialog [(visible)]="deleteConfirmationModal" [modal]="true" [closable]="true" [style]="{ width: '25vw' }" header="Confirm Deletion">
+  <div class="flex flex-col gap-5">
+    <div class="p-fluid flex flex-col gap-1">
+      <p>Are you sure you want to delete this {{ itemToDelete?.hasOwnProperty('event_id') ? 'invitation' : 'event' }}?</p>
+      <p class="font-semibold">{{ itemToDelete ? getPPMPProjectTitle(itemToDelete.ppmp_id) : '' }}</p>
+    </div>
+    <div class="flex justify-end gap-2">
+      <p-button label="No" icon="pi pi-times" severity="secondary" (click)="deleteConfirmationModal = false" class="p-button-xs"></p-button>
+      <p-button label="Yes" icon="pi pi-check" severity="danger" (click)="confirmDeleteItem()" class="p-button-xs"></p-button>
+    </div>
+  </div>
+</p-dialog>

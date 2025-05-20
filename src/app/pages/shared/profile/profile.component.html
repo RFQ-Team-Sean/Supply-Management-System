@@ -1,0 +1,186 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Profile Header -->
+    <div class="flex flex-col items-center">
+      <!-- Avatar -->
+      <img
+        [src]="user.avatarUrl"
+        alt="Profile avatar"
+        class="w-24 h-24 rounded-full object-cover"
+      />
+  
+      <!-- Display user info -->
+      <h1 class="text-xl font-semibold mt-4">{{ user.name }}</h1>
+      <p class="text-gray-500 mt-1">{{ user.role }}</p>
+  
+      <p class="text-sm text-gray-400">
+        Joined: {{ user.joinedDate }}
+      </p>
+  
+      <!-- Action Buttons -->
+      <div class="mt-4 flex space-x-4">
+        <!-- Edit Profile opens the modal -->
+        <button
+          (click)="editProfile()"
+          class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none"
+        >
+          Edit Profile
+        </button>
+  
+        <!-- Settings button just switches tabs -->
+        <button
+          (click)="setTab('settings')"
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none"
+        >
+          Settings
+        </button>
+      </div>
+    </div>
+  
+    <!-- Stats Section -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+      <!-- Projects Managed -->
+      <div class="p-4 bg-white rounded shadow text-center">
+        <p class="text-gray-500">Projects Managed</p>
+        <p class="text-xl font-semibold">{{ user.stats.projectsManaged }}</p>
+      </div>
+  
+      <!-- Tasks Completed -->
+      <div class="p-4 bg-white rounded shadow text-center">
+        <p class="text-gray-500">Tasks Completed</p>
+        <p class="text-xl font-semibold">{{ user.stats.tasksCompleted }}</p>
+      </div>
+  
+      <!-- Hours Logged -->
+      <div class="p-4 bg-white rounded shadow text-center">
+        <p class="text-gray-500">Hours Logged</p>
+        <p class="text-xl font-semibold">{{ user.stats.hoursLogged }}</p>
+      </div>
+    </div>
+  
+    <!-- Tabs (Overview, Activity, Settings) -->
+    <div class="mt-8 flex border-b border-gray-200">
+      <button
+        class="px-4 py-2"
+        [ngClass]="selectedTab === 'overview'
+          ? 'text-gray-600 border-b-2 border-blue-500 font-medium'
+          : 'text-gray-500 hover:text-gray-700'"
+        (click)="setTab('overview')"
+      >
+        Overview
+      </button>
+      <button
+        class="px-4 py-2"
+        [ngClass]="selectedTab === 'activity'
+          ? 'text-gray-600 border-b-2 border-blue-500 font-medium'
+          : 'text-gray-500 hover:text-gray-700'"
+        (click)="setTab('activity')"
+      >
+        Activity
+      </button>
+      <button
+        class="px-4 py-2"
+        [ngClass]="selectedTab === 'settings'
+          ? 'text-gray-600 border-b-2 border-blue-500 font-medium'
+          : 'text-gray-500 hover:text-gray-700'"
+        (click)="setTab('settings')"
+      >
+        Settings
+      </button>
+    </div>
+  
+    <!-- Tab Content -->
+    <div class="mt-6">
+      <!-- Overview Tab -->
+      <ng-container *ngIf="selectedTab === 'overview'">
+        <h2 class="text-lg font-semibold mb-4">Recent Activity</h2>
+        <div
+          *ngFor="let activity of user.recentActivity"
+          class="flex flex-col md:flex-row justify-between mb-4"
+        >
+          <div>
+            <h3 class="font-medium">{{ activity.title }}</h3>
+            <p class="text-sm text-gray-500">{{ activity.description }}</p>
+          </div>
+          <p class="text-gray-400 text-sm md:mt-0 md:ml-4">{{ activity.date }}</p>
+        </div>
+      </ng-container>
+  
+      <!-- Activity Tab -->
+      <ng-container *ngIf="selectedTab === 'activity'">
+        <h2 class="text-lg font-semibold mb-4">Activity</h2>
+        <p class="text-sm text-gray-500">
+          This is where you might show a more comprehensive activity log.
+        </p>
+      </ng-container>
+  
+      <!-- Settings Tab -->
+      <ng-container *ngIf="selectedTab === 'settings'">
+        <h2 class="text-lg font-semibold mb-4">User Settings</h2>
+        <p class="text-sm text-gray-500">
+          This is where you'd allow changes to user account settings, password, or other preferences.
+        </p>
+      </ng-container>
+    </div>
+  
+    <!-- Quick Links -->
+    <div class="mt-6 flex space-x-4">
+      <button
+        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none"
+        [routerLink]="['/reports']"
+        (click)="viewReports()"
+      >
+        View Reports
+      </button>
+      <button
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none"
+        [routerLink]="['/users']"
+        (click)="manageUsers()"
+      >
+        Manage Users
+      </button>
+    </div>
+  </div>
+  
+  <!-- PrimeNG Edit Dialog -->
+  <p-dialog
+    header="Edit Profile"
+    [(visible)]="displayEditModal"
+    [modal]="true"
+    [closable]="true"
+    (onHide)="cancelEdit()"
+  >
+    <!-- Modal Content -->
+    <ng-template pTemplate="content">
+      <form [formGroup]="editForm" class="flex flex-col items-center space-y-2">
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="Name"
+          class="block w-64 px-3 py-2 border rounded focus:outline-none focus:ring"
+        />
+        <input
+          type="text"
+          formControlName="role"
+          placeholder="Role"
+          class="block w-64 px-3 py-2 border rounded focus:outline-none focus:ring"
+        />
+      </form>
+    </ng-template>
+  
+    <!-- Modal Footer -->
+    <ng-template pTemplate="footer">
+      <button
+        (click)="saveProfile()"
+        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none mr-2"
+      >
+        Save
+      </button>
+      <button
+        (click)="cancelEdit()"
+        class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none"
+      >
+        Cancel
+      </button>
+    </ng-template>
+  </p-dialog>
+  

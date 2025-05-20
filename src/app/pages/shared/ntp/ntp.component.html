@@ -1,0 +1,42 @@
+<div class="p-10 bg-white shadow-md rounded-lg">
+  <div class="mb-4">
+    <h2 class="text-3xl font-bold mb-4">Notice to Proceed</h2>
+    <p class="text-xl">NTP No.: {{ mockData.ntpNumber }}</p>
+    <p class="text-xl">Date: {{ mockData.date }}</p>
+  </div>
+
+  <div class="text-xl">
+    <p>{{ mockData.recipient.company }}</p>
+    <p>{{ mockData.recipient.address }}</p>
+    <p>{{ mockData.recipient.email }}</p>
+  </div>
+
+  <div class="mt-6 text-xl">
+    <p><strong>Attention:</strong></p>
+    <p>{{ mockData.recipient.name }}</p>
+    <p>{{ mockData.recipient.position }}</p>
+  </div>
+
+  <div class="mt-6 text-xl">
+    <p>
+      Dear <strong>Ms. Maxwell</strong>, with reference to the approved Award
+      and Contract for <strong>{{ mockData.contractReference }}</strong>, you
+      are hereby advised to proceed.
+    </p>
+  </div>
+
+  <div class="mt-6 text-xl">
+    <p>Delivery Instructions:</p>
+    <p>{{ mockData.deliveryInstructions.lot1 }}</p>
+    <p>{{ mockData.deliveryInstructions.lot5 }}</p>
+  </div>
+
+  <div class="mt-6 text-xl">
+    <p>Thank you.</p>
+    <p>Very truly yours,</p>
+    <p class="mt-4">Jaldwin G. Jaldorina, Ph.D.</p>
+    <p>Director</p>
+  </div>
+
+  <p-button label="Export to PDF" (onClick)="exportPdf()" class="mt-4"></p-button>
+</div>

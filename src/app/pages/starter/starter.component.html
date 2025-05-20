@@ -1,0 +1,129 @@
+<div class="w-full h-full flex flex-row gap-x-5">
+  <div class="flex flex-col gap-5 w-full h-full">
+    <!-- CARD 1 -->
+    <p-card [style]="{height: '49.2vh', width: '40vw', overflow: 'hidden'}">
+      <h1 class="text-lg font-semibold">Project Procurement Management Plan</h1>
+      <p>Review recent PPMPs for consolidation.</p>
+      <div class="flex-grow overflow-y-auto">
+        <p-table [value]="ppmpData" responsiveLayout="scroll" [scrollable]="true" scrollHeight="300px" class="w-full">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Project</th>
+              <th>Department</th>
+              <th>Year</th>
+              <th>Budget</th>
+              <th>Status</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <td>{{ item.projectName}}</td>
+              <td>{{ item.department }}</td>
+              <td>{{ item.year }}</td>
+              <td>{{ item.budget | currency:'USD' }}</td>
+              <td>
+                <span 
+                  class="px-3 py-1 rounded text-white text-sm"
+                  [ngClass]="{
+                    'bg-green-500': item.status === 'Approved',
+                    'bg-yellow-500': item.status === 'Pending',
+                    'bg-red-500': item.status === 'Rejected'
+                  }">
+                  {{ item.status }}
+                </span>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-card>
+
+    <!-- CARD 4 -->
+    <p-card [style]="{height: '62vh', width: '40vw'}">
+      <h1 class="text-lg font-semibold">Budget Allocation Overview</h1>
+      <p>Comparison of Total Budget, Allocated, and Remaining funds.</p>
+      <p-divider></p-divider>
+
+      <apx-chart 
+        [series]="budgetChartOptions.series"
+        [chart]="budgetChartOptions.chart"
+        [xaxis]="budgetChartOptions.xaxis"
+        [yaxis]="budgetChartOptions.yaxis"
+        [stroke]="budgetChartOptions.stroke"
+        [title]="budgetChartOptions.title">
+      </apx-chart>
+    </p-card>
+  
+    
+  </div>
+  
+  <div class="flex flex-col gap-5 w-full h-full">
+    <p-card styleClass="flex justify-center h-[17vh] w-[35vw] items-center text-center ">
+      <h2 class="text-lg font-semibold italic mt-2">{{ currentQuote }}</h2>
+    </p-card>
+    
+    <div class="flex flex-row gap-5">
+      <!-- CARD 2 -->
+      <p-card [style]="{height: '30vh', width: '17vw'}">
+        <div class="flex justify-between items-center mb-1">
+          <button pButton icon="pi pi-chevron-left" class="p-button-text p-0" style="font-size: 0.8rem; width: 1.5rem; height: 1.5rem;" (click)="changeMonth(-1)"></button>
+          <h2 class="text-center font-bold text-sm">{{ currentMonthName }} {{ currentYear }}</h2>
+          <button pButton icon="pi pi-chevron-right" class="p-button-text p-0" style="font-size: 0.8rem; width: 1.5rem; height: 1.5rem;" (click)="changeMonth(1)"></button>
+        </div>
+      
+        <div class="grid grid-cols-7 gap-0.5 text-center font-light text-xs">
+          <div *ngFor="let day of daysOfWeek" class="text-gray-600">{{ day }}</div>
+        </div>
+      
+        <div class="grid grid-cols-7 gap-1 text-center mt-1">
+          <div 
+            *ngFor="let day of calendarDays" 
+            class="p-2 border rounded-md transition-all duration-300"
+            [ngClass]="{
+              'bg-blue-500 text-white font-bold': isToday(day),
+              'bg-blue-300 text-white': isEventDate(day)
+            }"
+          >
+            {{ day !== 0 ? day : '' }}
+          </div>
+        </div>
+      </p-card>
+    
+      <!-- CARD 3 -->
+      <p-card [style]="{height: '30vh', width: '17vw'}">
+        <h3 class="text-md font-semibold">Upcoming Events</h3>
+        <div *ngIf="showAnimation" class="flex flex-col justify-center items-center transition-all duration-500">
+          <app-lottie-animation animation="box" class="h-32 mt-4" />
+          <p>No upcoming events</p>
+        </div>
+      
+        <!-- Events Title & List (Only visible when showAnimation is false) -->
+        <div *ngIf="!showAnimation" class="w-full transition-all duration-500">
+          <ul class="mt-2">
+            <li *ngFor="let event of filteredEvents" class="text-sm gap-y-2">
+              {{ event.date | date:'MMM d' }} - {{ event.title }}
+            </li>
+          </ul> 
+        </div>
+      </p-card>
+    </div>
+    
+    <!-- CARD 5 -->
+    <p-card [style]="{height: '62vh', width: '35vw'}">
+      <h1 class="text-lg font-semibold">Supply Monitoring</h1>
+      <p>Track available and used stock levels.</p>
+      <p-divider></p-divider>
+
+      <div style="height: 85%; width: 100%;">
+        <apx-chart 
+          [series]="supplyChartOptions.series" 
+          [chart]="supplyChartOptions.chart" 
+          [xaxis]="supplyChartOptions.xaxis" 
+          [yaxis]="supplyChartOptions.yaxis" 
+          [stroke]="supplyChartOptions.stroke"
+          [title]="supplyChartOptions.title">
+        </apx-chart>
+      </div>
+    </p-card>
+  </div>
+</div>

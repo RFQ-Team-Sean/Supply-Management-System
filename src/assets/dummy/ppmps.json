@@ -1,0 +1,47 @@
+[
+    {
+      "id": 1,
+      "department_id": 101,
+      "office_id": 202,
+      "project_title": "Construction of New Office Building",
+      "project_code": "CON-2025-001",
+      "fiscal_year": 2025,
+      "start_date": "2025-05-01T00:00:00Z",
+      "end_date": "2026-05-01T00:00:00Z",
+      "prepared_by": "John Doe",
+      "date_prepared": "2025-02-07T00:00:00Z",
+      "item_description": "Concrete Mix",
+      "unit_of_measurement": "Cubic Meter",
+      "quantity_required": 500,
+      "estimated_unit_cost": 100,
+      "estimated_total_cost": 50000,
+      "procurement_mode_id": 3,
+      "funding_source_id": 1,
+      "remarks": "For foundation work",
+      "approval_status": "Pending",
+      "current_approval_stage": "Stage 1"
+    },
+    {
+      "id": 2,
+      "department_id": 102,
+      "office_id": 203,
+      "project_title": "Renovation of Conference Room",
+      "project_code": "REN-2025-002",
+      "fiscal_year": 2025,
+      "start_date": "2025-06-01T00:00:00Z",
+      "end_date": "2025-08-01T00:00:00Z",
+      "prepared_by": "Jane Smith",
+      "date_prepared": "2025-02-07T00:00:00Z",
+      "item_description": "Office Chairs",
+      "unit_of_measurement": "Piece",
+      "quantity_required": 30,
+      "estimated_unit_cost": 150,
+      "estimated_total_cost": 4500,
+      "procurement_mode_id": 1,
+      "funding_source_id": 2,
+      "remarks": "To replace old chairs",
+      "approval_status": "Approved",
+      "current_approval_stage": "Stage 2"
+    }
+  ]
+  

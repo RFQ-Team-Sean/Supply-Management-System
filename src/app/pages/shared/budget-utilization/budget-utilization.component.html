@@ -1,0 +1,60 @@
+<div class="app-bur p-10 ml-5 bg-white shadow-md rounded-lg" style="width: 380mm; height: auto;">  
+
+  <!-- Data Display -->
+  <div *ngIf="mockData">
+    <h1 class="text-4xl font-bold mb-4 flex justify-center">{{ mockData?.title }}</h1>
+    <h2 class="text-3xl font-bold mb-4 flex justify-center">{{ mockData?.subtitle }}</h2>
+    <h3 class="text-2xl font-bold mb-4 flex justify-center">{{ mockData?.reportTitle }}</h3>
+    <h4 class="text-xl font-bold mb-4 flex justify-center">{{ mockData?.quarterEnded }}</h4>
+
+    <table
+      class="w-full border-collapse border border-gray-300 text-lg"
+      style="table-layout: auto;"
+      *ngIf="mockData?.tableHeaders?.length"
+    >
+      <thead>
+        <tr class="bg-gray-200">
+          <th
+            *ngFor="let header of mockData.tableHeaders"
+            class="border border-gray-300 p-2"
+          >
+            {{ header }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of mockData.tableData">
+          <td class="border border-gray-300 p-2">Approved Funds</td>
+          <td class="border border-gray-300 p-2">{{ row.nadaiDate }}</td>
+          <td class="border border-gray-300 p-2">{{ row.programType }}</td>
+          <td class="border border-gray-300 p-2">{{ row.programTitle }}</td>
+          <td class="border border-gray-300 p-2">{{ row.location }}</td>
+          <td class="border border-gray-300 p-2">{{ row.implementationMode }}</td>
+          <td class="border border-gray-300 p-2">{{ row.beneficiaries }}</td>
+          <td class="border border-gray-300 p-2">
+            <strong>Received:</strong> {{ row.amountReceived }}<br />
+            <strong>Contracted:</strong> {{ row.amountContracted }}<br />
+            <strong>Disbursed:</strong> {{ row.amountDisbursed }}
+          </td>
+          <td class="border border-gray-300 p-2">{{ row.completionPeriod }}</td>
+          <td class="border border-gray-300 p-2">{{ row.remarks }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mt-8 text-2xl">
+      <p><strong>Certified correct by:</strong></p>
+        <p>{{ mockData.certifiedBy.lfc }}</p>
+        <p>{{ mockData.certifiedBy.budgetOfficer }}</p>
+        <p>{{ mockData.certifiedBy.treasurer }}</p>
+    </div>
+
+    <div class="mt-8 text-2xl">
+      <p><strong>Attested by:</strong></p>
+      <p>{{ mockData?.attestedBy?.chiefExecutive }}</p>
+      <p>{{ mockData?.attestedBy?.planningCoordinator }}</p>
+    </div>
+  </div>
+
+  <!-- <p-button label="Export to PDF" (onClick)="exportPdf()" class="mt-4"></p-button> -->
+</div>

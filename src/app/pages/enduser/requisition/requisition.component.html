@@ -1,0 +1,390 @@
+<p-card header="Requisitions" class="mb-4">
+  <p class="text-sm text-gray-600 mb-4">
+    Manage and track your requisitions below.
+  </p>
+
+  <p-tabView [(activeIndex)]="activeTabIndex">
+    <!-- Add Requisition Tab -->
+   
+
+<p-tabPanel header="Requisition & Issue Slip">
+  <form [formGroup]="issueSlipForm" class="p-fluid" novalidate>
+    
+    <!-- Update these fields in your Issue Slip form -->
+<div class="grid formgrid gap-y-4">
+  <!-- Title Field (Requisition Dropdown) -->
+  <div class="field col-12 md:col-6">
+    <label for="issueTitle" class="font-semibold text-gray-800 mb-2">Title</label>
+    <p-dropdown
+      id="issueTitle"
+      [options]="approvedRequisitions"
+      formControlName="title"
+      optionLabel="title"
+      [filter]="true"
+      filterBy="title"
+      placeholder="Select requisition title"
+      class="w-full"
+      (onChange)="onRequisitionSelect($event)"
+    >
+      <ng-template pTemplate="selectedItem">
+        <div class="flex align-items-center" *ngIf="issueSlipForm.get('title')?.value">
+          <div>{{issueSlipForm.get('title')?.value.title}}</div>
+        </div>
+      </ng-template>
+      <ng-template let-requisition pTemplate="item">
+        <div class="flex align-items-center">
+          <div>{{requisition.title}}</div>
+        </div>
+      </ng-template>
+    </p-dropdown>
+    <small
+      class="text-red-500"
+      *ngIf="submitted && issueSlipForm.get('title')?.errors?.['required']"
+    >Title is required</small>
+  </div>
+
+  <!-- Description Field -->
+  <div class="field col-12 md:col-6">
+    <label for="issueDescription" class="font-semibold text-gray-800 mb-2">Purpose</label>
+    <input
+      id="issueDescription"
+      type="text"
+      pInputText
+      formControlName="description"
+      placeholder="Enter Purpose"
+      class="w-full"
+    />
+  </div>
+
+
+  <div class="field col-12 md:col-6">
+    <label for="issueDescription" class="font-semibold text-gray-800 mb-2">Remarks</label>
+    <input
+      id="issueDescription"
+      type="text"
+      pInputText
+      formControlName="description"
+      placeholder="Enter Remarks / Comments"
+      class="w-full"
+    />
+  </div>
+  <!-- Requested By Field (Auto-filled) -->
+  <div class="field col-12 md:col-6">
+    <label for="requestedBy" class="font-semibold text-gray-800 mb-2">Requested By</label>
+    <input
+      id="requestedBy"
+      type="text"
+      pInputText
+      formControlName="requestedBy"
+      [readonly]="true"
+      class="w-full bg-gray-50"
+    />
+  </div>
+</div>
+
+    <!-- Available Stocks -->
+    <div class="mt-4 mx-4">
+      <h3 class="text-lg font-semibold mb-4">Available Stocks</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div 
+          *ngFor="let stock of stocks" 
+          class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-sm transition-all duration-200"
+        >
+          <div class="h-36 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500"></div>
+          <div class="p-4">
+            <div class="mb-4">
+              <h4 class="text-base font-semibold text-gray-900">{{stock.name}}</h4>
+              <p class="text-gray-600">{{stock.description}}</p>
+              <p class="text-gray-700">Available: {{stock.quantity}}</p>
+            </div>
+
+            <!-- Stock Form if already selected -->
+            <div *ngIf="isStockSelected(stock)" class="border border-gray-300 rounded-lg p-6 shadow-md">
+              <!-- Quantity -->
+              <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-800 mb-2">Quantity</label>
+                <p-inputNumber
+                  [(ngModel)]="getSelectedStock(stock)!.quantity"
+                  [ngModelOptions]="{ standalone: true }"
+                  [showButtons]="true"
+                  [min]="1"
+                  [max]="stock.quantity"
+                  class="w-full"
+                  placeholder="Enter quantity"
+                  [inputStyle]="{'width': '100%'}"
+                ></p-inputNumber>
+              </div>
+
+              <!-- Cancel Button -->
+              <div class="flex justify-end mt-4">
+                <button
+                  pButton
+                  type="button"
+                  label="Cancel"
+                  icon="pi pi-times"
+                  (click)="removeSelectedStock(stock)"
+                  class="p-button-danger p-button-outlined p-button-sm"
+                ></button>
+              </div>
+            </div>
+
+            <!-- Add Button if not yet selected -->
+            <div *ngIf="!isStockSelected(stock)" class="flex justify-end mt-4">
+              <button
+                pButton
+                type="button"
+                label="Add"
+                icon="pi pi-plus"
+                (click)="addSelectedStock(stock)"
+                class="p-button-outlined p-button-sm"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex justify-end mt-6 mx-4">
+      <button
+        pButton
+        type="button"
+        label="Generate Issue Slip"
+        icon="pi pi-file-pdf"
+        (click)="saveIssueSlip()"
+        [loading]="loading"
+        [disabled]="!issueSlipForm.valid || selectedStocks.length === 0"
+      ></button>
+    </div>
+  </form>
+</p-tabPanel>
+
+
+  </p-tabView>
+</p-card>
+
+
+<p-dialog
+  header="Preview PPMP"
+  [(visible)]="displayPdfDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '800px' }"
+  [resizable]="false"
+>
+  <div class="mb-4">
+    <iframe
+      *ngIf="pdfDataUrl"
+      [src]="pdfDataUrl"
+      width="100%"
+      height="500px"
+      style="border: none;"
+    ></iframe>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <button
+        pButton
+        label="Cancel"
+        class="p-button-secondary"
+        (click)="cancelRequisitionSubmission()"
+      ></button>
+      <button
+        pButton
+        label="Confirm Submission"
+        class="p-button-success"
+        (click)="confirmRequisitionSubmission()"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+
+
+<p-dialog
+  header="View Purchase Request"
+  [(visible)]="displayPurchaseRequestPreview"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '800px' }"
+  [resizable]="false"
+>
+  <div class="mb-4">
+    <iframe
+      *ngIf="selectedPurchaseRequestPdf"
+      [src]="selectedPurchaseRequestPdf"
+      width="100%"
+      height="500px"
+      style="border: none;"
+    ></iframe>
+  </div>
+</p-dialog>
+
+
+<!-- Dialogs -->
+<p-dialog 
+  header="PPMP Preview" 
+  [(visible)]="displayPdfDialog" 
+  [modal]="true" 
+  [style]="{width: '90vw', maxWidth: '800px'}" 
+  [resizable]="false"
+>
+  <div class="mb-4">
+    <iframe
+      *ngIf="pdfDataUrl"
+      [src]="pdfDataUrl"
+      width="100%"
+      height="500px"
+      style="border: none;"
+    ></iframe>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" (onClick)="cancelRequisitionSave()"></p-button>
+      <p-button label="Confirm" icon="pi pi-check" (onClick)="finalizeRequisitionSave()"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="View PPMP"
+  [(visible)]="displayPpmpPreview"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '800px' }"
+  [resizable]="false"
+>
+  <div class="mb-4">
+    <iframe
+      *ngIf="selectedRequisitionPdf"
+      [src]="selectedRequisitionPdf"
+      width="100%"
+      height="500px"
+      style="border: none;"
+    ></iframe>
+  </div>
+</p-dialog>
+
+
+
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
+<p-toast position="bottom-right"></p-toast>
+
+<p-dialog
+  [(visible)]="displayPurchaseRequestModal"
+  [modal]="true"
+  [style]="{ width: '90%', maxWidth: '800px' }"
+  [resizable]="false"
+>
+  <ng-template pTemplate="header">
+    <h3 class="text-lg font-bold">Purchase Request</h3>
+  </ng-template>
+  <app-purchase-req
+    *ngIf="selectedPurchaseRequestId"
+    [requisitionId]="selectedPurchaseRequestId"
+  ></app-purchase-req>
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      pRipple
+      type="button"
+      label="Close"
+      class="p-button-text"
+      (click)="closePurchaseRequestModal()"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+
+<!-- Modal for displaying attachments and approval history -->
+<p-dialog [(visible)]="displayModal" [modal]="true" [style]="{ width: '50vw' }" [draggable]="false" [resizable]="false">
+  <ng-template pTemplate="header">
+    <h3 class="text-lg font-bold">Attachments and Approval History</h3>
+  </ng-template>
+  <div *ngIf="selectedRequisition" class="space-y-4">
+    <div>
+      <ul class="list-disc list-inside gap-y-2 flex flex-col">
+        <!-- PPMP Attachment -->
+        <li *ngIf="selectedRequisition.ppmpAttachment">
+          <button
+            pButton
+            label="PPMP Attachment"
+            class="p-button-sm p-button-outlined"
+            (click)="viewAttachment(selectedRequisition.ppmpAttachment)">
+          </button>
+        </li>
+        <!-- Purchase Request Attachment -->
+        <li *ngIf="selectedRequisition.purchaseRequestAttachment">
+          <button
+            pButton
+            label="View Purchase Request"
+            class="p-button-sm p-button-outlined"
+            (click)="viewPurchaseRequest(selectedRequisition.id || '')">
+          </button>
+        </li>
+      
+      </ul>
+    </div>
+
+    <div>
+      <h4 class="font-semibold mb-2">Approval History</h4>
+      <p-timeline [value]="selectedRequisition.approvalHistory" align="alternate">
+        <ng-template pTemplate="content" let-history>
+          <p-card>
+            <p>{{ history.status }}</p>
+            <p class="text-sm text-gray-500">{{ history.timestamp | date: 'M/d/yy, h:mm a' }}</p>
+            <p class="text-sm text-gray-700">{{ history.comments || 'No comments' }}</p>
+            <p class="text-xs text-gray-500">By: {{ history.approversName || 'Unknown' }}</p>
+            <p *ngIf="history.signature" class="text-xs text-gray-500">
+              Signature: <img [src]="history.signature" alt="Signature" class="inline-block h-8">
+            </p>
+          </p-card>
+        </ng-template>
+      </p-timeline>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple type="button" label="Close" class="p-button-text" (click)="displayModal = false"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Modal for displaying attachment preview -->
+<p-dialog [(visible)]="displayAttachmentModal" [modal]="true" [style]="{ width: '90vw', maxWidth: '800px' }" [resizable]="false">
+  <ng-template pTemplate="header">
+    <h3 class="text-lg font-bold">Attachment Preview</h3>
+  </ng-template>
+  <iframe *ngIf="selectedAttachmentUrl" [src]="selectedAttachmentUrl" width="100%" height="500px" style="border: none;"></iframe>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple type="button" label="Close" class="p-button-text" (click)="displayAttachmentModal = false"></button>
+  </ng-template>
+</p-dialog>
+
+
+<p-dialog
+  header="Issue Slip Preview"
+  [(visible)]="displayIssueSlipPreview"
+  [modal]="true"
+  [style]="{width: '90vw', maxWidth: '800px'}"
+  [resizable]="false"
+>
+  <div class="mb-4">
+    <iframe
+      *ngIf="selectedIssueSlipPdf"
+      [src]="selectedIssueSlipPdf"
+      width="100%"
+      height="500px"
+      style="border: none;"
+    ></iframe>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancel"
+        (onClick)="displayIssueSlipPreview = false"
+        [outlined]="true"
+      ></p-button>
+      <p-button
+        label="Confirm"
+        icon="pi pi-check"
+        (onClick)="confirmIssueSlip()"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>

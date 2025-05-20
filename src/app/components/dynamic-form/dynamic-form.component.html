@@ -1,0 +1,149 @@
+<p-dialog
+  (onClose)="onClose()"
+  [modal]="true"
+  [(visible)]="config.show!"
+  [style]="{ width: config.rows ? '38rem' : '30rem' }">
+  <ng-template #header>
+    <div class="py-0 inline-flex items-center justify-center gap-3">
+      <i class="pi pi-box text-lg"></i>
+      <span class="font-bold text-lg whitespace-nowrap">{{ config.title }}</span>
+    </div>
+  </ng-template>
+  <span class="p-text-secondary block">
+    {{ config.description }}
+  </span>
+  @if (!config.view) {
+    <small class="p-text-secondary block">(Please fill out all form fields)</small>
+  }
+
+  <form
+    class="flex flex-col gap-3 mt-4 mb-4 overflow-hidden"
+    [formGroup]="form"
+    (submit)="onSubmit()">
+    <!-- Reusable field template -->
+    <ng-template #fieldTemplate let-field>
+      <div class="flex flex-col gap-3">
+        <label class="font-semibold" for="{{ field.id }}">
+          <span>{{ field.label }}</span>
+          @if (isRequired(field) && !config.view) {
+            <span class="text-red-500">*</span>
+          }
+        </label>
+        <div class="flex-auto flex-col flex">
+        @switch (field.type) {
+            @case ('input') {
+                <input
+                [readonly]="field.readonly || config.view"
+                [placeholder]="field.placeholder"
+                [formControlName]="field.id.toString()"
+                pInputText
+                [id]="field.id.toString()"
+                autocomplete="off" />
+            }
+            @case ('number') {
+                <p-inputnumber
+                [readonly]="field.readonly || config.view"
+                [placeholder]="field.placeholder"
+                [formControlName]="field.id.toString()"
+                [showButtons]="true"
+                [inputId]="field.id.toString()"
+
+                mode="decimal"
+                autocomplete="off" />
+            }
+            @case ('currency') {
+                <p-inputnumber
+                [readonly]="field.readonly || config.view"
+                [placeholder]="field.placeholder"
+                [formControlName]="field.id.toString()"
+                [inputId]="field.id.toString()"
+                mode="currency"
+                currency="PHP"
+                locale="en-PH"
+                autocomplete="off" />
+            }
+            @case ('select') {
+                <p-select
+                [readonly]="field.readonly || config.view"
+                (onChange)="onSelect($event, field)"
+                [options]="field.options ?? []"
+                [formControlName]="field.id.toString()"
+                optionLabel="label"
+                [filter]="true"
+                filterBy="label"
+                [placeholder]="field.placeholder"
+        
+                styleClass="text-[1rem] h-10 flex items-center">
+                <ng-template #selectedItem let-selectedOption>
+                    <div class="flex items-center gap-2">
+                    <div>{{ selectedOption.label }}</div>
+                    </div>
+                </ng-template>
+                <ng-template let-inventory #item>
+                    <div class="flex items-center gap-2">
+                    <div>{{ inventory.label }}</div>
+                    </div>
+                </ng-template>
+                </p-select>
+            }
+            @case ('textarea') {
+                <textarea
+                [readonly]="field.readonly || config.view"
+                [placeholder]="field.placeholder"
+                [formControlName]="field.id.toString()"
+                [name]="field.id.toString()"
+                rows="5"
+                cols="25"
+                pTextarea
+                [id]="field.id.toString()"
+                autocomplete="off"></textarea>
+            }
+        }
+          @for (validator of field.validators; track validator) {
+            @if (form.get(field.id.toString())?.hasError(validator.name) && form.get(field.id.toString())?.touched) {
+              <small class="self-end text-red-500 mt-2">{{ validator.message }}</small>
+            }
+          }
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Check if config.rows exists and has values -->
+    @if (config.rows && config.rows.length > 0) {
+      <!-- Multi-column layout based on config.rows -->
+      @for (rowCount of config.rows; track $index) {
+          <div class="grid gap-3" [style.grid-template-columns]="'repeat(' + (rowCount < config.formfields.length ?  rowCount : config.formfields.length) +', 1fr)'">
+            @for (field of getFieldsForRow($index, rowCount); track field) {
+              <ng-container [ngTemplateOutlet]="fieldTemplate" [ngTemplateOutletContext]="{ $implicit: field }"></ng-container>
+            }
+          </div>
+      }
+      <!-- Render remaining fields in single-column layout -->
+      @if (getStartIndex(config.rows.length) < config.formfields.length) {
+        @for (field of config.formfields.slice(getStartIndex(config.rows.length)); track field) {
+          <ng-container [ngTemplateOutlet]="fieldTemplate" [ngTemplateOutletContext]="{ $implicit: field }"></ng-container>
+        }
+      }
+    } @else {
+      <!-- Default single-column layout -->
+      @for (field of config.formfields; track field) {
+        <ng-container [ngTemplateOutlet]="fieldTemplate" [ngTemplateOutletContext]="{ $implicit: field }"></ng-container>
+      }
+    }
+
+    @if (!config.view) {
+      <div class="flex justify-end gap-6 mt-7">
+        <p-button
+          [label]="config.cancelDecoration ? config.cancelDecoration.label : 'Cancel'"
+          [icon]="config.submitDecoration ? config.submitDecoration.label : 'pi pi-times'"
+          severity="secondary"
+          (click)="config.show = false" />
+        <p-button
+          [label]="config.submitDecoration ? config.submitDecoration.label : 'Submit'"
+          [icon]="config.submitDecoration ? config.submitDecoration.icon : 'pi pi-check'"
+          (click)="onSubmit()"
+          [disabled]="!isFormValid()" />
+      </div>
+    }
+  </form>
+</p-dialog>

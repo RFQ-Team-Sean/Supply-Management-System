@@ -1,0 +1,233 @@
+<p-tabView>
+  <!-- Purchase Orders Tab -->
+  <p-tabPanel header="Purchase Orders">
+    <mat-card class="cardWithShadow">
+      <mat-card-content>
+        <mat-card-title>Purchase Orders</mat-card-title>
+        <mat-card-subtitle class="text-sm text-gray-500">
+          Allows administrators to View, Create, Manage, and Delete purchase orders.
+        </mat-card-subtitle>
+
+       <div class="flex justify-between items-center mt-4">
+  
+  <!-- Buttons: Create & Receive Purchase Order -->
+  <div class="flex gap-2">
+    <p-button
+      icon="pi pi-file"
+      label="Create Purchase Order"
+      severity="primary"
+      outlined="true"
+      size="small"
+      (click)="openCreatePurchaseOrderModal()"
+    ></p-button>
+
+    <p-button
+      icon="pi pi-download"
+      label="Receive Purchase Order"
+      severity="primary"
+      outlined="true"
+      size="small"
+      (click)="openReceivePurchaseOrderModal()"
+    ></p-button>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="relative w-[300px]">
+    <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+    <input
+      pInputText
+      type="text"
+      #searchInput
+      (input)="dt.filterGlobal(searchInput.value, 'contains')"
+      placeholder="Search Purchase Orders"
+      class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+
+</div>
+
+
+   <p-table
+  #dt
+  [value]="purchaseOrders"
+  [rows]="5"
+  [paginator]="true"
+  [rowsPerPageOptions]="[5, 10, 20]"
+  responsiveLayout="scroll"
+  styleClass="p-datatable-sm mt-4"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th>PO Number</th>
+      <th>Title</th>
+      <th>Total Value</th>
+      <th>Requested By</th>
+      <th>Date Created</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-po>
+    <tr>
+      <td>{{ po.id }}</td>
+      <td>{{ po.title }}</td>
+      <td>{{ po.totalValue | currency }}</td>
+      <td>{{ po.requestedBy }}</td>
+      <td>{{ po.dateCreated | date: 'short' }}</td>
+      <td>
+        <span class="px-2 py-1 rounded text-white" [ngClass]="getStatusClass(po.status)">
+          {{ po.status }}
+        </span>
+      </td>
+      <td>
+        <div class="flex gap-2">
+         <p-button 
+  icon="pi pi-pencil" 
+  severity="primary" 
+  outlined="true" 
+  size="small"
+  (click)="openEditPurchaseOrderModal()"
+></p-button>
+
+          <p-button 
+            icon="pi pi-trash" 
+            severity="danger" 
+            outlined="true" 
+            size="small"
+          ></p-button>
+          <p-button 
+            icon="pi pi-check-circle"
+            severity="success"
+            outlined="true"
+            size="small"
+            (click)="openReceivePurchaseOrderModal()"
+            *ngIf="po.status !== 'Received'"
+          ></p-button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+      </mat-card-content>
+    </mat-card>
+  </p-tabPanel>
+</p-tabView>
+
+<!-- Purchase Order Modal (Create/Edit) -->
+<p-dialog 
+  [(visible)]="isModalVisible"
+  [modal]="true" 
+  [position]="'center'"
+  [style]="{ width: '25rem' }"
+>
+  <ng-template pTemplate="header">
+    <div class="py-0 inline-flex items-center justify-center gap-3">
+      <i class="pi pi-file-edit text-lg"></i>
+      <span class="font-bold text-lg whitespace-nowrap">
+        {{ isEditMode ? 'Edit Purchase Order' : 'Create Purchase Order' }}
+      </span>
+    </div>
+  </ng-template>
+
+  <span class="p-text-secondary block">
+    {{ isEditMode ? 'Modify details of this purchase order.' : 'Create a new purchase order.' }}
+  </span>
+  <small class="p-text-secondary block mb-6">
+    {{ isEditMode ? '(Ensure all details are correct before saving changes)' : '(Please select an RFQ to proceed)' }}
+  </small>
+
+  <div class="flex items-center gap-4 mb-24">
+    <label for="rfqDropdown" class="font-semibold w-32">Select RFQ</label>
+    <p-dropdown
+      id="rfqDropdown"
+      optionLabel="title"
+      [filter]="true"
+      placeholder="Select an RFQ"
+      [showClear]="true"
+      class="flex-auto"
+      [appendTo]="'body'"
+    >
+      <ng-template let-rfq pTemplate="item">
+        <div class="flex items-center gap-2">
+          <div>{{ rfq.title }}</div>
+        </div>
+      </ng-template>
+    </p-dropdown>
+  </div>
+
+  <div class="flex justify-end gap-6 mt-2">
+    <p-button 
+      size="small" 
+      label="Cancel" 
+      icon="pi pi-times" 
+      severity="secondary" 
+      (click)="closeModal()"
+    />
+    <p-button 
+      size="small" 
+      label="{{ isEditMode ? 'Save Changes' : 'Create' }}" 
+      icon="pi pi-check"
+      (click)="savePurchaseOrder()" 
+    />
+  </div>
+</p-dialog>
+
+
+
+<p-dialog 
+  [(visible)]="isReceiveModalVisible"
+  [modal]="true" 
+  [position]="'center'"
+  [style]="{ width: '25rem' }"
+>
+  <ng-template pTemplate="header">
+    <div class="py-0 inline-flex items-center justify-center gap-3">
+      <i class="pi pi-box text-lg"></i>
+      <span class="font-bold text-lg whitespace-nowrap">Receive Purchase Order</span>
+    </div>
+  </ng-template>
+
+  <span class="p-text-secondary block">Confirm that this purchase order has been received.</span>
+  <small class="p-text-secondary block mb-6">(Ensure that all items are accounted for)</small>
+
+  <div class="flex items-center gap-4 mb-4">
+    <label class="font-semibold w-32">PO Number</label>
+    <input
+      type="text"
+      pInputText
+      [(ngModel)]="selectedPurchaseOrder.poNumber"
+      
+      class="w-full  border border-gray-300 rounded-md p-2 text-gray-700"
+    />
+  </div>
+
+  <div class="flex items-center gap-4 mb-24">
+    <label class="font-semibold w-32">Title</label>
+    <input
+      type="text"
+      pInputText
+      [(ngModel)]="selectedPurchaseOrder.title"
+      class="w-full  border border-gray-300 rounded-md p-2 text-gray-700"
+    />
+  </div>
+
+  <div class="flex justify-end gap-6 mt-2">
+    <p-button 
+      size="small" 
+      label="Cancel" 
+            outlined="true"
+
+      icon="pi pi-times" 
+      severity="secondary" 
+    />
+    <p-button 
+      size="small" 
+      label="Confirm Received" 
+      icon="pi pi-check"
+      outlined="true"
+      severity="success"
+    />
+  </div>
+</p-dialog>

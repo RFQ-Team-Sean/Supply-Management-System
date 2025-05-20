@@ -1,0 +1,248 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+        <mat-card-title class="select-none font-light">Purchase Orders</mat-card-title>
+        <div class="flex justify-between">
+            <p>View and manage purchase orders in this section.</p>
+            <p-iconfield fluid class="w-full max-w-72">
+                <p-inputicon styleClass="pi pi-search" />
+                <input fluid class="w-full" pSize="small" [(ngModel)]="searchValue" (input)="dt.filterGlobal(searchValue,'contains')" type="text"
+                    pInputText placeholder="Search" />
+                <!-- <p-inputicon styleClass="pi pi-spinner pi-spin" /> -->
+            </p-iconfield>
+        </div>
+        <p-tabs [value]="stockTab">
+            <p-tablist>
+                <p-tab [value]="0" (click)="switchStockTab(0)">
+                    <p-overlaybadge badgeSize="small" [value]="countStocked()">
+                        <div class="px-3 flex gap-6">
+                            <i class="pi pi-box"></i>
+                            <span>In Stock</span>
+                        </div>
+                    </p-overlaybadge>
+                </p-tab>
+                <p-tab [value]="1" (click)="switchStockTab(1)">
+                    <p-overlaybadge badgeSize="small" [value]="countUnstocked()">
+                        <div class="px-3 flex gap-6">
+                            <i class="pi pi-warehouse"></i>
+                            <span>To Stock</span>
+                        </div>
+                    </p-overlaybadge>
+                    
+                </p-tab>
+            </p-tablist>
+        </p-tabs>
+        <p-table #dt dataKey="purchaseOrder.id" [rowHover]="true" [value]="purchaseOrders"
+            [paginator]="true"
+            [rows]="5"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            sortField="purchaseOrder.supplierName" sortMode="single" [scrollable]="true" scrollHeight="600px"
+            rowGroupMode="subheader" groupRowsBy="purchaseOrder.id"
+            [globalFilterFields]="['purchaseOrder.supplierName','purchaseOrder.id']"
+            [tableStyle]="{'min-width': '60rem'}">
+
+            <ng-template #header>
+                <tr>
+                    <th pFrozen="left">Name</th>
+                    <th>Ticker</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Date Added</th>
+                    <th>Description</th>
+                    @if(purchaseOrders.length > 0 && !purchaseOrders[0].purchaseOrder.stocked){
+                        <th></th>
+                    }
+                </tr>
+            </ng-template>
+
+            <ng-template #groupheader let-po>
+                <tr class="hover:cursor-pointer" pRowGroupHeader>
+                    <td [attr.colspan]="!po.purchaseOrder.stocked?7:6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-5">
+                                <img [alt]="po.purchaseOrder.supplierName" src="assets/images/products/dash-prd-4.jpg"
+                                    width="32" class="rounded-full" style="vertical-align: middle" />
+                                <span class="font-bold">{{ po.purchaseOrder.supplierName}} </span>
+                                <p-divider layout="vertical" />
+                                <span>Receipt No. {{po.purchaseOrder.id.toUpperCase()}}</span>
+                            </div>
+                            @if(!po.purchaseOrder.stocked){
+                            <p-buttongroup>
+                                <p-button pTooltip="Click to add new stock"
+                                    (click)="openAddStockModal(po.purchaseOrder)" [outlined]="true" size="small"
+                                    label="Stock" icon="pi pi-plus" />
+                                <p-button pTooltip="Click to view purchase receipt" [outlined]="true"
+                                    (click)="viewReceipts(po.purchaseOrder.receipts)" size="small" label="Receipt"
+                                    icon="pi pi-receipt" />
+                                <p-button pTooltip="Click to finalize stocking from purchase"
+                                    (click)="confirmSubmit($event, po.purchaseOrder.id)" size="small" label="Submit"
+                                    icon="pi pi-arrow-right" />
+
+                            </p-buttongroup>
+                            }
+
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #groupfooter let-po>
+                <tr class="hover:cursor-pointer">
+                    <td [attr.colspan]="!po.purchaseOrder.stocked?7:6" class="text-left pr-12 ">
+                        <div class="flex items-center">
+                            <div class="flex gap-2"><span class="font-semibold">Total Price: </span> <span>
+                                    {{calculateItemPriceTotal(po.purchaseOrder.id) | currency:'PHP' }}</span></div>
+                            <p-divider layout="vertical" />
+                            <div class="flex gap-2"><span class="font-semibold">Total Items: </span> <span>
+                                    {{calculateItemTotal(po.purchaseOrder.id)}}</span></div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-po let-rowIndex="rowIndex">
+                @for(item of po.items;track item.id){
+                <tr class="hover:cursor-pointer">
+                    <td pFrozen="left"> 
+                        <i class="pi pi-box mr-2"></i>
+                        {{ item.name }}</td>
+                    <td>{{ item.ticker }}</td>
+                    <td>{{ item.price | currency:'PHP' }}</td>
+                    <td>{{ item.quantity | number }}</td>
+                    <td>{{ item.dateAdded | date: 'yyyy-MM-dd' }}</td>
+                    <td>{{ item.description || 'No description set.' }}</td>
+                    @if(!po.purchaseOrder.stocked){
+                    <td class="w-16">
+                        <div class="flex gap-4 ">
+                            <p-button size="small" icon="pi pi-pencil"
+                                (click)="openEditStockModal(po.purchaseOrder, item)" [outlined]="true" rounded />
+                            <p-button size="small" icon="pi pi-trash" (click)="confirmDeleteStock($event, item.id)" severity="danger" [outlined]="true"
+                                rounded />
+                        </div>
+                    </td>
+                    }
+                </tr>
+                }
+            </ng-template>
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="8">
+                        <div class="flex flex-col w-full items-center justify-center mb-8">
+                            <div class="overflow-hidden h-52 w-52 mr-8 ">
+                                <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+                            </div>
+                            <span>No purchase orders found.</span>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+        </p-table>
+
+
+    </mat-card-content>
+</mat-card>
+
+<p-dialog [position]="'bottom'"  [modal]="false" [(visible)]="showReceipt" [style]="{ width: '40rem', height:'20rem' }">
+    <ng-template #header>
+        <div class="select-none py-0 inline-flex items-center justify-center gap-3">
+            <i class="pi pi-receipt text-xl"></i>
+            <span class="font-bold text-lg whitespace-nowrap">Purchase Receipt</span>
+            <i pTooltip="This container is draggable and can be resized at the bottom right. Scroll down for more items." class="pi pi-question-circle"></i>
+        </div>
+    </ng-template>
+    <p-carousel class="select-none" [value]="selectedReceipts" [showNavigators]="false" [numVisible]="1" [numScroll]="1"
+        [circular]="true" [responsiveOptions]="responsiveOptions">
+        <ng-template let-receipt #item>
+            <div class="rounded-xl border border-surface rounded-border p-2">
+                <div class="mb-4">
+                    <div class="relative mx-auto">
+                        <img [src]="receipt" class="w-full rounded-border" />
+                    </div>
+                </div>
+
+            </div>
+        </ng-template>
+    </p-carousel>
+</p-dialog>
+
+
+<p-dialog [position]="'right'" [(visible)]="showStockModal"
+    [style]="{ width: '25rem' }">
+    <ng-template #header>
+        <div class="py-0 inline-flex items-center justify-center gap-3">
+            <i class="pi pi-box text-lg"></i>
+            <span class="font-bold text-lg whitespace-nowrap">{{selectedStock ?'Edit' :'Add'}} Stock</span>
+        </div>
+    </ng-template>
+    <span class="p-text-secondary block">{{selectedStock ?'Editing' :'Adding new'}} stock from Purchase
+        {{selectedPurchaseOrder?.id}}.</span>
+    <small class="p-text-secondary block mb-6">(Please fill out all form fields)</small>
+
+    <form [formGroup]="stockForm" (submit)="selectedStock ? editStock(): addStock()">
+        <div class="flex items-center gap-4 mb-2">
+            <label for="name" class="font-semibold w-24">Item Name</label>
+            <div class="flex-auto flex-col flex">
+                <input placeholder="Enter item name" formControlName="name" pSize="small" pInputText id="name"
+                    autocomplete="off" />
+                @if(stockForm.get('name')?.hasError('required') && stockForm.get('name')?.touched){
+                <small class="self-end text-red-500 mt-2">Item Name is required</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="ticker" class="font-semibold w-24">Item Ticker</label>
+            <div class="flex-auto flex-col flex">
+                <input placeholder="Enter item ticker" formControlName="ticker" pSize="small" pInputText id="ticker"
+                    class="flex-auto uppercase placeholder:normal-case" autocomplete="off" />
+                @if(stockForm.get('ticker')?.hasError('required') && stockForm.get('ticker')?.touched){
+                <small class="self-end text-red-500 mt-2">Item Ticker is required</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="price" class="font-semibold w-24">Item Price</label>
+            <div class="flex-auto flex-col flex">
+                <p-inputnumber placeholder="Enter item price" formControlName="price" inputId="price" size="small"
+                    mode="currency" currency="PHP" locale="en-PH" class="flex-auto" autocomplete="off" />
+                @if(stockForm.get('price')?.hasError('required') && stockForm.get('price')?.touched){
+                <small class="self-end text-red-500 mt-2">Item price is required</small>
+                }
+                @if(stockForm.get('price')?.hasError('min') && stockForm.get('price')?.touched){
+                <small class="self-end text-red-500 mt-2">Item price must be greater than zero</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="quantity" class="font-semibold w-24">Quantity</label>
+            <div class="flex-auto flex-col flex">
+                <p-inputnumber placeholder="Enter quantity" formControlName="quantity" size="small" [showButtons]="true"
+                    inputId="quantity" class="flex-auto" mode="decimal" autocomplete="off" />
+                @if(stockForm.get('quantity')?.hasError('required') && stockForm.get('quantity')?.touched){
+                <small class="self-end text-red-500 mt-2">Stock quantity is required</small>
+                }
+                @if(stockForm.get('quantity')?.hasError('min') && stockForm.get('quantity')?.touched){
+                <small class="self-end text-red-500 mt-2">Stock quantity must be greater zero</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="description" class="font-semibold w-24">Description</label>
+            <textarea placeholder="Enter item description (Optional)" formControlName="description" pSize="small"
+                name="description" rows="5" cols="25" pTextarea id="description" class="flex-auto"
+                autocomplete="off"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-6 mt-2">
+            <p-button size="small" label="Cancel" icon="pi pi-times" severity="secondary" (click)="closeStockModal()" />
+            <p-button size="small" label="{{selectedStock ?'Edit' :'Add'}}" icon="pi pi-plus"
+                (click)="selectedStock ? editStock(): addStock()" [disabled]="!stockForm.valid" />
+        </div>
+    </form>
+</p-dialog>
+
+<p-toast position="bottom-right" />
+<p-confirmpopup />

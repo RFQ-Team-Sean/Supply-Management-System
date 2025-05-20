@@ -1,0 +1,404 @@
+<!-- src/app/pages/admin/item-classification/item-classification.component.html -->
+
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Item Classification</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      Manage categories and groups of products here.
+    </mat-card-subtitle>
+
+    <!-- Tabs for Group and Classify -->
+    <p-tabView>
+      <p-tabPanel header="Group">
+        <!-- Content for Group tab -->
+        <div class="flex justify-between items-center mt-4">
+          <p-button
+            pTooltip="Add Group"
+            (click)="openNewGroupDialog()"
+            [outlined]="true"
+            size="small"
+            label="Add Group"
+            icon="pi pi-plus"
+          ></p-button>
+
+          <!-- Search Box -->
+          <div class="relative w-[300px]">
+            <i
+              class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            ></i>
+            <input
+              pInputText
+              type="text"
+              #groupSearchInput
+              (input)="groupTable.filterGlobal(groupSearchInput.value, 'contains')"
+              placeholder="Search Group"
+              style="text-indent: 1.5rem;"
+              class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:ml-6"
+            />
+          </div>
+        </div>
+
+        <!-- p-table for Groups -->
+        <p-table
+          #groupTable
+          [value]="groups"
+          [rows]="10"
+          [paginator]="true"
+          [globalFilterFields]="['name', 'description', 'products']"
+          [rowsPerPageOptions]="[5, 10, 20]"
+          [loading]="loading"
+          [showCurrentPageReport]="false"
+          [responsive]="true"
+          [rowHover]="true"
+          [scrollable]="true"
+          scrollHeight="600px"
+          styleClass="p-datatable-sm mt-4"
+          dataKey="id"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="name">
+                Name <p-sortIcon field="name"></p-sortIcon>
+              </th>
+              <th pSortableColumn="description">
+                Description <p-sortIcon field="description"></p-sortIcon>
+              </th>
+              <th pSortableColumn="products">
+                Products <p-sortIcon field="products"></p-sortIcon>
+              </th>
+              <th class="w-[100px]">Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-group>
+            <tr>
+              <td>{{ group.name }}</td>
+              <td>{{ group.description }}</td>
+              <td>
+                <span *ngFor="let productId of group.products">
+                  {{ getProductName(productId) }}<br />
+                </span>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <button
+                    pButton
+                    icon="pi pi-pencil"
+                    class="p-button-rounded p-button-primary p-button-sm"
+                    [outlined]="true"
+                    (click)="editGroup(group)"
+                  ></button>
+                  <button
+                    pButton
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-danger p-button-sm"
+                    [outlined]="true"
+                    (click)="deleteGroup(group)"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4">
+                <div class="flex flex-col w-full items-center justify-center py-8">
+                  <span>No groups found.</span>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+
+      <p-tabPanel header="Classify">
+        <!-- Content for Classify tab -->
+        <div class="flex justify-between items-center mt-4">
+          <p-button
+            pTooltip="Add Classification"
+            (click)="openNewClassificationDialog()"
+            [outlined]="true"
+            size="small"
+            label="Add Classification"
+            icon="pi pi-plus"
+          ></p-button>
+
+          <!-- Search Box -->
+          <div class="relative w-[300px]">
+            <i
+              class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            ></i>
+            <input
+              pInputText
+              type="text"
+              #classificationSearchInput
+              (input)="classificationTable.filterGlobal(classificationSearchInput.value, 'contains')"
+              placeholder="Search Classification"
+              style="text-indent: 1.5rem;"
+              class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:ml-6"
+            />
+          </div>
+        </div>
+
+        <!-- p-table for Classifications -->
+       <p-table
+  #classificationTable
+  [value]="classifications"
+  [rows]="10"
+  [paginator]="true"
+  [globalFilterFields]="['category', 'group', 'description']"
+  [rowsPerPageOptions]="[5, 10, 20]"
+  [loading]="loading"
+  [showCurrentPageReport]="false"
+  [responsive]="true"
+  [rowHover]="true"
+  [scrollable]="true"
+  scrollHeight="600px"
+  styleClass="p-datatable-sm mt-4"
+  dataKey="id"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="category">
+        Category <p-sortIcon field="category"></p-sortIcon>
+      </th>
+      <th pSortableColumn="group">
+        Group <p-sortIcon field="group"></p-sortIcon>
+      </th>
+      <th pSortableColumn="description">
+        Description <p-sortIcon field="description"></p-sortIcon>
+      </th>
+      <th class="w-[100px]">Actions</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-classification>
+    <tr>
+      <td>{{ classification.category }}</td>
+      <td>{{ classification.group }}</td>
+      <td>{{ classification.description }}</td>
+      <td>
+        <div class="flex gap-2">
+          <button
+            pButton
+            icon="pi pi-pencil"
+            class="p-button-rounded p-button-primary p-button-sm"
+            [outlined]="true"
+            (click)="editClassification(classification)"
+          ></button>
+          <button
+            pButton
+            icon="pi pi-trash"
+            class="p-button-rounded p-button-danger p-button-sm"
+            [outlined]="true"
+            (click)="deleteClassification(classification)"
+          ></button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="4">
+        <div class="flex flex-col w-full items-center justify-center py-8">
+          <span>No classifications found.</span>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+      </p-tabPanel>
+    </p-tabView>
+
+    <!-- Dialogs for Group and Classification -->
+    <p-dialog
+      [(visible)]="groupDialogVisible"
+      [modal]="true"
+      [style]="{ width: '90vw', maxWidth: '450px' }"
+      [header]="isEditMode ? 'Edit Group' : 'Add Group'"
+      styleClass="p-fluid"
+      [dismissableMask]="true"
+      [draggable]="false"
+      [resizable]="false"
+      [position]="'center'"
+    >
+      <form [formGroup]="groupForm" class="w-full">
+        <div class="flex items-center gap-4 mb-4">
+          <label for="name" class="font-semibold w-24">Name</label>
+          <div class="flex-auto flex-col flex">
+            <input
+              type="text"
+              pInputText
+              id="name"
+              formControlName="name"
+              placeholder="Enter group name"
+              class="w-full"
+              required
+              autofocus
+            />
+            <small
+              class="self-end text-red-500 mt-1"
+              *ngIf="submitted && groupForm.get('name')?.errors?.['required']"
+            >
+              Name is required.
+            </small>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-4">
+          <label for="description" class="font-semibold w-24">Description</label>
+          <div class="flex-auto flex-col flex">
+            <textarea
+              pInputTextarea
+              id="description"
+              formControlName="description"
+              placeholder="Optional"
+              rows="3"
+              class="w-full"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-4">
+          <label for="products" class="font-semibold w-24">Products</label>
+          <div class="flex-auto flex-col flex">
+            <p-multiSelect
+              id="products"
+              formControlName="products"
+              [options]="products"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Select products"
+              class="w-full"
+                              [appendTo]="'body'"
+
+            ></p-multiSelect>
+          </div>
+        </div>
+      </form>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+          <button
+            pButton
+            label="Cancel"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideGroupDialog()"
+            size="small"
+          ></button>
+          <button
+            pButton
+            label="Save"
+            icon="pi pi-check"
+            (click)="saveGroup()"
+            size="small"
+          ></button>
+        </div>
+      </ng-template>
+    </p-dialog>
+
+  <!-- Classification Dialog -->
+<p-dialog
+  [(visible)]="classificationDialogVisible"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '450px' }"
+  [header]="isEditMode ? 'Edit Classification' : 'Add Classification'"
+  styleClass="p-fluid"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [position]="'center'"
+>
+  <form [formGroup]="classificationForm" class="w-full">
+    <div class="flex items-center gap-4 mb-4">
+      <label for="category" class="font-semibold w-24">Category</label>
+      <div class="flex-auto flex-col flex">
+        <input
+          type="text"
+          pInputText
+          id="category"
+          formControlName="category"
+          placeholder="Enter category"
+          class="w-full"
+          required
+          autofocus
+        />
+        <small
+          class="self-end text-red-500 mt-1"
+          *ngIf="submitted && classificationForm.get('category')?.errors?.['required']"
+        >
+          Category is required.
+        </small>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label for="group" class="font-semibold w-24">Group</label>
+      <div class="flex-auto flex-col flex">
+        <p-dropdown
+          id="group"
+          formControlName="group"
+          [options]="groups"
+          optionLabel="name"
+          optionValue="name"
+          placeholder="Select group"
+          class="w-full"
+        ></p-dropdown>
+        <small
+          class="self-end text-red-500 mt-1"
+          *ngIf="submitted && classificationForm.get('group')?.errors?.['required']"
+        >
+          Group is required.
+        </small>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label for="description" class="font-semibold w-24">Description</label>
+      <div class="flex-auto flex-col flex">
+        <textarea
+          pInputTextarea
+          id="description"
+          formControlName="description"
+          placeholder="Optional"
+          rows="3"
+          class="w-full"
+        ></textarea>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="hideClassificationDialog()"
+        size="small"
+      ></button>
+      <button
+        pButton
+        label="Save"
+        icon="pi pi-check"
+        (click)="saveClassification()"
+        size="small"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+    <!-- ConfirmDialog and Toast for feedback -->
+    <p-confirmDialog
+      [style]="{ width: '90vw', maxWidth: '450px' }"
+      rejectButtonStyleClass="p-button-text"
+    ></p-confirmDialog>
+    <p-toast position="bottom-right"></p-toast>
+  </mat-card-content>
+</mat-card>

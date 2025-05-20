@@ -1,0 +1,534 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PPMP {
+  id             String        @id @default(cuid())
+  fiscal_year    Int
+  status         ProjectStatus @default(DRAFT)
+  head_signature String?
+  user_signature String?
+  prepared_by_id String
+  office_id      String
+  approved_by_id String?
+  date_submitted DateTime?
+  date_approved  DateTime?
+  remarks        String?
+  PPMPProjects   PPMPProject[] @relation("PPMPToPPMPProjects")
+  Office         Office        @relation(fields: [office_id], references: [id])
+  PreparedBy     Users         @relation("PPMPPreparedBy", fields: [prepared_by_id], references: [id])
+  ApprovedBy     Users?        @relation("PPMPApprovedBy", fields: [approved_by_id], references: [id])
+}
+
+model PPMPProject {
+  id                  String            @id @default(cuid())
+  ppmp_id             String
+  procurement_mode_id String
+  project_title       String
+  project_code        String?
+  project_description String
+  classifications     String[]
+  user_budget_id      String
+  abc                 Float?
+  contract_scope      String?
+  app_id              String?
+  status              ProjectStatus     @default(DRAFT)
+  PPMP                PPMP              @relation("PPMPToPPMPProjects", fields: [ppmp_id], references: [id])
+  PPMPItem            PPMPItem[]
+  ProcurementMode     ProcurementMode   @relation(fields: [procurement_mode_id], references: [id])
+  UserBudget          UserBudget        @relation(fields: [user_budget_id], references: [id])
+  PurchaseRequest     PurchaseRequest?
+  ConferenceEvent     ConferenceEvent[] @relation("ConferenceEventToPPMPProject")
+  PPMPSchedule        PPMPSchedule[]    @relation("PPMPProjectToPPMPSchedule")
+}
+
+model ProcurementProcess {
+  id                  String            @id @default(cuid())
+  name                String
+  process_order       Int
+  procurement_mode_id ProcurementMethod
+}
+
+model ProcurementMode {
+  id          String            @id @default(cuid())
+  mode_name   String
+  method      ProcurementMethod
+  PPMPProject PPMPProject[]
+}
+
+model FundSource {
+  id          String   @id @default(cuid())
+  source_name String
+  APP         APP[]
+  Budget      Budget[]
+}
+
+model Budget {
+  id               String       @id @default(cuid())
+  office_id        String
+  fund_id          String
+  created_by       String
+  fiscal_year      Int
+  budget_name      String
+  allocated_budget Float
+  used_amount      Float
+  date_created     DateTime
+  budget_type      BudgetType
+  FundSource       FundSource   @relation(fields: [fund_id], references: [id])
+  Office           Office       @relation(fields: [office_id], references: [id])
+  UserBudget       UserBudget[]
+}
+
+model UserBudget {
+  id               String        @id @default(cuid())
+  user_id          String
+  budget_id        String
+  allocated_amount Float
+  used_amount      Float
+  date_allocated   DateTime
+  PPMPProject      PPMPProject[]
+  Budget           Budget        @relation(fields: [budget_id], references: [id])
+  Users            Users         @relation(fields: [user_id], references: [id])
+}
+
+model PPMPItem {
+  id                      String      @id @default(cuid())
+  ppmp_project_id         String
+  quantity_required       Int
+  unit_of_measurement     String
+  estimated_unit_cost     Float
+  estimated_total_cost    Float
+  classification          String
+  technical_specification String?
+  scope_of_work           String?
+  terms_of_reference      String?
+  PPMPProject             PPMPProject @relation(fields: [ppmp_project_id], references: [id])
+}
+
+model PPMPSchedule {
+  id          String        @id @default(cuid())
+  ppmp_id     String // Kept as ppmp_id but updated relation
+  milestone   String
+  date        DateTime
+  PPMPProject PPMPProject[] @relation("PPMPProjectToPPMPSchedule")
+}
+
+model Approvals {
+  id              String         @id @default(cuid())
+  approver_id     String
+  entity_id       String
+  approval_status ApprovalStatus
+  remarks         String?
+  signature       String?
+  timestamp       DateTime
+  document_id     String
+  Approver        Approver       @relation(fields: [approver_id], references: [id])
+}
+
+model Approver {
+  id             String      @id @default(cuid())
+  user_id        String
+  entity_id      String
+  name           String
+  approval_order Int
+  process_id     String?
+  Approvals      Approvals[]
+  Users          Users       @relation(fields: [user_id], references: [id])
+}
+
+model Entity {
+  id          Int        @id @default(autoincrement())
+  name        EntityType
+  description String?
+}
+
+model APP {
+  id                      String     @id @default(cuid())
+  fund_source             String
+  prepared_by             String
+  approvals_id            String
+  fiscal_year             Int
+  date_prepared           DateTime
+  date_approved           DateTime?
+  total_quantity_required Int
+  total_estimated_cost    Float
+  FundSource              FundSource @relation(fields: [fund_source], references: [id])
+  Users                   Users      @relation(fields: [prepared_by], references: [id])
+}
+
+model PurchaseRequest {
+  id                        String        @id @default(cuid())
+  prNo                      String
+  user_id                   String
+  office_id                 String
+  project_id                String        @unique
+  current_approver_level    Int
+  current_procurement_level Int?
+  request_date              DateTime
+  status                    RequestStatus
+  signature                 String?
+  Contract                  Contract[]
+  Office                    Office        @relation(fields: [office_id], references: [id])
+  PPMPProject               PPMPProject   @relation(fields: [project_id], references: [id])
+  Users                     Users         @relation(fields: [user_id], references: [id])
+}
+
+model VendorInfo {
+  id          String @id @default(cuid())
+  companyName String
+  tin         String
+  address     String
+  telFax      String
+  email       String
+}
+
+model Department {
+  id     String   @id @default(cuid())
+  name   String
+  Office Office[]
+}
+
+model Building {
+  id              String    @id @default(cuid())
+  name            String
+  address         String
+  numberOfFloors  Int
+  dateConstructed DateTime?
+  Office          Office[]
+}
+
+model Office {
+  id              String            @id @default(cuid())
+  department_id   String
+  building_id     String?
+  name            String
+  Budget          Budget[]
+  Building        Building?         @relation(fields: [building_id], references: [id])
+  Department      Department        @relation(fields: [department_id], references: [id])
+  PPMP            PPMP[]
+  PurchaseRequest PurchaseRequest[]
+  Users           Users[]
+}
+
+model Users {
+  id              String            @id @default(cuid())
+  fullname        String
+  username        String            @unique
+  password        String
+  position        String?
+  user_type       UserType
+  role            UserRole
+  isAdmin         Boolean?
+  profile         String
+  officeId        String
+  APP             APP[]
+  Approver        Approver[]
+  PPMPPrepared    PPMP[]            @relation("PPMPPreparedBy")
+  PPMPApproved    PPMP[]            @relation("PPMPApprovedBy")
+  PurchaseRequest PurchaseRequest[]
+  UserBudget      UserBudget[]
+  office          Office            @relation(fields: [officeId], references: [id])
+}
+
+model Contract {
+  id                   String                 @id @default(cuid())
+  purchase_request_id  String
+  contractor_name      String
+  contract_amount      Float
+  contract_date        DateTime
+  start_date           DateTime
+  end_date             DateTime
+  status               ContractStatus
+  PurchaseRequest      PurchaseRequest        @relation(fields: [purchase_request_id], references: [id])
+  InspectionAcceptance InspectionAcceptance[]
+  Payment              Payment[]
+}
+
+model InspectionAcceptance {
+  id              String   @id @default(cuid())
+  contract_id     String
+  inspected_by    Int
+  inspection_date DateTime
+  signature       String
+  remarks         String?
+  Contract        Contract @relation(fields: [contract_id], references: [id])
+}
+
+model Payment {
+  id                        String        @id @default(cuid())
+  contract_id               String
+  disbursement_voucher_date DateTime
+  payment_date              DateTime
+  amount_paid               Float
+  payment_method            PaymentMethod
+  Contract                  Contract      @relation(fields: [contract_id], references: [id])
+}
+
+model AuditTrail {
+  id           String      @id @default(cuid())
+  entity_id    String
+  record_id    String
+  approvals_id String
+  action       AuditAction
+  performed_by String
+  performed_at DateTime
+  remarks      String?
+}
+
+model Notification {
+  id         Int              @id @default(autoincrement())
+  message    String
+  type       NotificationType
+  created_at DateTime
+  is_read    Boolean
+  office_id  String?
+  user_id    String?
+  role       UserRole?
+}
+
+model Document {
+  id                     String   @id @default(cuid())
+  procurement_process_id String
+  entity_id              Int
+  record_id              Int
+  file_path              String
+  uploaded_by            Int
+  upload_date            DateTime
+}
+
+model ConferenceEvent {
+  id          String        @id @default(cuid())
+  ppmp_id     String
+  date        DateTime
+  event_time  DateTime
+  mode        EventMode
+  platform    String?
+  type        EventType
+  created_by  String
+  created_at  DateTime
+  Invitation  Invitation[]
+  PPMPProject PPMPProject[] @relation("ConferenceEventToPPMPProject")
+}
+
+model Invitation {
+  id              String          @id @default(cuid())
+  event_id        String
+  ppmp_id         String
+  date            DateTime
+  time            DateTime
+  mode            EventMode
+  platform        String?
+  participants    String[]
+  type            EventType
+  sent_by         String
+  sent_at         DateTime
+  ConferenceEvent ConferenceEvent @relation(fields: [event_id], references: [id])
+}
+
+model PaymentTerm {
+  id                 String  @id @default(cuid())
+  code               String
+  name               String
+  description        String
+  days               Int
+  percentageRequired Float
+  isActive           Boolean
+}
+
+enum ProcurementMethod {
+  Public
+  Alternative
+}
+
+enum BudgetType {
+  MOOE
+  CO
+}
+
+enum ProjectStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum ApprovalStatus {
+  Approved
+  Rejected
+}
+
+enum EntityType {
+  PPMP
+  PurchaseRequest
+  APP
+  ProcurementProcess
+  Contract
+  InspectionAcceptance
+  Payment
+}
+
+enum RequestStatus {
+  Draft
+  Pending
+  Approved
+}
+
+enum UserType {
+  SuperAdmin
+  Admin
+  User
+  Head
+}
+
+enum UserRole {
+  superadmin
+  accounting
+  supply
+  bac
+  inspection
+  enduser
+  president
+}
+
+enum ContractStatus {
+  Active
+  Completed
+  Terminated
+}
+
+enum PaymentMethod {
+  Check
+  ADA
+}
+
+enum AuditAction {
+  Created
+  Updated
+  Approved
+  Rejected
+  Deleted
+}
+
+enum NotificationType {
+  info
+  success
+  warning
+  error
+}
+
+enum EventMode {
+  Online
+  InPerson
+  Hybrid
+}
+
+enum EventType {
+  PreProcurement
+  PreBidding
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  code        String
+  description String
+  status      String   @default("Active") // Enum-like behavior can be enforced in the application layer
+  Asset      Asset[]
+}
+
+model Asset {
+  id              String   @id @default(uuid())
+  name            String
+  categoryId      String
+  category        Category @relation(fields: [categoryId], references: [id])
+  status          String
+  serialNumber    String
+  model           String
+  barcode         String
+  qrCode          String
+  image           String
+  departmentId    String?  // Nullable
+  locationId      String?  // Nullable
+  propertyTypeId  String?  // Nullable
+  purchaseDate    DateTime
+  purchaseCost    Float
+  vendor          String
+  invoice         String
+  warrantyExpiry  DateTime
+  ownershipDetails String
+  notes           String
+  depreciation    Float
+  RepairHistory RepairHistory[]
+}
+
+model RepairHistory {
+  id       String @id @default(uuid())
+  assetId  String
+  asset    Asset  @relation(fields: [assetId], references: [id])
+  description String
+  date     DateTime
+  cost     Float
+}
+
+model Transfer {
+  id                 String   @id @default(uuid())
+  fromWarehouseId    String
+  toWarehouseId      String
+  noOfProducts       Int
+  quantityTransferred Int
+  refNumber          String
+  date               DateTime
+}
+
+model Items {
+  id           String   @id @default(uuid())
+  productId    String
+  barcode      String
+  warehouseId  String
+  categoryId   String
+  quantity     Int
+  dateAdded    DateTime
+  description  String
+  imageFile    String?  // Optional
+  minimumQty   Int
+  unit         String
+  status       String
+  brand        String?  // Optional
+  subCategory  String?  // Optional
+}
+
+model Warehouse {
+  id       String   @id @default(uuid())
+  name     String
+  building String
+  WarehouseProduct WarehouseProduct[]
+}
+
+model WarehouseProduct {
+  id          String   @id @default(uuid())
+  warehouseId String
+  Warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  name        String
+  image       String
+  quantity    Int
+}
+
+model Person {
+  id       Int    @id @default(autoincrement())
+  name     String
+  image    String
+  position String
+}
+
+model DocumentCategory {
+  id      String  @id @default(uuid())
+  name    String
+  key     String
+  checked Boolean? // Optional
+}

@@ -1,0 +1,361 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+
+        <mat-card-title class="select-none font-light">Special Receiving</mat-card-title>
+       
+        <div class="flex justify-between items-center">
+        
+            <p>View and add special received items in this section.</p>
+
+            <div class="flex-1"></div>
+         
+            <p-iconfield fluid class="w-full max-w-72 mr-2">
+                <p-inputicon styleClass="pi pi-search" />
+                <input fluid class="w-full" pSize="small" [(ngModel)]="searchValue" (input)="dt.filterGlobal(searchValue,'contains')" type="text"
+                    pInputText placeholder="Search" />
+                <!-- <p-inputicon styleClass="pi pi-spinner pi-spin" /> -->
+            </p-iconfield>
+        </div>
+
+        <!-- Status indicators with Add Stock button -->
+        <div class="flex items-center gap-4 my-6">
+            <div class="relative flex-1 flex justify-between items-center p-6 border border-dotted border-gray-300 rounded-lg">
+                <div class="flex items-center gap-2 px-4 bg-white z-10 cursor-pointer" (click)="filterByStatus('pending')">
+                    <i class="pi pi-inbox text-indigo-500 text-xl"></i>
+                    <span class="text-sm font-medium text-indigo-500">Unverified</span>
+                </div>
+                
+                <!-- Dotted line connecting indicators -->
+                <div class="absolute top-1/2 left-0 right-0 w-full border-t-2 border-dotted border-gray-200 -z-0"></div>
+                
+                <div class="flex items-center gap-2 px-4 bg-white z-10 cursor-pointer" (click)="filterByStatus('Pending')">
+                    <i class="pi pi-spinner pi-spin text-indigo-500 text-xl"></i>
+                    <span class="text-sm font-medium text-indigo-500">Processing</span>
+                </div>
+                
+                <div class="flex items-center gap-2 px-4 bg-white z-10">
+                    <i class="pi pi-verified text-indigo-500 text-xl"></i>
+                    <span class="text-sm font-medium text-indigo-500">Verified</span>
+                </div>
+            </div>
+
+            <p-button 
+                pTooltip="Click to add new special item" 
+                [outlined]="true" 
+                size="small" 
+                label="Add Stock"
+                (click)="openAddStockModal()" 
+                icon="pi pi-plus" />
+        </div>
+
+        <p-table #dt dataKey="id" [rowHover]="true" [value]="filteredStocks"
+            [paginator]="true"
+            [rows]="5"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            [scrollable]="true" 
+            scrollHeight="600px"
+            [globalFilterFields]="['name', 'ticker', 'storage_name', 'product_name']"
+            [tableStyle]="{'min-width': '60rem'}">
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pFrozen="left">Name</th>
+                    <th>Ticker</th>
+                    <th>Storage</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Date Added</th>
+                    <th>Description</th>
+                    <th *ngIf="currentView !== 'Pending'">Actions</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-item>
+                <tr>
+                    <td pFrozen="left"> 
+                        <i class="pi pi-box mr-2"></i>
+                        {{ item.name }}
+                    </td>
+                    <td>{{ item.ticker }}</td>
+                    <td>{{ item.storage_name }}</td>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.quantity | number }}</td>
+                    <td>{{ item.dateAdded | date: 'yyyy-MM-dd' }}</td>
+                    <td>{{ item.description || 'No description set.' }}</td>
+                    <td *ngIf="currentView !== 'Pending'">
+                        <div class="flex gap-6">
+                            <button 
+                                pButton
+                                pTooltip="Print Documents"
+                                class="p-button-text p-button-rounded"
+                                (click)="generateQR(item)"
+                                [style]="{
+                                    'width': '2.5rem',
+                                    'height': '2.5rem',
+                                    'background-color': '#ffffff',
+                                    'color': '#4F46E5',
+                                    'border': '1px solid #E5E7EB',
+                                    'box-shadow': '0 1px 2px rgba(0, 0, 0, 0.05)'
+                                }">
+                                <i class="pi pi-file-pdf"></i>
+                            </button>
+                            <button 
+                                pButton
+                                pTooltip="Edit Item"
+                                class="p-button-text p-button-rounded"
+                                (click)="openEditStockModal(item)"
+                                [style]="{
+                                    'width': '2.5rem',
+                                    'height': '2.5rem',
+                                    'background-color': '#ffffff',
+                                    'color': '#4F46E5',
+                                    'border': '1px solid #E5E7EB',
+                                    'box-shadow': '0 1px 2px rgba(0, 0, 0, 0.05)'
+                                }">
+                                <i class="pi pi-pencil"></i>
+                            </button>
+                            <button 
+                                pButton
+                                pTooltip="Delete Item"
+                                class="p-button-text p-button-rounded"
+                                (click)="confirmDeleteStock($event, item.id)"
+                                [style]="{
+                                    'width': '2.5rem',
+                                    'height': '2.5rem',
+                                    'background-color': '#ffffff',
+                                    'color': '#EF4444',
+                                    'border': '1px solid #E5E7EB',
+                                    'box-shadow': '0 1px 2px rgba(0, 0, 0, 0.05)'
+                                }">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                            <button 
+                                pButton
+                                pTooltip="Click to submit this item for inspection"
+                                class="p-button-text p-button-rounded"
+                                (click)="submitForInspection($event, item)"
+                                [style]="{
+                                    'width': '2.5rem',
+                                    'height': '2.5rem',
+                                    'background-color': '#ffffff',
+                                    'color': '#10B981',
+                                    'border': '1px solid #E5E7EB',
+                                    'box-shadow': '0 1px 2px rgba(0, 0, 0, 0.05)'
+                                }">
+                                <i class="pi pi-arrow-right"></i>
+                            </button>
+                            </div>
+                        </td>
+                </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="9">
+                        <div class="flex flex-col w-full items-center justify-center mb-8">
+                            <div class="overflow-hidden h-52 w-52 mr-8 ">
+                                <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+                            </div>
+                            <span>No delivery receipt items found.</span>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+        </p-table>
+
+
+    </mat-card-content>
+</mat-card>
+
+<p-dialog [position]="'bottom'"  [modal]="false" [(visible)]="showReceipt" [style]="{ width: '40rem', height:'20rem' }">
+    <ng-template #header>
+        <div class="select-none py-0 inline-flex items-center justify-center gap-3">
+            <i class="pi pi-receipt text-xl"></i>
+            <span class="font-bold text-lg whitespace-nowrap">Delivery Receipt</span>
+            <i pTooltip="This container is draggable and can be resized at the bottom right. Scroll down for more items." class="pi pi-question-circle"></i>
+        </div>
+    </ng-template>
+    <p-carousel class="select-none" [value]="selectedReceipts" [showNavigators]="false" [numVisible]="1" [numScroll]="1"
+        [circular]="true" [responsiveOptions]="responsiveOptions">
+        <ng-template let-receipt #item>
+            <div class="rounded-xl border border-surface rounded-border p-2">
+                <div class="mb-4">
+                    <div class="relative mx-auto">
+                        <img [src]="receipt" class="w-full rounded-border" />
+                    </div>
+                </div>
+
+            </div>
+        </ng-template>
+    </p-carousel>
+</p-dialog>
+
+
+<p-dialog 
+    [(visible)]="showStockModal"
+    [modal]="true"
+    [style]="{ 
+        width: '450px',
+        'max-height': '90vh',
+        'margin': '0 auto',
+        'border-radius': '8px'
+    }"
+    [contentStyle]="{ padding: '1.5rem', paddingTop: '0' }"
+    [position]="'center'"
+    [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="flex items-center gap-2 mb-1">
+            <i class="pi pi-box text-lg"></i>
+            <span class="text-lg font-bold">{{selectedStock ?'Edit' :'Add'}} Stock</span>
+        </div>
+    </ng-template>
+
+    <p class="text-gray-600 mb-3">Add a new special received item.</p>
+
+    <form [formGroup]="stockForm" (submit)="selectedStock ? editStock(): addStock()">
+        <div class="flex items-center gap-4 mb-2">
+            <label for="name" class="font-semibold w-24">Item Name</label>
+            <div class="flex-auto flex-col flex">
+                <input placeholder="Enter item name" formControlName="name" pSize="small" pInputText id="name"
+                    autocomplete="off" />
+                @if(stockForm.get('name')?.hasError('required') && stockForm.get('name')?.touched){
+                <small class="self-end text-red-500 mt-2">Item Name is required</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="ticker" class="font-semibold w-24">Code</label>
+            <div class="flex-auto flex-col flex">
+                <input placeholder="Enter item property code" formControlName="ticker" pSize="small" pInputText id="ticker"
+                    class="flex-auto uppercase placeholder:normal-case" autocomplete="off" />
+                @if(stockForm.get('ticker')?.hasError('required') && stockForm.get('ticker')?.touched){
+                <small class="self-end text-red-500 mt-2">Item Ticker is required</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="quantity" class="font-semibold w-24">Quantity</label>
+            <div class="flex-auto flex-col flex">
+                <p-inputnumber placeholder="Enter quantity" formControlName="quantity" size="small" [showButtons]="true"
+                    inputId="quantity" class="flex-auto" mode="decimal" autocomplete="off" />
+                @if(stockForm.get('quantity')?.hasError('required') && stockForm.get('quantity')?.touched){
+                <small class="self-end text-red-500 mt-2">Stock quantity is required</small>
+                }
+                @if(stockForm.get('quantity')?.hasError('min') && stockForm.get('quantity')?.touched){
+                <small class="self-end text-red-500 mt-2">Stock quantity must be greater zero</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="storage" class="font-semibold w-24">Item Storage</label>
+            <p-select [options]="inventories" formControlName="storage" optionLabel="name" [filter]="true"
+              filterBy="name" [showClear]="true" placeholder="Select storage location" class="flex-auto">
+              <ng-template #selectedItem let-selectedOption>
+                <div class="flex items-center gap-2">
+                  <div>{{ selectedOption.name }}</div>
+                </div>
+              </ng-template>
+              <ng-template let-inventory #item>
+                <div class="flex items-center gap-2">
+                  <div>{{ inventory.name }}</div>
+                </div>
+              </ng-template>
+            </p-select>
+          </div>
+        
+          <div class="flex items-center gap-4 mb-2">
+            <label for="type" class="font-semibold w-24">Item Type</label>
+            <p-select [options]="products" formControlName="type" optionLabel="name" [filter]="true"
+              filterBy="name" [showClear]="true" placeholder="Select item type" class="flex-auto">
+              <ng-template #selectedItem let-selectedOption>
+                <div class="flex items-center gap-2">
+                  <div>{{ selectedOption.name }}</div>
+                </div>
+              </ng-template>
+              <ng-template let-inventory #item>
+                <div class="flex items-center gap-2">
+                  <div>{{ inventory.name }}</div>
+                </div>
+              </ng-template>
+            </p-select>
+          </div>
+        
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="description" class="font-semibold w-24">Description</label>
+            <textarea placeholder="Enter item description (Optional)" formControlName="description" pSize="small"
+                name="description" rows="5" cols="25" pTextarea id="description" class="flex-auto"
+                autocomplete="off"></textarea>
+        </div>
+
+        <div class="mb-4">
+            <div class="flex gap-2 mb-4">
+                <button type="button" 
+                        class="flex-1 border rounded-lg py-2 text-center hover:bg-gray-50 text-gray-600"
+                        (click)="fileUpload.click()">
+                    <i class="pi pi-plus mr-2"></i>
+                    Choose
+                </button>
+                <button type="button" 
+                        class="flex-1 border rounded-lg py-2 text-center hover:bg-gray-50 text-red-400"
+                        (click)="onFileClear()">
+                    <i class="pi pi-times mr-2"></i>
+                    Clear
+                </button>
+            </div>
+            
+            <div class="border rounded-lg p-6 flex flex-col items-center justify-center">
+                <i class="pi pi-cloud-upload text-gray-400 text-2xl mb-2"></i>
+                <p class="text-gray-600 text-sm">Drag and drop files to here to upload.</p>
+            </div>
+
+            <input #fileUpload
+                   type="file"
+                   class="hidden"
+                   (change)="onFileSelect($event)"
+                   accept="image/*">
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+            <button 
+                pButton 
+                label="Cancel"
+                icon="pi pi-times"
+                (click)="closeStockModal()"
+                class="p-button-text"
+                [style]="{
+                    'background-color': '#E5E7EB',
+                    'color': '#6B7280',
+                    'border': 'none',
+                    'padding': '0.5rem 1rem',
+                    'font-weight': '400',
+                    'border-radius': '6px'
+                }">
+            </button>
+            <button 
+                pButton 
+                label="Add"
+                icon="pi pi-plus"
+                (click)="selectedStock ? editStock() : addStock()"
+                [style]="{
+                    'background-color': '#4F46E5',
+                    'border': 'none',
+                    'padding': '0.5rem 1rem',
+                    'font-weight': '400',
+                    'border-radius': '6px'
+                }">
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+
+
+<p-toast position="bottom-right" />
+<p-confirmpopup />

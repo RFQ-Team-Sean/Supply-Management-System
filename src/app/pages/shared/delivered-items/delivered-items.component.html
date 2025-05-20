@@ -1,0 +1,165 @@
+<mat-card>
+  <mat-card-title class="select-none font-light">Delivered Items</mat-card-title>
+  
+  <div class="flex justify-between items-center">
+    <p>View and add delivered items in this section.</p>
+    <div class="flex-1"></div>
+    <div class="relative w-full max-w-72 mr-2">
+      <mat-icon class="absolute left-3 top-2.5 text-gray-400">search</mat-icon>
+      <input 
+        class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        [(ngModel)]="searchValue"
+        (keyup)="applyFilter($event)"
+        type="text"
+        placeholder="Search">
+    </div>
+  </div>
+
+  <div class="p-6">
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-4 border-b border-gray-200">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+              <div class="h-2.5 w-2.5 rounded-full bg-blue-600"></div>
+              <span class="text-sm font-medium">All Items: {{totalItems}}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="h-2.5 w-2.5 rounded-full bg-green-600"></div>
+              <span class="text-sm font-medium">Checked: {{totalCheckedItems}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="dataSource" class="w-full">
+          <!-- Supplier Column -->
+          <ng-container matColumnDef="supplier">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 px-6 py-3">
+              <span class="text-xs font-medium text-gray-500 uppercase">Supplier</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-6 py-4">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10">
+                  <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                    <mat-icon>business</mat-icon>
+                  </div>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">{{item.supplierName}}</div>
+                  <div class="text-sm text-gray-500">{{item.supplierId}}</div>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Date Column -->
+          <ng-container matColumnDef="dateDelivered">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 px-6 py-3">
+              <span class="text-xs font-medium text-gray-500 uppercase">Date Delivered</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-6 py-4">
+              <div class="text-sm text-gray-900">{{item.dateDelivered | date:'MMM d, yyyy'}}</div>
+              <div class="text-xs text-gray-500">{{item.dateDelivered | date:'h:mm a'}}</div>
+            </td>
+          </ng-container>
+
+          <!-- Department Column -->
+          <ng-container matColumnDef="department">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 px-6 py-3">
+              <span class="text-xs font-medium text-gray-500 uppercase">Department</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-6 py-4">
+              <span class="px-2 py-1 text-xs rounded-full" [ngClass]="getDepartmentClass(item.department)">
+                {{item.department}}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 px-6 py-3">
+              <span class="text-xs font-medium text-gray-500 uppercase">Status</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-6 py-4">
+              <span class="px-2 py-1 text-xs rounded-full" [ngClass]="getStatusClass(item.status)">
+                {{item.status | titlecase}}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="bg-gray-50 px-6 py-3">
+              <span class="text-xs font-medium text-gray-500 uppercase">Actions</span>
+            </th>
+            <td mat-cell *matCellDef="let item" class="px-6 py-4">
+              <div class="flex items-center gap-2">
+                <button mat-icon-button 
+                        (click)="viewChecklist(item)"
+                        [disabled]="item.status !== 'pending'"
+                        [matTooltip]="getChecklistTooltip(item)"
+                        [ngClass]="getChecklistIconColor(item)">
+                  <mat-icon>{{getChecklistIcon(item)}}</mat-icon>
+                </button>
+                
+                <button mat-icon-button
+                        [matTooltip]="canGenerateDocuments(item) ? 'Generate Documents' : 'Complete checklist first'"
+                        [disabled]="!canGenerateDocuments(item) || item.status !== 'pending'"
+                        (click)="generateDocuments(item)"
+                        class="text-blue-600">
+                  <mat-icon>description</mat-icon>
+                </button>
+                
+                <button mat-icon-button
+                        (click)="acceptDelivery(item)"
+                        [disabled]="!canGenerateDocuments(item) || item.status !== 'pending'"
+                        matTooltip="Accept Delivery"
+                        class="text-green-600">
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+                
+                <button mat-icon-button
+                        (click)="rejectDelivery(item)"
+                        [disabled]="item.status !== 'pending'"
+                        matTooltip="Reject Delivery"
+                        class="text-red-600">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+              class="hover:bg-gray-50 transition-colors duration-150"></tr>
+
+          <!-- No Data Row -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="px-6 py-4 text-center text-gray-500" [attr.colspan]="displayedColumns.length">
+              <div class="flex flex-col items-center py-6">
+                <mat-icon class="text-gray-400 text-4xl mb-2">inbox</mat-icon>
+                <p class="text-lg font-medium">No deliveries found</p>
+                <p class="text-sm text-gray-500">
+                  {{dataSource.filter ? 'Try adjusting your search' : 'Deliveries will appear here'}}
+                </p>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <mat-paginator [pageSizeOptions]="[5, 10, 25]" 
+                     showFirstLastButtons 
+                     class="border-t border-gray-200">
+        </mat-paginator>
+      </div>
+    </div>
+  </div>
+</mat-card>
+
+<style>
+::ng-deep .mat-tooltip {
+  margin-top: 6px !important;
+}
+</style>

@@ -1,0 +1,485 @@
+<!-- abstract-quotation.component.html -->
+<p-card>
+    <h1 class="text-xl font-semibold">Abstract of Quotation</h1>
+  
+    <div class="flex justify-between mb-4 items-center">
+      <p class="text-sm">Manage quotation abstracts and bidding details</p>
+      <div class="flex flex-row gap-2">
+        <p-iconfield styleClass="small">
+          <p-inputicon styleClass="pi pi-search small" />
+          <input
+            type="text"
+            pInputText
+            placeholder="Search"
+            [(ngModel)]="searchQuery"
+            (input)="filterAbstracts()"
+          />
+        </p-iconfield>
+        <p-button
+          label="New Abstract"
+          icon="pi pi-plus"
+          [outlined]="true"
+          (click)="showDialog()"
+        ></p-button>
+      </div>
+    </div>
+  
+    <p-table
+      [value]="filteredAbstracts"
+      responsiveLayout="scroll"
+      [paginator]="true"
+      [rows]="5"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Reference No.</th>
+          <th>Project Name</th>
+          <th>Approved Budget</th>
+          <th>No. of Bidders</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-abstract>
+        <tr>
+          <td>{{ abstract.projectReferenceNumber }}</td>
+          <td>{{ abstract.projectName }}</td>
+          <td>{{ abstract.approvedBudget | currency:'PHP' }}</td>
+          <td>{{ abstract.bidders.length }}</td>
+          <td>
+            <span
+              [ngClass]="getStatusClass(abstract.status)"
+              class="px-3 py-1 rounded-lg text-white"
+            >
+              {{ abstract.status }}
+            </span>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <p-button
+                icon="pi pi-eye"
+                [outlined]="true"
+                (click)="viewDetails(abstract)"
+              ></p-button>
+              < <p-button
+              icon="pi pi-pencil"
+              [outlined]="true"
+              [severity]="'secondary'"
+              (click)="showStatusDialog(abstract)"
+            ></p-button>
+          </div>
+        </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+  
+  <!-- Create Abstract Dialog -->
+  <p-dialog
+    header="Create Abstract of Quotation"
+    [(visible)]="displayDialog"
+    [modal]="true"
+    [style]="{ width: '60vw' }"
+  >
+    <form (ngSubmit)="submitAbstract()">
+      <div class="grid gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="projectRef">Project Reference Number</label>
+          <p-dropdown
+            [options]="projects"
+            [(ngModel)]="newAbstract.projectReferenceNumber"
+            optionLabel="referenceNumber"
+            optionValue="referenceNumber"
+            placeholder="Select Project"
+            (onChange)="onProjectSelect($event)"
+            name="projectRef"
+            [style]="{ width: '100%' }"
+          ></p-dropdown>
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="projectName">Project Name</label>
+          <input
+            pInputText
+            id="projectName"
+            [(ngModel)]="newAbstract.projectName"
+            name="projectName"
+            [disabled]="true"
+          />
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="projectLocation">Project Location</label>
+          <input
+            pInputText
+            id="projectLocation"
+            [(ngModel)]="newAbstract.projectLocation"
+            name="projectLocation"
+            [disabled]="true"
+          />
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="approvedBudget">Approved Budget</label>
+          <p-inputNumber
+            id="approvedBudget"
+            [(ngModel)]="newAbstract.approvedBudget"
+            name="approvedBudget"
+            mode="currency"
+            currency="PHP"
+            [disabled]="true"
+          ></p-inputNumber>
+        </div>
+  
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <label for="date">Date</label>
+            <p-calendar
+              id="date"
+              [(ngModel)]="newAbstract.date"
+              name="date"
+              [showIcon]="true"
+            ></p-calendar>
+          </div>
+  
+          <div class="flex flex-col gap-1">
+            <label for="time">Time</label>
+            <input
+              pInputText
+              id="time"
+              [(ngModel)]="newAbstract.time"
+              name="time"
+              type="time"
+            />
+          </div>
+        </div>
+  
+        <!-- Bidders Section -->
+        <div class="mt-4">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-lg font-semibold">Bidders</h3>
+            <p-button
+              label="Add Bidder"
+              icon="pi pi-plus"
+              [outlined]="true"
+              (click)="addBidder()"
+            ></p-button>
+          </div>
+  
+          <div *ngFor="let bidder of newAbstract.bidders; let i = index" class="border p-4 mb-4 rounded-lg">
+            <div class="flex justify-between mb-2">
+              <h4 class="text-md font-medium">Bidder {{i + 1}}</h4>
+              <p-button
+                icon="pi pi-trash"
+                [outlined]="true"
+                severity="danger"
+                (click)="removeBidder(i)"
+              ></p-button>
+            </div>
+  
+            <!-- abstract-quotation.component.html -->
+<!-- Previous code remains the same until the bidders section -->
+
+          <div class="grid gap-4">
+            <div class="flex flex-col gap-1">
+              <label>Bidder Name</label>
+              <input
+                pInputText
+                [(ngModel)]="bidder.name"
+                [name]="'bidderName' + i"
+              />
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label>Total Bid Amount</label>
+              <p-inputNumber
+                [(ngModel)]="bidder.totalBidAmount"
+                [name]="'bidAmount' + i"
+                mode="currency"
+                currency="PHP"
+              ></p-inputNumber>
+            </div>
+
+            <div class="border-t pt-2">
+              <h5 class="font-medium mb-2">Bid Security Details</h5>
+              <div class="grid gap-2">
+                <div class="flex flex-col">
+                  <label>Bank/Company</label>
+                  <input
+                    pInputText
+                    [(ngModel)]="bidder.bidSecurity.bankCompany"
+                    [name]="'bankCompany' + i"
+                  />
+                </div>
+                <div class="flex flex-col">
+                  <label>Number</label>
+                  <input
+                    pInputText
+                    [(ngModel)]="bidder.bidSecurity.number"
+                    [name]="'securityNumber' + i"
+                  />
+                </div>
+                <div class="flex flex-col">
+                  <label>Validity</label>
+                  <p-calendar
+                    [(ngModel)]="bidder.bidSecurity.validity"
+                    [name]="'validity' + i"
+                    [showIcon]="true"
+                  ></p-calendar>
+                </div>
+                <div class="flex flex-col">
+                  <label>Security Amount</label>
+                  <p-inputNumber
+                    [(ngModel)]="bidder.bidSecurity.amount"
+                    [name]="'securityAmount' + i"
+                    mode="currency"
+                    currency="PHP"
+                  ></p-inputNumber>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label>Required Bid Security</label>
+              <p-inputNumber
+                [(ngModel)]="bidder.requiredBidSecurity"
+                [name]="'requiredSecurity' + i"
+                mode="currency"
+                currency="PHP"
+              ></p-inputNumber>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label>Status</label>
+              <p-dropdown
+                [options]="[{label: 'Sufficient', value: true}, {label: 'Insufficient', value: false}]"
+                [(ngModel)]="bidder.sufficient"
+                [name]="'sufficient' + i"
+                optionLabel="label"
+                optionValue="value"
+                [style]="{ width: '100%' }"
+              ></p-dropdown>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label>Remarks</label>
+              <textarea
+                pInputTextarea
+                [(ngModel)]="bidder.remarks"
+                [name]="'remarks' + i"
+                rows="2"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        (click)="displayDialog = false"
+      ></p-button>
+      <p-button
+        label="Submit"
+        icon="pi pi-check"
+        type="submit"
+        [outlined]="true"
+        severity="success"
+      ></p-button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- View Details Dialog -->
+<p-dialog
+  header="Abstract of Quotation Details"
+  [(visible)]="displayViewDialog"
+  [modal]="true"
+  [style]="{ width: '80vw' }"
+>
+  <div *ngIf="selectedAbstract" class="p-4">
+    <div class="grid grid-cols-2 gap-8 mb-6">
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Project Details</h3>
+        <div class="grid gap-2">
+          <div>
+            <label class="font-medium">Project Name:</label>
+            <p>{{ selectedAbstract.projectName }}</p>
+          </div>
+          <div>
+            <label class="font-medium">Project Location:</label>
+            <p>{{ selectedAbstract.projectLocation }}</p>
+          </div>
+          <div>
+            <label class="font-medium">Approved Budget:</label>
+            <p>{{ selectedAbstract.approvedBudget | currency:'PHP' }}</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Quotation Details</h3>
+        <div class="grid gap-2">
+          <div>
+            <label class="font-medium">Date:</label>
+            <p>{{ selectedAbstract.date | date }}</p>
+          </div>
+          <div>
+            <label class="font-medium">Time:</label>
+            <p>{{ selectedAbstract.time }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse border">
+        <thead>
+            <tr>
+              <th class="border p-2" colspan="1">Bidders</th>
+              <th class="border p-2" *ngFor="let bidder of selectedAbstract.bidders; let i = index">
+                Bidder {{ i + 1 }}
+              </th>
+            </tr>
+          </thead>          
+        <tbody>
+          <!-- First row should show bidder names -->
+          <tr>
+            <td class="border p-2 font-medium">Bidder Name</td>
+            <td class="border p-2" *ngFor="let bidder of selectedAbstract.bidders">
+              {{ bidder.name }}
+            </td>
+          </tr>
+          <tr>
+            <td class="border p-2 font-medium">Total Amount of Bid</td>
+            <td class="border p-2" *ngFor="let bidder of selectedAbstract.bidders">
+              {{ bidder.totalBidAmount | currency:'PHP' }}
+            </td>
+          </tr>
+          <tr>
+            <td class="border p-2 font-medium">Bank/Company</td>
+            <td class="border p-2" *ngFor="let bidder of selectedAbstract.bidders">
+              {{ bidder.bidSecurity.bankCompany }}
+            </td>
+          </tr>
+          <tr>
+            <td class="border p-2 font-medium">Number</td>
+            <td class="border p-2" *ngFor="let bidder of selectedAbstract.bidders">
+              {{ bidder.bidSecurity.number }}
+            </td>
+          </tr>
+          <tr>
+            <td class="border p-2 font-medium">Validity</td>
+            <td class="border p-2" *ngFor="let bidder of selectedAbstract.bidders">
+              {{ bidder.bidSecurity.validity | date }}
+            </td>
+          </tr>
+          <tr>
+            <td class="border p-2 font-medium">Bid Security Amount</td>
+            <td class="border p-2" *ngFor="let bidder of selectedAbstract.bidders">
+              {{ bidder.bidSecurity.amount | currency:'PHP' }}
+            </td>
+          </tr>
+          <tr>
+            <td class="border p-2 font-medium">Required Bid Security</td>
+            <td class="border p-2" *ngFor="let bidder of selectedAbstract.bidders">
+              {{ bidder.requiredBidSecurity | currency:'PHP' }}
+            </td>
+          </tr>
+          <tr>
+            <td class="border p-2 font-medium">Status</td>
+            <td class="border p-2" *ngFor="let bidder of selectedAbstract.bidders">
+              {{ bidder.sufficient ? 'Sufficient' : 'Insufficient' }}
+            </td>
+          </tr>
+          <tr>
+            <td class="border p-2 font-medium">Remarks</td>
+            <td class="border p-2" *ngFor="let bidder of selectedAbstract.bidders">
+              {{ bidder.remarks }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-8 grid grid-cols-2 gap-8">
+      <div>
+        <div class="border-t pt-4 mt-4">
+          <p class="text-center">_______________________</p>
+          <p class="text-center">BAC Chairman</p>
+        </div>
+      </div>
+      <div>
+        <div class="border-t pt-4 mt-4">
+          <p class="text-center">_______________________</p>
+          <p class="text-center">Requesting Officer</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-8 mt-4">
+      <div>
+        <div class="border-t pt-4 mt-4">
+          <p class="text-center">_______________________</p>
+          <p class="text-center">BAC Member</p>
+        </div>
+      </div>
+      <div>
+        <div class="border-t pt-4 mt-4">
+          <p class="text-center">_______________________</p>
+          <p class="text-center">BAC Member</p>
+        </div>
+      </div>
+      <div>
+        <div class="border-t pt-4 mt-4">
+          <p class="text-center">_______________________</p>
+          <p class="text-center">BAC Member</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Update Status"
+  [(visible)]="displayStatusDialog"
+  [modal]="true"
+  [style]="{ width: '30vw' }"
+>
+  <div class="flex flex-col gap-4" *ngIf="abstractToUpdate">
+    <div class="flex flex-col gap-2">
+      <label for="status">Status</label>
+      <p-dropdown
+        [options]="statusOptions"
+        [(ngModel)]="abstractToUpdate.status"
+        optionLabel="label"
+        optionValue="value"
+        [style]="{ width: '100%' }"
+      ></p-dropdown>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        (click)="displayStatusDialog = false"
+      ></p-button>
+      <p-button
+        label="Update"
+        icon="pi pi-check"
+        [outlined]="true"
+        severity="success"
+        (click)="changeStatus()"
+      ></p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-toast position="bottom-right"></p-toast>
+
+                

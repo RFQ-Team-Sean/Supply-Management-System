@@ -1,0 +1,93 @@
+<!-- <div class="p-10 ml-5 bg-white shadow-md rounded-lg" style="width: 390mm; height: auto;">
+  <h1 class="text-3xl font-bold mb-4 flex justify-center">{{ mockData?.title }}</h1>
+  <h2 class="text-2xl font-bold mb-4 flex justify-center">{{ mockData?.subtitle }}</h2>
+  <p class="text-xl mb-4"><strong>{{ mockData?.department }}</strong></p>
+  <p class="text-xl mb-4"><strong>{{ mockData?.agency }}</strong></p>
+  <p class="text-xl mb-4">{{ mockData?.address }}</p>
+  <p class="text-xl mb-4">{{ mockData?.contact }}</p>
+
+  <div class="mb-4 text-xl" *ngIf="mockData?.resolutionDetails?.length">
+    <div *ngFor="let detail of mockData.resolutionDetails">
+      <p>{{ detail }}</p>
+    </div>
+  </div>
+
+  <table class="w-full border-collapse border border-gray-300 text-xl" style="table-layout: fixed;" *ngIf="mockData?.suppliers?.length">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="border border-gray-300 p-4">SUPPLIER</th>
+        <th class="border border-gray-300 p-4">BID AMOUNT</th>
+        <th class="border border-gray-300 p-4">REMARKS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let supplier of mockData.suppliers">
+        <td class="border border-gray-300 p-4">{{ supplier.name }}</td>
+        <td class="border border-gray-300 p-4">{{ supplier.bidAmount }}</td>
+        <td class="border border-gray-300 p-4">{{ supplier.remarks }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="mt-4 text-xl" *ngIf="mockData?.resolutionConclusion?.length">
+    <div *ngFor="let conclusion of mockData.resolutionConclusion">
+      <p>{{ conclusion }}</p>
+    </div>
+  </div>
+
+  <div class="mt-8 text-xl" *ngIf="mockData?.bacMembers?.length">
+    <p><strong>By:</strong></p>
+    <p><strong>THE BIDS AND AWARDS COMMITTEE:</strong></p>
+    <div *ngFor="let member of mockData.bacMembers">
+      <p>{{ member.name }} - {{ member.role }}</p>
+    </div>
+  </div>
+</div>
+
+<p-button label="Export to PDF" (onClick)="exportPdf()" class="mt-4"></p-button> -->
+
+<div class="bac-resolution p-10 ml-5 bg-white shadow-md rounded-lg" style="width: 390mm; height: auto;" *ngIf="mockData">
+  <h1 class="text-3xl font-bold mb-4 flex justify-center">{{ mockData?.title }}</h1>
+  <h2 class="text-2xl font-bold mb-4 flex justify-center">{{ mockData?.subtitle }}</h2>
+  <p class="text-xl mb-4"><strong>{{ mockData?.department }}</strong></p>
+  <p class="text-xl mb-4"><strong>{{ mockData?.agency }}</strong></p>
+  <p class="text-xl mb-4">{{ mockData?.address }}</p>
+  <p class="text-xl mb-4">{{ mockData?.contact }}</p>
+
+  <div class="mb-4 text-xl" *ngIf="mockData?.resolutionDetails?.length">
+    <div *ngFor="let detail of mockData.resolutionDetails">
+      <p>{{ detail }}</p>
+    </div>
+  </div>
+
+  <table class="w-full border-collapse border border-gray-300 text-xl" style="table-layout: fixed;" *ngIf="mockData?.suppliers?.length">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="border border-gray-300 p-4">SUPPLIER</th>
+        <th class="border border-gray-300 p-4">BID AMOUNT</th>
+        <th class="border border-gray-300 p-4">REMARKS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let supplier of mockData.suppliers">
+        <td class="border border-gray-300 p-4">{{ supplier.name }}</td>
+        <td class="border border-gray-300 p-4">{{ supplier.bidAmount }}</td>
+        <td class="border border-gray-300 p-4">{{ supplier.remarks }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="mt-4 text-xl" *ngIf="mockData?.resolutionConclusion?.length">
+    <div *ngFor="let conclusion of mockData.resolutionConclusion">
+      <p>{{ conclusion }}</p>
+    </div>
+  </div>
+
+  <div class="mt-8 text-xl" *ngIf="mockData?.bacMembers?.length">
+    <p><strong>By:</strong></p>
+    <p><strong>THE BIDS AND AWARDS COMMITTEE:</strong></p>
+    <div *ngFor="let member of mockData.bacMembers">
+      <p>{{ member.name }} - {{ member.role }}</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,94 @@
+
+<app-progress-table [config]="ppmpRequests"></app-progress-table>
+
+@if(rejectForm.show) {
+  <app-dynamic-form [config]="rejectForm"></app-dynamic-form>
+}
+
+@if(submitSignature.show) {
+  <app-signature-modal [config]="submitSignature"></app-signature-modal>
+}
+
+@if(headSignature.show) {
+  <app-signature-modal [config]="headSignature"></app-signature-modal>
+} 
+
+<app-ppmp-dialog
+  [visible]="dialogVisible"
+  [isEditMode]="isEditMode"
+  [ppmpData]="ppmpFormData"
+  [procurementModes]="procurementModes"
+  [procurementModeData]="procurementModeData"
+  [procurementProcess]="procurementProcesses"
+  [classifications]="classifications"
+  [fundSources]="fundSources"
+  [loading]="dialogLoading"
+  (visibleChange)="handleDialogClose()"
+  (savePpmp)="handleSavePpmp($event)"
+  (cancelPpmp)="handleDialogClose()">
+</app-ppmp-dialog>
+
+<p-dialog 
+  [(visible)]="documentViewerVisible" 
+  [modal]="true" 
+  [style]="{width: '90vw', height: '90vh'}" 
+  [resizable]="false"
+  [draggable]="false"
+  [closeOnEscape]="true"
+  header="Consolidated PPMP Document">
+  <div class="flex flex-col h-full">
+    @if(documentUrl) {
+      <iframe 
+        [src]="documentUrl" 
+        class="w-full h-full border-0"
+        style="min-height: 80vh;">
+      </iframe>
+    } @else {
+      <div class="flex items-center justify-center h-full">
+        <p>No document available</p>
+      </div>
+    }
+  </div>
+</p-dialog>
+
+<p-dialog 
+  [(visible)]="showApproveAllDialog" 
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="true"
+  header="Approve PPMPs"
+  [style]="{width: '500px'}">
+  <div class="p-4">
+    <p>Are you sure you want to approve {{pendingPPMPsCount}} PPMPs for fiscal year {{selectedFiscalYear}}?</p>
+    <div class="mt-3">
+      <ul class="list-disc pl-6 mt-2">
+        @for(ppmp of pendingPPMPs; track ppmp.id) {
+          <li class="mb-1">{{ppmp.project_code}} ({{ppmp.project_title}})</li>
+        }
+      </ul>
+    </div>
+  </div>
+  <div class="flex justify-end gap-2 p-3 border-t">
+    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="cancelApproval()"></button>
+    <button pButton label="Approve" icon="pi pi-check" class="p-button-success" (click)="proceedWithApproval()"></button>
+  </div>
+</p-dialog>
+
+<!-- Add this to your ppmp.component.html file -->
+<p-dialog 
+  header="Finalize PPMPs" 
+  [(visible)]="showFinalizeDialog" 
+  [modal]="true" 
+  [style]="{width: '450px'}" 
+  [draggable]="false" 
+  [resizable]="false">
+  <p class="m-0">
+    Are you sure you want to finalize {{finalizePPMPsCount}} PPMP for fiscal year {{selectedFiscalYear}}?
+    Your signature will be applied to all eligible PPMP Projects.
+  </p>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="cancelFinalization()"></button>
+    <button pButton pRipple label="Finalize All" icon="pi pi-check" class="p-button-success" (click)="proceedWithFinalization()"></button>
+  </ng-template>
+</p-dialog>

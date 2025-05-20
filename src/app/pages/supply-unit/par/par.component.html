@@ -1,0 +1,204 @@
+<div class="p-fluid">
+    <!-- Table of PAR Reports -->
+    <p-card header="Property Acknowledgment Receipt (PAR)" styleClass="p-shadow-3 mb-4">
+        <div class="flex flex-row items-center justify-between">
+            <p>Manage and generate Property Acknowledgment Receipts.</p>
+            <div class="p-field" style="text-align: right; margin-top: 1rem">
+                <p-button
+                    label="Create PAR"
+                    (onClick)="showDialog()"
+                    styleClass="p-button-success"
+                    [size]="'small'"
+                    [outlined]="true"
+                ></p-button>
+            </div>
+        </div>
+        <p-table [value]="parReports" [paginator]="true" [rows]="5">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>PAR No.</th>
+                    <th>Entity Name</th>
+                    <th>Fund Cluster</th>
+                    <th>Date</th>
+                    <th>Received By</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-par>
+                <tr>
+                    <td>{{ par.parNo }}</td>
+                    <td>{{ par.entityName }}</td>
+                    <td>{{ par.fundCluster }}</td>
+                    <td>{{ par.date | date: 'mediumDate' }}</td>
+                    <td>{{ par.receivedBy }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button icon="pi pi-pencil" 
+                                    (click)="editPAR(par)"
+                                    styleClass="p-button-rounded p-button-text p-button-primary">
+                            </p-button>
+                            <p-button icon="pi pi-trash" 
+                                    (click)="deletePAR(par)"
+                                    styleClass="p-button-rounded p-button-text p-button-danger">
+                            </p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+
+    <!-- Dialog for PAR Form -->
+    <p-dialog
+        header="{{ editingIndex === -1 ? 'Create' : 'Edit' }} Property Acknowledgment Receipt"
+        [(visible)]="displayDialog"
+        [modal]="true"
+        [style]="{ width: '60vw' }"
+        [draggable]="false"
+        [resizable]="false"
+    >
+        <form [formGroup]="parForm" class="p-4" (ngSubmit)="savePAR()">
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Left Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">PAR No.</label>
+                        <input type="text" pInputText formControlName="parNo" class="w-full" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Entity Name</label>
+                        <input type="text" pInputText formControlName="entityName" class="w-full" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Fund Cluster</label>
+                        <input type="text" pInputText formControlName="fundCluster" class="w-full" />
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Received By</label>
+                        <input type="text" pInputText formControlName="receivedBy" class="w-full" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Received From</label>
+                        <input type="text" pInputText formControlName="receivedFrom" class="w-full" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Date</label>
+                        <input type="date" pInputText formControlName="date" class="w-full" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Section -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-lg font-medium text-gray-700">Items</label>
+                    <p-button 
+                        label="Add Item" 
+                        icon="pi pi-plus" 
+                        styleClass="p-button-sm p-button-success"
+                        (onClick)="showItemDialog()"
+                    ></p-button>
+                </div>
+                <p-table [value]="parForm.get('items')?.value || []" styleClass="p-datatable-sm">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Property No.</th>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Unit</th>
+                            <th>Actions</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item let-i="rowIndex">
+                        <tr>
+                            <td>{{item.propertyNo}}</td>
+                            <td>{{item.description}}</td>
+                            <td>{{item.quantity}}</td>
+                            <td>{{item.unit}}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <p-button icon="pi pi-pencil" 
+                                            (click)="editItem(i)"
+                                            styleClass="p-button-rounded p-button-text p-button-primary p-button-sm">
+                                    </p-button>
+                                    <p-button icon="pi pi-trash" 
+                                            (click)="removeItem(i)"
+                                            styleClass="p-button-rounded p-button-text p-button-danger p-button-sm">
+                                    </p-button>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex justify-end gap-2 mt-4">
+                <p-button
+                    label="Export to PDF"
+                    (onClick)="exportPdf()"
+                    [disabled]="parForm.invalid"
+                    styleClass="p-button-warning"
+                ></p-button>
+                <p-button
+                    label="Cancel"
+                    (onClick)="displayDialog = false"
+                    styleClass="p-button-secondary"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    type="submit"
+                    [disabled]="parForm.invalid"
+                    styleClass="p-button-success"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+
+    <!-- Dialog for Item Form -->
+    <p-dialog
+        header="{{ editingItemIndex === -1 ? 'Add' : 'Edit' }} Item"
+        [(visible)]="displayItemDialog"
+        [modal]="true"
+        [style]="{ width: '30vw' }"
+        [draggable]="false"
+        [resizable]="false"
+    >
+        <form [formGroup]="itemsForm" class="p-4" (ngSubmit)="saveItem()">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Property No.</label>
+                <input type="text" pInputText formControlName="propertyNo" class="w-full" />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Description</label>
+                <input type="text" pInputText formControlName="description" class="w-full" />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                <input type="number" pInputText formControlName="quantity" class="w-full" />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Unit</label>
+                <input type="text" pInputText formControlName="unit" class="w-full" />
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <p-button
+                    label="Cancel"
+                    (onClick)="displayItemDialog = false"
+                    styleClass="p-button-secondary"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    type="submit"
+                    [disabled]="itemsForm.invalid"
+                    styleClass="p-button-success"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+</div>

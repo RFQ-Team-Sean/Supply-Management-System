@@ -1,0 +1,174 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Approved Purchase Requests</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      View requisitions assigned to you for approval.
+    </mat-card-subtitle>
+
+    <!-- Filters and Actions -->
+    <div class="flex justify-between items-center mt-4">
+      <div class="flex gap-2">
+        <div class="relative w-[300px]">
+          <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+          <input
+            pInputText
+            type="text"
+            #searchInput
+            (input)="dt.filterGlobal(searchInput.value, 'contains')"
+            placeholder="Search Requisitions"
+            style="text-indent: 1.5rem;"
+            class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:ml-6"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Requisitions Table -->
+    <p-table
+      #dt
+      [value]="requisitions"
+      [rows]="10"
+      [paginator]="true"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [loading]="loading"
+      [globalFilterFields]="['id', 'title', 'description', 'approvalStatus', 'createdByUserName']"
+      responsiveLayout="scroll"
+      styleClass="p-datatable-sm mt-4"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="id">Code <p-sortIcon field="id"></p-sortIcon></th>
+          <th pSortableColumn="title">Title <p-sortIcon field="title"></p-sortIcon></th>
+          <th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>
+          <th pSortableColumn="approvalStatus">Status <p-sortIcon field="approvalStatus"></p-sortIcon></th>
+          <th pSortableColumn="createdByUserName">Created By <p-sortIcon field="createdByUserName"></p-sortIcon></th>
+          <th pSortableColumn="dateCreated">Date Created <p-sortIcon field="dateCreated"></p-sortIcon></th>
+          <th>Attachments</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-requisition>
+        <tr>
+          <td>{{ requisition.id }}</td>
+          <td>{{ requisition.title }}</td>
+          <td>{{ requisition.description }}</td>
+          <td>
+            <span [ngClass]="{
+              'bg-green-100 text-green-800': requisition.approvalStatus === 'Approved',
+              'bg-yellow-100 text-yellow-800': requisition.approvalStatus === 'Pending',
+              'bg-red-100 text-red-800': requisition.approvalStatus === 'Rejected'
+            }" class="px-2 py-1 rounded-full text-sm">
+              {{ requisition.approvalStatus }}
+            </span>
+          </td>
+          <td>{{ requisition.createdByUserName }}</td>
+          <td>{{ requisition.dateCreated | date: 'short' }}</td>
+          <td>
+            <button
+              pButton
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-secondary p-button-sm"
+              (click)="showAttachments(requisition)"
+              pTooltip="View Attachments"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="flex flex-col w-full items-center justify-center py-8">
+              <span>No requisitions found.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+<!-- Modal for displaying attachments and approval history -->
+<p-dialog [(visible)]="displayModal" [modal]="true" [style]="{ width: '50vw' }" [draggable]="false" [resizable]="false">
+  <ng-template pTemplate="header">
+    <h3 class="text-lg font-bold">Attachments and Approval History</h3>
+  </ng-template>
+  <div *ngIf="selectedRequisition" class="space-y-4">
+    <div>
+      <ul class="list-disc list-inside gap-y-2 flex flex-col">
+        <!-- PPMP Attachment -->
+        <li *ngIf="selectedRequisition.ppmpAttachment">
+          <button
+            pButton
+            label="PPMP Attachment"
+            class="p-button-sm p-button-outlined"
+            (click)="viewAttachment(selectedRequisition.ppmpAttachment)" >
+            </button>
+        </li>
+        <!-- Purchase Request Attachment -->
+        <li *ngIf="selectedRequisition.purchaseRequestAttachment">
+          <button
+            pButton
+            label="View Purchase Request"
+            class="p-button-sm p-button-outlined"
+            (click)="viewPurchaseRequest(selectedRequisition.id || '')"
+          ></button>
+        </li>
+        <!-- Add RFQ Button -->
+        <li>
+          <button pButton pRipple type="button" icon="pi pi-plus" label="Add RFQ" class="p-button-sm p-button-outlined"></button>
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <h4 class="font-semibold mb-2">Approval History</h4>
+      <p-timeline [value]="selectedRequisition.approvalHistory" align="alternate">
+        <ng-template pTemplate="content" let-history>
+          <p-card>
+            <p>{{ history.status }}</p>
+            <p class="text-sm text-gray-500">{{ history.timestamp | date: 'M/d/yy, h:mm a' }}</p>
+            <p class="text-sm text-gray-700">{{ history.comments || 'No comments' }}</p>
+            <p class="text-xs text-gray-500">By: {{ history.approversName || 'Unknown' }}</p>
+            <p *ngIf="history.signature" class="text-xs text-gray-500">
+              Signature: <img [src]="history.signature" alt="Signature" class="inline-block h-8">
+            </p>
+          </p-card>
+        </ng-template>
+      </p-timeline>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple type="button" label="Close" class="p-button-text" (click)="displayModal = false"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Modal for displaying purchase request -->
+<p-dialog
+  [(visible)]="displayPurchaseRequestModal"
+  [modal]="true"
+  [style]="{ width: '90%', maxWidth: '800px' }"
+  [resizable]="false"
+>
+  <ng-template pTemplate="header">
+    <h3 class="text-lg font-bold">Purchase Request</h3>
+  </ng-template>
+  <div class="overflow-x-auto">
+    <app-purchase-req *ngIf="selectedRequisitionId" [requisitionId]="selectedRequisitionId"></app-purchase-req>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple type="button" label="Close" class="p-button-text" (click)="displayPurchaseRequestModal = false"></button>
+  </ng-template>
+</p-dialog>
+
+
+<!-- Modal for displaying attachment preview -->
+<p-dialog [(visible)]="displayAttachmentModal" [modal]="true" [style]="{ width: '90vw', maxWidth: '800px' }" [resizable]="false">
+  <ng-template pTemplate="header">
+    <h3 class="text-lg font-bold">Attachment Preview</h3>
+  </ng-template>
+  <iframe *ngIf="selectedAttachmentUrl" [src]="selectedAttachmentUrl" width="100%" height="500px" style="border: none;"></iframe>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple type="button" label="Close" class="p-button-text" (click)="displayAttachmentModal = false"></button>
+  </ng-template>
+</p-dialog>

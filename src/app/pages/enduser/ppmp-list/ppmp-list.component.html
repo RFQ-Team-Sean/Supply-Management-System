@@ -1,0 +1,206 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+      <mat-card-title>Annual Procurement Plan (APP) with Budget</mat-card-title>
+      <mat-card-subtitle class="mat-body-1 mb-4">
+        Manage and review the annual procurement plan and budget allocations.
+      </mat-card-subtitle>
+  
+      <!-- Add New PPMP Button -->
+      <div class="mb-4">
+        <button mat-raised-button color="primary" (click)="openCreatePPMPDialog()">
+          <mat-icon>add</mat-icon> Create New PPMP Entry
+        </button>
+      </div>
+  
+      <!-- Budget Table -->
+      <p-table
+        [value]="budgets"
+        [tableStyle]="{ 'min-width': '60rem' }"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [loading]="loading"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Department</th>
+            <th>Fiscal Year</th>
+            <th>Total Budget</th>
+            <th>Allocated Amount</th>
+            <th>Remaining Balance</th>
+          </tr>
+        </ng-template>
+  
+        <ng-template pTemplate="body" let-budget>
+          <tr (click)="openDetailsDialog(budget)" style="cursor: pointer;">
+            <td>{{ budget.departmentName }}</td>
+            <td>{{ budget.fiscalYear }}</td>
+            <td>{{ budget.totalBudget | currency }}</td>
+            <td>{{ budget.allocatedAmount | currency }}</td>
+            <td>{{ budget.remainingBalance | currency }}</td>
+          </tr>
+        </ng-template>
+  
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">
+              <div class="flex flex-col items-center justify-center p-6">
+                <p class="text-gray-500">No budget data found.</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Create PPMP Dialog -->
+  <ng-template #createPpmpDialog>
+    <h2 mat-dialog-title>Create New PPMP Entry</h2>
+    <mat-dialog-content>
+      <form [formGroup]="ppmpForm" class="flex flex-col gap-4">
+        <!-- General Information -->
+        <div class="section">
+          <h3 class="section-title">General Information</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Department</mat-label>
+            <mat-select formControlName="department" required>
+              <mat-option *ngFor="let department of departments" [value]="department.id">
+                {{ department.name }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="ppmpForm.get('department')?.hasError('required')">
+              Department is required.
+            </mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Project Name</mat-label>
+            <input matInput formControlName="projectName" required />
+            <mat-error *ngIf="ppmpForm.get('projectName')?.hasError('required')">
+              Project Name is required.
+            </mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Fiscal Year</mat-label>
+            <input matInput formControlName="fiscalYear" type="number" required />
+            <mat-error *ngIf="ppmpForm.get('fiscalYear')?.hasError('required')">
+              Fiscal Year is required.
+            </mat-error>
+          </mat-form-field>
+        </div>
+  
+        <!-- Procurement Details -->
+        <div class="section">
+          <h3 class="section-title">Procurement Details</h3>
+          <div formArrayName="procurementItems">
+            <div
+              *ngFor="let item of procurementItems.controls; let i = index"
+              [formGroupName]="i"
+              class="procurement-item"
+            >
+              <mat-form-field appearance="outline">
+                <mat-label>Item Description</mat-label>
+                <input matInput formControlName="itemDescription" required />
+                <mat-error *ngIf="item.get('itemDescription')?.hasError('required')">
+                  Item Description is required.
+                </mat-error>
+              </mat-form-field>
+  
+              <mat-form-field appearance="outline">
+                <mat-label>Quantity</mat-label>
+                <input matInput formControlName="quantity" type="number" required />
+                <mat-error *ngIf="item.get('quantity')?.hasError('required')">
+                  Quantity is required.
+                </mat-error>
+              </mat-form-field>
+  
+              <mat-form-field appearance="outline">
+                <mat-label>Estimated Cost</mat-label>
+                <input matInput formControlName="estimatedCost" type="number" required />
+                <mat-error *ngIf="item.get('estimatedCost')?.hasError('required')">
+                  Estimated Cost is required.
+                </mat-error>
+              </mat-form-field>
+  
+              <mat-form-field appearance="outline">
+                <mat-label>Preferred Supplier</mat-label>
+                <input matInput formControlName="preferredSupplier" />
+              </mat-form-field>
+  
+              <mat-form-field appearance="outline">
+                <mat-label>Justification</mat-label>
+                <textarea matInput formControlName="justification" required></textarea>
+                <mat-error *ngIf="item.get('justification')?.hasError('required')">
+                  Justification is required.
+                </mat-error>
+              </mat-form-field>
+  
+              <button mat-icon-button color="warn" (click)="removeProcurementItem(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+  
+          <button mat-raised-button color="accent" (click)="addProcurementItem()">
+            <mat-icon>add</mat-icon> Add Item
+          </button>
+        </div>
+  
+        <!-- Budget Information -->
+        <div class="section">
+          <h3 class="section-title">Budget Information</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Total Budget</mat-label>
+            <input matInput formControlName="totalBudget" type="number" required />
+            <mat-error *ngIf="ppmpForm.get('totalBudget')?.hasError('required')">
+              Total Budget is required.
+            </mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Allocated Amount</mat-label>
+            <input matInput formControlName="allocatedAmount" type="number" required />
+            <mat-error *ngIf="ppmpForm.get('allocatedAmount')?.hasError('required')">
+              Allocated Amount is required.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Cancel</button>
+      <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="ppmpForm.invalid">
+        Save
+      </button>
+    </mat-dialog-actions>
+  </ng-template>
+  
+  <!-- Details Dialog -->
+  <ng-template #detailsDialog>
+    <h2 mat-dialog-title>PPMP Details</h2>
+    <mat-dialog-content>
+      <div *ngIf="selectedBudget">
+        <h3>General Information</h3>
+        <p><strong>Department:</strong> {{ selectedBudget.departmentName }}</p>
+        <p><strong>Fiscal Year:</strong> {{ selectedBudget.fiscalYear }}</p>
+        <p><strong>Total Budget:</strong> {{ selectedBudget.totalBudget | currency }}</p>
+        <p><strong>Allocated Amount:</strong> {{ selectedBudget.allocatedAmount | currency }}</p>
+        <p><strong>Remaining Balance:</strong> {{ selectedBudget.remainingBalance | currency }}</p>
+  
+        <h3>Procurement Items</h3>
+        <div *ngFor="let item of selectedBudget.procurementItems">
+          <p><strong>Item Description:</strong> {{ item.itemDescription }}</p>
+          <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+          <p><strong>Estimated Cost:</strong> {{ item.estimatedCost | currency }}</p>
+          <p><strong>Preferred Supplier:</strong> {{ item.preferredSupplier }}</p>
+          <p><strong>Justification:</strong> {{ item.justification }}</p>
+          <hr />
+        </div>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Close</button>
+    </mat-dialog-actions>
+  </ng-template>

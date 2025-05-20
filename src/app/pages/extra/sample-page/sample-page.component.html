@@ -1,0 +1,55 @@
+
+<div>
+  <div>
+    <h1 class="mt-5 mb-5 text-xl font-semibold">Pending Purchase Requests</h1>
+    <table mat-table [dataSource]="pendingRequests" class="cardWithShadow">
+
+      <!-- PR Number Column -->
+      <ng-container matColumnDef="number">
+        <th mat-header-cell *matHeaderCellDef> PR Number </th>
+        <td mat-cell *matCellDef="let pr"> {{pr.number}} </td>
+      </ng-container>
+
+      <!-- Requestor Column -->
+      <ng-container matColumnDef="requestor">
+        <th mat-header-cell *matHeaderCellDef> Requestor </th>
+        <td mat-cell *matCellDef="let pr"> {{pr.requestor}} </td>
+      </ng-container>
+
+      <!-- Department Column -->
+      <ng-container matColumnDef="department">
+        <th mat-header-cell *matHeaderCellDef> Department </th>
+        <td mat-cell *matCellDef="let pr"> {{pr.department}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="item">
+        <th mat-header-cell *matHeaderCellDef> Item/Model </th>
+        <td mat-cell *matCellDef="let pr"> {{pr.item}} </td>
+      </ng-container>
+
+      <!-- Amount Column -->
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef> Amount </th>
+        <td mat-cell *matCellDef="let pr"> {{pr.amount}} </td>
+      </ng-container>
+
+      <!-- Submission Date Column -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef> Submission Date </th>
+        <td mat-cell *matCellDef="let pr"> {{pr.date}} </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let pr" class="">
+          <button mat-raised-button color="primary" (click)="accept(pr)">Accept</button>
+          <button mat-raised-button color="warn" (click)="deny(pr)">Deny</button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</div>

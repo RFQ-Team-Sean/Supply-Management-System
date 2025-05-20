@@ -1,0 +1,287 @@
+<div class="p-fluid">
+    <!-- Table of RLSDDP Reports -->
+    <p-card header="Report of Lost, Stolen, Damaged or Destroyed Property (RLSDDP)" styleClass="p-shadow-3 mb-4">
+        <div class="flex flex-row items-center justify-between">
+            <p>Manage and generate Reports of Lost, Stolen, Damaged or Destroyed Property.</p>
+            <div class="p-field" style="text-align: right; margin-top: 1rem">
+                <p-button
+                    label="Create RLSDDP"
+                    (onClick)="showDialog()"
+                    styleClass="p-button-success"
+                    [size]="'small'"
+                    [outlined]="true"
+                ></p-button>
+            </div>
+        </div>
+        <p-table [value]="rlsddpReports" [paginator]="true" [rows]="5">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>RLSDDP No.</th>
+                    <th>Department</th>
+                    <th>Reported By</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rlsddp>
+                <tr>
+                    <td>{{ rlsddp.rlsddpNo }}</td>
+                    <td>{{ rlsddp.department }}</td>
+                    <td>{{ rlsddp.reportedBy }}</td>
+                    <td>{{ rlsddp.date | date: 'mediumDate' }}</td>
+                    <td>{{ rlsddp.type }}</td>
+                    <td>{{ rlsddp.status }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button icon="pi pi-pencil" 
+                                    (click)="editRLSDDP(rlsddp)"
+                                    styleClass="p-button-rounded p-button-text p-button-primary">
+                            </p-button>
+                            <p-button icon="pi pi-trash" 
+                                    (click)="deleteRLSDDP(rlsddp)"
+                                    styleClass="p-button-rounded p-button-text p-button-danger">
+                            </p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+
+    <!-- Dialog for RLSDDP Form -->
+    <p-dialog
+        header="{{ editingIndex === -1 ? 'Create' : 'Edit' }} Lost, Stolen, Damaged or Destroyed Property Report"
+        [(visible)]="displayDialog"
+        [modal]="true"
+        [style]="{ width: '80vw', maxWidth: '1200px' }"
+        [draggable]="false"
+        [resizable]="false"
+        appendTo="body"
+        >
+        <form [formGroup]="rlsddpForm" class="p-4" (ngSubmit)="saveRLSDDP()">
+            <!-- Main Form Section -->
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <!-- Left Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">RLSDDP No.</label>
+                        <input type="text" pInputText formControlName="rlsddpNo" class="w-full p-inputtext-sm" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Entity Name</label>
+                        <input type="text" pInputText formControlName="entityName" class="w-full p-inputtext-sm" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fund Cluster</label>
+                        <input type="text" pInputText formControlName="fundCluster" class="w-full p-inputtext-sm" />
+                    </div>
+                </div>
+
+                <!-- Middle Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" pInputText formControlName="department" class="w-full p-inputtext-sm" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Accountable Officer</label>
+                        <input type="text" pInputText formControlName="accountableOfficer" class="w-full p-inputtext-sm" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                        <input type="text" pInputText formControlName="designation" class="w-full p-inputtext-sm" />
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" pInputText formControlName="date" class="w-full p-inputtext-sm" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">PAR No.</label>
+                        <input type="text" pInputText formControlName="parNo" class="w-full p-inputtext-sm" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Property Status</label>
+                        <p-dropdown
+                            [options]="propertyStatuses"
+                            formControlName="propertyStatus"
+                            placeholder="Select Property Status"
+                            [style]="{'width':'100%'}"
+                            class="w-full"
+                        ></p-dropdown>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Police Notification Section -->
+            <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center mb-4">
+                    <p-checkbox formControlName="policeNotified" [binary]="true" styleClass="mr-2"></p-checkbox>
+                    <label class="text-sm font-medium text-gray-700">Police Notified</label>
+                </div>
+                <div class="grid grid-cols-2 gap-4" *ngIf="rlsddpForm.get('policeNotified')?.value">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Police Station</label>
+                        <input type="text" pInputText formControlName="policeStation" class="w-full p-inputtext-sm" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Notification Date</label>
+                        <input type="date" pInputText formControlName="policeNotificationDate" class="w-full p-inputtext-sm" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Section -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-lg font-medium text-gray-700">Items</label>
+                    <p-button 
+                        label="Add Item" 
+                        icon="pi pi-plus" 
+                        styleClass="p-button-sm p-button-success"
+                        (onClick)="showItemDialog()"
+                    ></p-button>
+                </div>
+                <p-table [value]="rlsddpForm.get('items')?.value || []" [scrollable]="true" [scrollHeight]="'300px'" styleClass="p-datatable-sm p-datatable-gridlines">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Property No.</th>
+                            <th>Description</th>
+                            <th>Date Acquired</th>
+                            <th>Acquisition Cost</th>
+                            <th>Property Status</th>
+                            <th>Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item let-i="rowIndex">
+                        <tr>
+                            <td>{{item.propertyNo}}</td>
+                            <td>{{item.description}}</td>
+                            <td>{{item.dateAcquired | date}}</td>
+                            <td>{{item.acquisitionCost | number:'1.2-2'}}</td>
+                            <td>{{item.propertyStatus}}</td>
+                            <td>{{item.remarks}}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <button pButton icon="pi pi-pencil" class="p-button-sm p-button-text" (click)="editItem(i)"></button>
+                                    <button pButton icon="pi pi-trash" class="p-button-sm p-button-text p-button-danger" (click)="deleteItem(i)"></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+
+            <!-- Circumstances Section -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Circumstances</label>
+                <input type="text" pInputText formControlName="circumstances" class="w-full p-inputtext-sm" />
+            </div>
+
+            <!-- Government ID Section -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Government ID No.</label>
+                    <input type="text" pInputText formControlName="govtIdNo" class="w-full p-inputtext-sm" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ID Date Issued</label>
+                    <input type="date" pInputText formControlName="govtIdDateIssued" class="w-full p-inputtext-sm" />
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex justify-end gap-2 mt-4">
+                <p-button
+                    label="Export to PDF"
+                    icon="pi pi-file-pdf"
+                    styleClass="p-button-warning p-button-sm"
+                    (onClick)="exportPdf()"
+                    [disabled]="rlsddpForm.invalid"
+                ></p-button>
+                <p-button
+                    label="Cancel"
+                    icon="pi pi-times"
+                    styleClass="p-button-secondary p-button-sm"
+                    (onClick)="displayDialog = false"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    icon="pi pi-check"
+                    styleClass="p-button-success p-button-sm"
+                    type="submit"
+                    [disabled]="rlsddpForm.invalid"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+
+    <!-- Item Dialog -->
+    <p-dialog
+        header="{{ editingItemIndex === -1 ? 'Add' : 'Edit' }} Item"
+        [(visible)]="displayItemDialog"
+        [modal]="true"
+        [style]="{ width: '50vw' }"
+        [draggable]="false"
+        [resizable]="false"
+        appendTo="body"
+    >
+        <form [formGroup]="itemsForm" class="p-4" (ngSubmit)="saveItem()">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Property No.</label>
+                    <input type="text" pInputText formControlName="propertyNo" class="w-full p-inputtext-sm" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date Acquired</label>
+                    <input type="date" pInputText formControlName="dateAcquired" class="w-full p-inputtext-sm" />
+                </div>
+                <div class="col-span-2 mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea pInputTextarea formControlName="description" class="w-full p-inputtext-sm" rows="2"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Acquisition Cost</label>
+                    <input type="number" pInputText formControlName="acquisitionCost" class="w-full p-inputtext-sm" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Property Status</label>
+                    <p-dropdown
+                        [options]="propertyStatuses"
+                        formControlName="propertyStatus"
+                        placeholder="Select Status"
+                        [style]="{'width':'100%'}"
+                        class="w-full"
+                    ></p-dropdown>
+                </div>
+                <div class="col-span-2 mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+                    <textarea pInputTextarea formControlName="remarks" class="w-full p-inputtext-sm" rows="2"></textarea>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex justify-end gap-2 mt-4">
+                <p-button
+                    label="Cancel"
+                    icon="pi pi-times"
+                    styleClass="p-button-secondary p-button-sm"
+                    (onClick)="displayItemDialog = false"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    icon="pi pi-check"
+                    styleClass="p-button-success p-button-sm"
+                    type="submit"
+                    [disabled]="itemsForm.invalid"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+</div> 

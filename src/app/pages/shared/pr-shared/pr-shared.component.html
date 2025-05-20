@@ -1,0 +1,17 @@
+<app-progress-table [config]="prRequests" />
+
+@if(prForm.show){
+  <app-dynamic-form [config]="prForm"></app-dynamic-form>
+}
+
+
+
+@if(rejectForm.show){
+  <app-dynamic-form [config]="rejectForm"></app-dynamic-form>
+}
+@if(approvalSignature.show){
+  <app-signature-modal [config]="approvalSignature" ></app-signature-modal>
+}
+@if(selfSignature.show){
+  <app-signature-modal [config]="selfSignature" ></app-signature-modal>
+}

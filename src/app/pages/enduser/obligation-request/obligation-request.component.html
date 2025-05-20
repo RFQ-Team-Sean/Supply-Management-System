@@ -1,0 +1,581 @@
+<p-card>
+    <h1 class="text-xl font-semibold">Obligation Request and Status</h1>
+    <p class="text-sm mb-3">Initiate Enduser ORS request</p>
+    
+    <div class="flex flex-row justify-between mb-2">
+        <p-iconfield styleClass="small">
+            <p-inputicon styleClass="pi pi-search smal  l"/>
+            <input size="" type="text" pInputText placeholder="Search" [(ngModel)]="searchQuery" (input)="filterRequests()"/>
+            <!-- <p-inputicon styleClass="pi pi-spinner pi-spin" /> -->
+        </p-iconfield>
+        <p-button label="Create ORS" icon="pi pi-plus" [outlined]="true" (click)="showDialog()"></p-button>
+    </div>
+
+    <div class="relative">
+
+        <div *ngIf="loading" class="table-skeleton">
+            <p-skeleton width="100%" height="40px" styleClass="mb-2"></p-skeleton> <!-- Header -->
+            <p-skeleton width="100%" height="40px" styleClass="mb-2" *ngFor="let _ of [].constructor(5)"></p-skeleton>
+        </div>
+
+        <!-- ORS Table -->
+        <p-table *ngIf="!loading" [value]="filteredORSList" responsiveLayout="scroll" [paginator]="true" [rows]="5">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>ORS ID</th>
+                    <th>Requesting Office</th>
+                    <th>Payee</th>
+                    <th>Fund Source</th>
+                    <th>Account Code</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Request Date</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ors>
+                <tr (click)="showPreviewDialog(ors)" style="cursor: pointer;" class="hover:bg-gray-100">
+                    <td>{{ ors.id }}</td>
+                    <td>{{ ors.requestingOffice }}</td>
+                    <td>{{ ors.payee }}</td>
+                    <td>{{ getFundSourceName(ors.fundSourceId) }}</td>
+                    <td>{{ ors.accountCode }}</td>
+                    <td>{{ ors.totalAmount | currency:'PHP' }}</td>
+                    <td>
+                        <span [ngClass]="getStatusClass(ors.status)" class="px-3 py-1 rounded-full text-white">
+                            {{ ors.status }}
+                        </span>
+                    </td>
+                    <td>{{ ors.date }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+    
+
+    
+</p-card>
+
+
+<p-toast position="bottom-right"></p-toast>
+<p-confirmDialog></p-confirmDialog> 
+
+<!-- CREATE ORS -->
+<p-dialog header="Create Obligation Request" [(visible)]="displayDialog" [modal]="true" [closable]="true" [style]="{width:'60vw'}">
+    <div class="grid gap-3">
+        <div class="flex flex-col gap-1">
+            <label for="contract">Select Contract</label>
+            <p-dropdown
+            id="contract"
+            [options]="contracts"
+            [(ngModel)]="selectedContract"
+            (onChange)="onContractChange($event)"
+            placeholder="Select a contract"
+            optionLabel="label"
+            optionValue="value"
+            [style]="{width: '100%'}"
+            ></p-dropdown>
+        </div>
+
+        <div class="flex flex-row w-full gap-4">
+            <div class="flex flex-col gap-1 w-1/4 grow">
+                <label>Serial No.</label>
+                <input pInputText [ngModel]="ors.serialNo" readonly />
+            </div>
+            <div class="flex flex-col gap-1 w-1/4  grow">
+                <label>Date</label>
+                <p-calendar [ngModel]="ors.requestDate" [disabled]="true" dateFormat="yy-mm-dd" />
+            </div>
+            <div class="flex flex-col gap-1 w-1/2 grow">
+                <label>Fund Cluster</label>
+                <input pInputText [ngModel]="getFundSourceName(ors.fundSourceId)" readonly />
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label>Entity Name</label>
+            <input pInputText [ngModel]="ors.entityName" readonly />
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label>Payee</label>
+            <input pInputText [ngModel]="ors.payee" readonly />
+        </div>
+        <div class="flex flex-col gap-1">
+            <label>Requesting Office</label>
+            <input pInputText [ngModel]="ors.requestingOffice" readonly />
+        </div>
+        <div class="flex flex-col gap-1">
+            <label>Address</label>
+            <input pInputText [ngModel]="ors.address" readonly />
+        </div>
+        <div class="flex flex-col gap-1">
+            <label>Responsibility Center</label>
+            <input pInputText [ngModel]="ors.responsibilityCenter" readonly />
+        </div>
+
+        <!-- <div class="flex flex-col gap-1">
+            <label>Particulars</label>
+            <textarea pTextarea [ngModel]="ors.particulars"></textarea>
+        </div> -->
+
+        <div>
+            <div class="w-full flex flex-row items-center">
+                <div class="w-1/4">
+                    <span>Particulars</span>
+                </div>
+                <div class="w-1/4">
+                    <span>MFO/PAP</span>
+                </div>
+                <div class="w-1/4 mr-3">
+                    <span>UACS Object Code</span>
+                </div>
+                <div class="w-1/4 mr-2">
+                    <span>Amount</span>
+                </div>
+            </div>
+            <div *ngFor="let field of fields; let i = index" class="flex items-center gap-4 mb-2">
+                <textarea
+                    type="text"
+                    pInputText
+                    [(ngModel)]="fields[i].particulars"
+                    placeholder="Enter particulars"
+                    class="flex-1 p-4 mr-2 text-lg"
+                    [ngModelOptions]="{standalone: true}"
+                ></textarea>
+                <input
+                    type="text"
+                    pInputText
+                    [(ngModel)]="fields[i].mfoPap"
+                    placeholder="Enter MFO/PAP"
+                    class="flex-1 p-4 mr-2 text-lg"
+                    [ngModelOptions]="{standalone: true}"
+                />
+                <input
+                    type="text"
+                    pInputText
+                    [(ngModel)]="fields[i].uacsObjectCode"
+                    placeholder="Enter UACS Object Code"
+                    class="flex-1 p-4 mr-2 text-lg"
+                    [ngModelOptions]="{standalone: true}"
+                />
+                <input
+                    type="text"
+                    pInputText
+                    [(ngModel)]="fields[i].amount"
+                    placeholder="Enter amount"
+                    class="flex-1 p-4 text-lg"
+                    [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="updateFormValues()"
+                />
+                <button
+                    pButton
+                    pRipple
+                    size="small"
+
+                    [icon]="i === fields.length - 1 ? 'pi pi-plus' : 'pi pi-trash'"
+                    (click)="i === fields.length - 1 ? addField() : removeField(i)"
+                    class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                ></button>
+            </div>
+        </div>
+
+        <!-- <div class="flex flex-col gap-1">
+            <label>MFO/PAP</label>
+            <input pInputText [ngModel]="ors.mfoPap" readonly />
+        </div>
+        <div class="flex flex-col gap-1">
+            <label>UACS Object Code</label>
+            <input pInputText [ngModel]="ors.uacsObjectCode" readonly />
+        </div>
+        <div class="flex flex-col gap-1">
+            <label>Amount</label>
+            <p-inputNumber [ngModel]="ors.amount" mode="currency" currency="PHP" readonly />
+        </div> -->
+
+        <div class="flex flex-col gap-1">
+            <label>Supporting Documents</label>
+            <div class="mb-2">
+                <div *ngFor="let doc of supportingDocsChecklist" class="flex items-center flex-row gap-2 py-1">
+                    <div class="flex items-center gap-4">
+                        <p-checkbox
+                            [(ngModel)]="doc.checked"
+                            [binary]="true"
+                            [disabled]="true"
+                            [ngClass]="{'text-green-600': doc.checked, 'text-red-600': !doc.checked}"
+                            [ngModelOptions]="{ standalone: true }">
+                        </p-checkbox>
+                        <span [ngClass]="{'text-green-600': doc.checked, 'text-red-600': !doc.checked}">{{ doc.name }}</span>
+                    </div>
+                    <span *ngIf="doc.checked && doc.fileName">
+                        <p-button
+                            icon="pi pi-eye"
+                            [text]="true"
+                            (click)="viewFile(doc.fileName)"
+                            title="View File"
+                            class="p-button-sm"
+                        ></p-button>
+                    </span>
+                </div>
+            </div>
+            
+            <label for="additionalDocs"> Upload additional files. (ex. Bidding Documents, etc.)</label>
+            <p-fileUpload
+                name="additionalDocs"
+                (onUpload)="onFileUpload($event)"
+                (onRemove)="onFileRemove($event)"
+                multiple="true"
+                accept=".pdf,.doc,.docx"
+                maxFileSize="10000000"
+                [customUpload]="true"   
+                [auto]="true"
+                chooseLabel="Upload"
+                [files]="additionalDocs"
+            >
+            <ng-template pTemplate="content">
+                <ul *ngIf="additionalDocs && additionalDocs.length > 0">
+                    <li *ngFor="let file of additionalDocs" class="flex items-center justify-between py-1">
+                        <span>{{ file.name }}</span>
+                        <p-button 
+                            icon="pi pi-times" 
+                            [text]="true" 
+                            [severity]="'danger'" 
+                            (click)="onFileRemove($event)" 
+                            title="Remove File" 
+                            class="p-button-sm"
+                            >
+                        </p-button>
+                    </li>
+                </ul>
+            </ng-template>
+            </p-fileUpload>
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+        <p-button label="Cancel" icon="pi pi-times" [severity]="'secondary'" (click)="displayDialog = false"></p-button>
+        <p-button label="Submit" icon="pi pi-check" [severity]="'primary'" (click)="submitORS()"></p-button>
+    </div>
+</p-dialog>
+
+<p-dialog header="ORS Preview" [(visible)]="previewDialogVisible" [modal]="true" [closable]="true" [style]="{width:'60vw'}">
+    <div *ngIf="selectedORS" class="grid gap-3">
+        <!-- Serial No, Date, Fund Cluster -->
+        <div class="flex flex-row w-full gap-4">
+            <div class="flex flex-col gap-1 w-1/2 grow">
+                <label>Serial No.</label>
+                <input pInputText [ngModel]="selectedORS.serialNo" readonly />
+            </div>
+            <div class="flex flex-col gap-1 w-1/2 grow">
+                <label for="statusPreview">Status</label>
+                <input
+                    pInputText
+                    readonly
+                    id="statusPreview"
+                    [ngModel]="selectedORS.status"
+                />
+            </div>    
+        </div>
+
+        <div class="flex flex-row w-full gap-4">
+            <div class="flex flex-col gap-1 w-1/2 grow">
+                <label>Fund Cluster</label>
+                <input pInputText [ngModel]="getFundSourceName(selectedORS.fundSourceId)" readonly />
+            </div>
+            <div class="flex flex-col gap-1 w-1/2 grow">
+                <label>Date</label>
+                <p-calendar [ngModel]="selectedORS.requestDate" [disabled]="true" dateFormat="yy-mm-dd" class="w-full"/>
+            </div>
+        </div>
+
+        <!-- Requesting Office -->
+        <div class="flex flex-col gap-1">
+            <label for="requestingOfficePreview">Requesting Office</label>
+            <input
+                pInputText
+                readonly
+                id="requestingOfficePreview"
+                [ngModel]="selectedORS.requestingOffice"
+                name="requestingOfficePreview"
+            />
+        </div>
+
+        <!-- Payee/Supplier Name -->
+        <div class="flex flex-col gap-1">
+            <label for="payeePreview">Payee/Supplier</label>
+            <input 
+                pInputText
+                readonly
+                id="payeePreview"
+                [ngModel]="selectedORS.payee"
+                name="payeePreview"
+            />
+        </div>
+
+        <!-- Entity Name -->
+        <div class="flex flex-col gap-1">
+            <label>Entity Name</label>
+            <input pInputText [ngModel]="selectedORS.entityName" readonly />
+        </div>
+
+        <!-- Address -->
+        <div class="flex flex-col gap-1">
+            <label>Address</label>
+            <input pInputText [ngModel]="selectedORS.address" readonly />
+        </div>
+
+        <!-- Responsibility Center -->
+        <div class="flex flex-col gap-1">
+            <label>Responsibility Center</label>
+            <input pInputText [ngModel]="selectedORS.responsibilityCenter" readonly />
+        </div>
+
+        <!-- Dynamic Fields Table -->
+        <p-table [value]="selectedORS.items" class="border rounded-lg">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Particulars</th>
+                    <th>MFO/PAP</th>
+                    <th>UACS Object Code</th>
+                    <th>Amount</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+                <tr>
+                    <td>{{ item.particulars }}</td>
+                    <td>{{ item.mfoPap }}</td>
+                    <td>{{ item.uacsObjectCode }}</td>
+                    <td>{{ item.amount | currency:'PHP' }}</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="footer">
+                <tr>
+                    <td colspan="3"><strong>Total Amount</strong></td>
+                    <td><strong>{{ selectedORS.totalAmount | currency:'PHP' }}</strong></td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+        <!-- Account Code -->
+        <div class="flex flex-col gap-1">
+            <label for="accountCodePreview">Charge to Account Code</label>
+            <input
+                pInputText
+                readonly
+                id="accountCodePreview"
+                [ngModel]="selectedORS.accountCode"
+            />
+        </div>
+
+        <!-- Date of Request -->
+        <div class="flex flex-col gap-1">
+            <label for="requestDatePreview">Date of Request</label>
+            <input
+                pInputText
+                readonly
+                id="requestDatePreview"
+                [ngModel]="selectedORS.date"
+            />
+        </div>
+
+        <!-- Supporting Documents Table -->
+        <div class="flex flex-col gap-1">
+            <label>Supporting Documents</label>
+            <p-table [value]="selectedORS.supportingDocs" class="border rounded-xl">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>File Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-fileName>
+                    <tr>
+                        <td>{{ fileName }}</td>
+                        <td>
+                            <p-button 
+                                *ngIf="fileName === (selectedORS.serialNo + '.pdf') && pdfBlobUrl" 
+                                icon="pi pi-download" 
+                                [text]="true" 
+                                (click)="downloadPDF(fileName)" 
+                                title="Download PDF" 
+                                class="p-button-sm">
+                            </p-button>
+                            <p-button 
+                                *ngIf="fileName !== (selectedORS.serialNo + '.pdf') || !pdfBlobUrl" 
+                                icon="pi pi-eye" 
+                                [text]="true" 
+                                (click)="viewFile(fileName)" 
+                                title="View File" 
+                                class="p-button-sm">
+                            </p-button>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                    <td>No supporting documents available.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+        <button 
+            pButton
+            label="Cancel" 
+            icon="pi pi-times" 
+            [severity]="'secondary'" 
+            (click)="previewDialogVisible = false">
+        </button>
+        <button 
+            pButton
+            label="Delete" 
+            icon="pi pi-trash" 
+            [severity]="'danger'" 
+            (click)="selectedORS && deleteORS(selectedORS)"
+            [disabled]="!selectedORS">
+        </button>
+    </div>
+</p-dialog>
+
+<!-- PDF TEMPLATE -->
+<div #pdfContent class="absolute left-[-9999px] p-10">
+    <div class="flex text-center justify-center mb-3">
+        <h1 class=" text-lg font-bold">Appendix 11</h1>
+    </div>
+    <div class="w-[210mm] h-[35mm] flex flex-row">
+        <div class="flex flex-col gap-4 w-2/3 mx-auto border border-black justify-center">
+            <h2 class="text-center font-bold mb-4 text-lg">OBLIGATION REQUEST AND STATUS</h2>
+            <div class="flex flex-col text-center">
+                <span class="underline-offset-8 underline font-bold text-base">{{ selectedORS?.entityName || ors.entityName }}</span>
+                <p class="">Entity Name</p>
+            </div>  
+        </div>
+        <div class="w-1/3 border border-black p-6">
+            <table>
+                <tr class="flex flex-col gap-4 text-sm">
+                    <td class="">Serial No.: <span class="font-bold underline">{{ selectedORS?.serialNo || ors.serialNo }}</span></td>
+                    <td class="">Date: <span class="font-bold underline">{{ selectedORS?.date || ors.date }}</span></td>
+                    <td class="">Fund Cluster: <span class="font-bold underline">{{ getFundSourceName(selectedORS?.fundSourceId || ors.fundSourceId) || '' }}</span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="w-[210mm] font-sans text-sm">
+  
+        <table class="w-full h-[35mm] border-collapse border border-black p-4">
+            <tr>
+                <td class="border-b border-black p-2">Payee: {{ selectedORS?.payee || ors.payee }}</td>
+            </tr>
+            <tr>
+                <td class="border-b border-black p-2">Office: {{ selectedORS?.requestingOffice || ors.requestingOffice }}</td>
+            </tr>
+            <tr>
+                <td class="p-2">Address: {{ selectedORS?.address || ors.address }}</td>
+            </tr>
+        </table>
+  
+        <table class="w-full border-collapse border border-black mt-4">
+            <thead>
+                <tr class="border border-black">
+                    <th class="border border-black p-2">Responsibility Center</th>
+                    <th class="border border-black p-2">Particulars</th>
+                    <th class="border border-black p-2">MFO/PAP</th>
+                    <th class="border border-black p-2">UACS Object Code</th>
+                    <th class="border border-black p-2">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of ors.items" class="border border-black">
+                    <td class="border border-black p-2">{{ ors.responsibilityCenter }}</td>
+                    <td class="border border-black p-2">{{ item.particulars }}</td>
+                    <td class="border border-black p-2">{{ item.mfoPap }}</td>
+                    <td class="border border-black p-2">{{ item.uacsObjectCode }}</td>
+                    <td class="border border-black p-2">{{ item.amount | number:'1.2-2' }}</td>
+                </tr>
+                <tr class="border border-black">
+                    <td colspan="4" class="border border-black p-2 text-right font-bold">Total</td>
+                    <td class="border border-black p-2 font-bold">{{ calculateTotalAmount(ors.items) | number:'1.2-2' }}</td>
+                </tr>
+            </tbody>
+        </table>
+  
+        <table class="w-full h-[50mm] border-collapse border border-black mt-4 p-10">
+            <tr>
+                <td class="border border-black p-2 w-1/2 vertical-top">
+                    <strong class="font-bold">A.</strong> Certified: Charges to appropriation/allotment are necessary, lawful and under my direct supervision and supporting documents valid, proper and legal
+                    <br><br>
+                    Signature: ____________________<br>
+                    Printed Name: _________________<br>
+                    Position: <div class="flex text-center items-start">____________________<br>Head, Requesting Office/Authorized Representative</div>
+                    Date: ____________________
+                </td>
+                <td class="border border-black p-2 w-1/2 vertical-top">
+                    <strong class="font-bold">B.</strong> Certified: Allotment available and obligated for the purpose/adjustment necessary as indicated above
+                    <br><br>
+                    Signature: ____________________<br>
+                    Printed Name: _________________<br>
+                    Position: <div class="flex text-center items-start">____________________<br>Head, Budget Division/Unit/Authorized Representative</div>
+                    Date: ____________________
+                </td>
+            </tr>
+        </table>
+  
+        <table class="w-full min-h-[60mm] border-collapse border border-black mt-4">
+            <table class="w-full border-collapse border border-black">
+                <!-- Define column widths -->
+                <colgroup>
+                    <col style="width: 12.5%;">
+                    <col style="width: 12.5%;">
+                    <col style="width: 12.5%;">
+                    <col style="width: 12.5%;">
+                    <col style="width: 12.5%;">
+                    <col style="width: 12.5%;">
+                    <col style="width: 12.5%;">
+                    <col style="width: 12.5%;">
+                </colgroup>
+                <tr>
+                    <td class="border-b border-r border-black p-2 font-bold">C.</td>
+                    <td class="border-b border-black p-2 text-center font-bold text-lg" colspan="7">STATUS OF OBLIGATION</td>
+                </tr>
+                <!-- First Header Row: "Reference" and "Amount" side by side -->
+                <tr>
+                    <th class="border-b border-r border-black py-3 p-2" colspan="3">Reference</th>
+                    <th class="border-b border-black p-2 py-3" colspan="5">Amount</th>
+                </tr>
+                <!-- Second Header Row: Column titles and "Balance" under "Amount" -->
+                <tr>
+                    <th class=" border-r border-black p-2">Date</th>
+                    <th class=" border-r border-black p-2">Particulars</th>
+                    <th class=" border-r border-black p-2">ORS/JEV/Check/ADA/TRA No.</th>
+                    <th class=" border-r border-black p-2">Obligation (a)</th>
+                    <th class=" border-r border-black p-2">Payable (b)</th>
+                    <th class="border-r border-black p-2">Payment (c)</th>
+                    <th class=" border-b border-black p-2" colspan="2">Balance</th>
+                </tr>
+                <!-- Third Header Row: Sub-columns under "Balance" -->
+                <tr>
+                    <th class="border-b border-r border-black p-2"></th>
+                    <th class="border-b border-r border-black p-2"></th>
+                    <th class="border-b border-r border-black p-2"></th>
+                    <th class="border-b border-r border-black p-2"></th>
+                    <th class="border-b border-r border-black p-2"></th>
+                    <th class="border-b border-r border-black p-2"></th>
+                    <th class="border-b border-r border-black p-2">Not Yet Due (a-b)</th>
+                    <th class="border-b border-black p-2">Due and Demandable (b-c)</th>
+                </tr>
+                <!-- Data Rows -->
+                <tr *ngFor="let ref of selectedORS?.obligationReferences || ors.obligationReferences">
+                    <td class="border-b border-r border-black p-6">{{ ref.date }}</td>
+                    <td class="border-b border-r border-black p-6">{{ ref.particulars }}</td>
+                    <td class="border-b border-r border-black p-6">{{ ref.refNo }}</td>
+                    <td class="border-b border-r border-black p-6">{{ selectedORS?.obligationAmount || ors.obligationAmount || 0 }}</td>
+                    <td class="border-b border-r border-black p-6">{{ selectedORS?.payableNotYetDue || ors.payableNotYetDue || 0 }}</td>
+                    <td class="border-b border-r border-black p-6">{{ selectedORS?.paymentAmount || ors.paymentAmount || 0 }}</td>
+                    <td class="border-b border-r border-black p-6">{{ (selectedORS?.obligationAmount || ors.obligationAmount || 0) - (selectedORS?.payableNotYetDue || ors.payableNotYetDue || 0) }}</td>
+                    <td class="border-b border-black p-6">{{ (selectedORS?.payableNotYetDue || ors.payableNotYetDue || 0) - (selectedORS?.paymentAmount || ors.paymentAmount || 0) }}</td>
+                </tr>
+            </table>
+        </table>
+    </div>
+</div>

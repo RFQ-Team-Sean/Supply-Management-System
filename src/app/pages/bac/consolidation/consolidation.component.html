@@ -1,0 +1,70 @@
+<p-card class="">
+    <h1 class="font-semibold text-xl">Approved Annual Procurement Plans</h1>
+    <div class="flex justify-between mb-4">
+        <p>Review Annual Procurement Plans here.</p>
+        <div class="relative w-[300px]">
+            <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+            <input
+            pInputText
+            type="text"
+            placeholder="Search Procurement Plans"
+            class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:ml-6"
+            />
+        </div>
+    </div>
+    <ng-template pTemplate="content">
+        <p-table [value]="documents" class="w-full">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>ID</th>
+                    <th>Document Name</th>
+                    <th>Type</th>
+                    <th>Submission Date</th>
+                    <th>Submitted By</th>
+                    <th>Reviewer</th>
+                    <th>Status</th>
+                    <th>Approval Date</th>
+                    <th>PPMP</th>
+                    <th>APP</th>
+                    <th>Actions</th>    
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-doc>
+                <tr>
+                    <td>{{ doc.id }}</td>
+                    <td>{{ doc.name }}</td>
+                    <td>{{ doc.type }}</td>
+                    <td>{{ doc.submissionDate }}</td>
+                    <td>{{ doc.submittedBy }}</td>
+                    <td>{{ doc.reviewer }}</td>
+                    <td>
+                        <span [ngClass]="getStatusClass(doc.status)" class="text-white">{{ doc.status }}</span>
+                    </td>
+                    <td>{{ doc.approvalDate || '-' }}</td>
+                    <td>
+                        <div *ngFor="let attachment of doc.ppmpAttachment" class="mb-2">
+                            <a href="{{ attachment }}" target="_blank">
+                                <p-button [severity]="'secondary'" pTooltip="{{doc.ppmpAttachment}}" icon="pi pi-file-pdf" [outlined]="true" styleClass="p-button-sm"></p-button>
+                            </a><br>
+                        </div>
+                    </td>
+                    <td>
+                        <div *ngFor="let attachment of doc.appAttachment" class="mb-2">
+                            <a href="{{ attachment }}" target="_blank">
+                                <p-button [severity]="'secondary'" pTooltip="{{doc.appAttachment}}" icon="pi pi-file-pdf" [outlined]="true" styleClass="p-button-sm"></p-button>
+                            </a><br>
+                        </div>
+                    </td>
+                    <td>
+                    <button pButton pTooltip="Post to PhilGEPS" tooltipPosition="top"
+                            icon="pi pi-check" class="p-button-success p-button-sm" [rounded]="true" [outlined]="true"
+                            (click)="approveDocument(doc)">
+                    </button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </ng-template>
+</p-card>
+
+<p-toast position="bottom-right"></p-toast>

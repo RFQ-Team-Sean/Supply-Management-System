@@ -1,0 +1,267 @@
+<div class="p-fluid">
+    <!-- Table of RPCPPE Reports -->
+    <p-card header="Report on the Physical Count of Property, Plant and Equipment (RPCPPE)" styleClass="p-shadow-3 mb-4">
+        <div class="flex flex-row items-center justify-between">
+            <p>Manage and generate Physical Count of Property, Plant and Equipment Reports.</p>
+            <div class="p-field" style="text-align: right; margin-top: 1rem">
+                <p-button
+                    label="Create RPCPPE"
+                    (onClick)="showDialog()"
+                    styleClass="p-button-success"
+                    [size]="'small'"
+                    [outlined]="true"
+                ></p-button>
+            </div>
+        </div>
+        <p-table [value]="rpcppeReports" [paginator]="true" [rows]="5">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>RPCPPE No.</th>
+                    <th>Entity Name</th>
+                    <th>Accountable Officer</th>
+                    <th>Date</th>
+                    <th>Total Value</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rpcppe>
+                <tr>
+                    <td>{{ rpcppe.rpcppeNo || rpcppe.rpcppe_no }}</td>
+                    <td>{{ rpcppe.entityName || rpcppe.entity_name }}</td>
+                    <td>{{ rpcppe.accountableOfficer || rpcppe.accountable_officer }}</td>
+                    <td>{{ rpcppe.date | date: 'mediumDate' }}</td>
+                    <td>{{ (rpcppe.totalValue || rpcppe.total_value) | number:'1.2-2' }}</td>
+                    <td>{{ rpcppe.status }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button icon="pi pi-pencil" 
+                                    (click)="editRPCPPE(rpcppe)"
+                                    styleClass="p-button-rounded p-button-text p-button-primary">
+                            </p-button>
+                            <p-button icon="pi pi-trash" 
+                                    (click)="deleteRPCPPE(rpcppe)"
+                                    styleClass="p-button-rounded p-button-text p-button-danger">
+                            </p-button>
+                            <p-button icon="pi pi-file-pdf"
+                                    (click)="exportPdf(rpcppe)"
+                                    styleClass="p-button-rounded p-button-text p-button-warning">
+                            </p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="7" class="text-center">No RPCPPE reports found.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+
+    <!-- Dialog for RPCPPE Form -->
+    <p-dialog
+        header="{{ editingIndex === -1 ? 'Create' : 'Edit' }} Physical Count of Property, Plant and Equipment Report"
+        [(visible)]="displayDialog"
+        [modal]="true"
+        [style]="{ width: '80vw', maxWidth: '1200px' }"
+        [draggable]="false"
+        [resizable]="false"
+        appendTo="body"
+        >
+        <form [formGroup]="rpcppeForm" class="p-4" (ngSubmit)="saveRPCPPE()">
+            <!-- Main Form Section -->
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <!-- Left Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">RPCPPE No.</label>
+                        <input type="text" pInputText formControlName="rpcppeNo" class="w-full p-inputtext-sm" [value]="rpcppeForm.get('rpcppeNo')?.value" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Entity Name</label>
+                        <input type="text" pInputText formControlName="entityName" class="w-full p-inputtext-sm" [value]="rpcppeForm.get('entityName')?.value" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fund Cluster</label>
+                        <input type="text" pInputText formControlName="fundCluster" class="w-full p-inputtext-sm" [value]="rpcppeForm.get('fundCluster')?.value" />
+                    </div>
+                </div>
+
+                <!-- Middle Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Accountable Officer</label>
+                        <input type="text" pInputText formControlName="accountableOfficer" class="w-full p-inputtext-sm" [value]="rpcppeForm.get('accountableOfficer')?.value" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                        <input type="text" pInputText formControlName="designation" class="w-full p-inputtext-sm" [value]="rpcppeForm.get('designation')?.value" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Accountability Date</label>
+                        <input type="date" pInputText formControlName="accountabilityDate" class="w-full p-inputtext-sm" [value]="rpcppeForm.get('accountabilityDate')?.value" />
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-span-1">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" pInputText formControlName="date" class="w-full p-inputtext-sm" [value]="rpcppeForm.get('date')?.value" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Total Value</label>
+                        <input type="number" pInputText formControlName="totalValue" class="w-full p-inputtext-sm" [readonly]="true" [value]="rpcppeForm.get('totalValue')?.value" style="pointer-events: none; cursor: default;" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+                        <textarea pInputTextarea formControlName="remarks" class="w-full p-inputtext-sm" rows="3" [value]="rpcppeForm.get('remarks')?.value"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Section -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-lg font-medium text-gray-700">Items</label>
+                    <p-button 
+                        label="Add Item" 
+                        icon="pi pi-plus" 
+                        styleClass="p-button-sm p-button-success"
+                        (onClick)="showItemDialog()"
+                    ></p-button>
+                </div>
+                <p-table [value]="rpcppeForm.get('items')?.value || []" [scrollable]="true" [scrollHeight]="'300px'" styleClass="p-datatable-sm p-datatable-gridlines">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Article</th>
+                            <th>Description</th>
+                            <th>Property No.</th>
+                            <th style="width: 100px">Quantity</th>
+                            <th style="width: 120px">Unit Value</th>
+                            <th style="width: 120px">Total Value</th>
+                            <th style="width: 100px">Shortage Qty</th>
+                            <th style="width: 120px">Shortage Value</th>
+                            <th>Remarks</th>
+                            <th style="width: 100px">Actions</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item let-i="rowIndex">
+                        <tr>
+                            <td>{{item.article}}</td>
+                            <td>{{item.description}}</td>
+                            <td>{{item.propertyNo || item.property_no}}</td>
+                            <td class="text-right">{{item.quantity}}</td>
+                            <td class="text-right">{{(item.unitValue || item.unit_value) | number:'1.2-2'}}</td>
+                            <td class="text-right">{{(item.totalValue || item.total_value) | number:'1.2-2'}}</td>
+                            <td class="text-right">{{item.shortageQty || item.shortage_qty}}</td>
+                            <td class="text-right">{{(item.shortageValue || item.shortage_value) | number:'1.2-2'}}</td>
+                            <td>{{item.remarks}}</td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <button pButton icon="pi pi-pencil" class="p-button-sm p-button-text" (click)="editItem(i)"></button>
+                                    <button pButton icon="pi pi-trash" class="p-button-sm p-button-text p-button-danger" (click)="deleteItem(i)"></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="10" class="text-center">No items added yet.</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex justify-end gap-2 mt-4">
+                <p-button
+                    label="Export to PDF"
+                    icon="pi pi-file-pdf"
+                    styleClass="p-button-warning p-button-sm"
+                    (onClick)="exportPdf()"
+                    [disabled]="rpcppeForm.invalid"
+                ></p-button>
+                <p-button
+                    label="Cancel"
+                    icon="pi pi-times"
+                    styleClass="p-button-secondary p-button-sm"
+                    (onClick)="cancelDialog()"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    icon="pi pi-check"
+                    styleClass="p-button-success p-button-sm"
+                    type="submit"
+                    [disabled]="rpcppeForm.invalid"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+
+    <!-- Item Dialog -->
+    <p-dialog
+        header="{{ editingItemIndex === -1 ? 'Add' : 'Edit' }} Item"
+        [(visible)]="displayItemDialog"
+        [modal]="true"
+        [style]="{ width: '50vw' }"
+        [draggable]="false"
+        [resizable]="false"
+        appendTo="body"
+    >
+        <form [formGroup]="itemsForm" class="p-4" (ngSubmit)="saveItem()">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Article</label>
+                    <input type="text" pInputText formControlName="article" class="w-full p-inputtext-sm" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Property No.</label>
+                    <input type="text" pInputText formControlName="propertyNo" class="w-full p-inputtext-sm" />
+                </div>
+                <div class="col-span-2 mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea pInputTextarea formControlName="description" class="w-full p-inputtext-sm" rows="2"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" pInputText formControlName="quantity" class="w-full p-inputtext-sm" min="0" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Unit Value</label>
+                    <input type="number" pInputText formControlName="unitValue" class="w-full p-inputtext-sm" min="0" step="0.01" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Shortage Quantity</label>
+                    <input type="number" pInputText formControlName="shortageQty" class="w-full p-inputtext-sm" min="0" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Shortage Value</label>
+                    <input type="number" pInputText formControlName="shortageValue" class="w-full p-inputtext-sm" [readonly]="true" />
+                </div>
+                <div class="col-span-2 mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+                    <textarea pInputTextarea formControlName="remarks" class="w-full p-inputtext-sm" rows="2"></textarea>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex justify-end gap-2 mt-4">
+                <p-button
+                    label="Cancel"
+                    icon="pi pi-times"
+                    styleClass="p-button-secondary p-button-sm"
+                    (onClick)="displayItemDialog = false"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    icon="pi pi-check"
+                    styleClass="p-button-success p-button-sm"
+                    type="submit"
+                    [disabled]="itemsForm.invalid"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+</div> 

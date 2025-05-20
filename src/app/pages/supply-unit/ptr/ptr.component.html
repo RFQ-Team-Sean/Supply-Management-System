@@ -1,0 +1,214 @@
+<div class="p-fluid">
+    <!-- Table of PTR Reports -->
+    <p-card header="Property Transfer Report (PTR)" styleClass="p-shadow-3 mb-4">
+        <div class="flex flex-row items-center justify-between">
+            <p>Manage and generate Property Transfer Reports.</p>
+            <div class="p-field" style="text-align: right; margin-top: 1rem">
+                <p-button
+                    label="Create PTR"
+                    (onClick)="showDialog()"
+                    styleClass="p-button-success"
+                    [size]="'small'"
+                    [outlined]="true"
+                ></p-button>
+            </div>
+        </div>
+        <p-table [value]="ptrReports" [paginator]="true" [rows]="5">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>PTR No.</th>
+                    <th>From Department</th>
+                    <th>To Department</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ptr>
+                <tr>
+                    <td>{{ ptr.ptrNo }}</td>
+                    <td>{{ ptr.fromDepartment }}</td>
+                    <td>{{ ptr.toDepartment }}</td>
+                    <td>{{ ptr.date | date: 'mediumDate' }}</td>
+                    <td>{{ ptr.status }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button icon="pi pi-pencil" 
+                                    (click)="editPTR(ptr)"
+                                    styleClass="p-button-rounded p-button-text p-button-primary">
+                            </p-button>
+                            <p-button icon="pi pi-trash" 
+                                    (click)="deletePTR(ptr)"
+                                    styleClass="p-button-rounded p-button-text p-button-danger">
+                            </p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+
+    <!-- Dialog for PTR Form -->
+    <p-dialog
+        header="{{ editingIndex === -1 ? 'Create' : 'Edit' }} Property Transfer Report"
+        [(visible)]="displayDialog"
+        [modal]="true"
+        [style]="{ width: '60vw' }"
+        [draggable]="false"
+        [resizable]="false"
+        >
+        <form [formGroup]="ptrForm" class="p-4 grid grid-cols-2 gap-4" (ngSubmit)="savePTR()">
+            <!-- Left Column -->
+            <div class="col-span-1">
+                <!-- PTR No. -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">PTR No.</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="ptrNo"
+                        placeholder="PTR Number"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- From Department -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">From Department</label>
+                    <p-dropdown
+                        [options]="departments"
+                        optionLabel="name"
+                        optionValue="name"
+                        formControlName="fromDepartment"
+                        placeholder="Select Source Department"
+                        [style]="{'width':'100%'}"
+                        class="w-full"
+                    ></p-dropdown>
+                </div>
+
+                <!-- From Officer -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">From Officer</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="fromOfficer"
+                        placeholder="Source Officer"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Date -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Date</label>
+                    <input
+                        type="date"
+                        pInputText
+                        formControlName="date"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-span-1">
+                <!-- To Department -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">To Department</label>
+                    <p-dropdown
+                        [options]="departments"
+                        optionLabel="name"
+                        optionValue="name"
+                        formControlName="toDepartment"
+                        placeholder="Select Destination Department"
+                        [style]="{'width':'100%'}"
+                        class="w-full"
+                    ></p-dropdown>
+                </div>
+
+                <!-- To Officer -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">To Officer</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="toOfficer"
+                        placeholder="Receiving Officer"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Status -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Status</label>
+                    <p-dropdown
+                        [options]="transferTypes"
+                        formControlName="transferType"
+                        placeholder="Select Transfer Type"
+                        [style]="{'width':'100%'}"
+                        class="w-full"
+                    ></p-dropdown>
+                </div>
+
+                <!-- Total Value -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Total Value</label>
+                    <input
+                        type="number"
+                        pInputText
+                        formControlName="totalValue"
+                        placeholder="Total Value of Items"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+            </div>
+
+            <!-- Full Width Fields -->
+            <div class="col-span-2">
+                <!-- Transfer Reason -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Transfer Reason</label>
+                    <textarea
+                        pInputText
+                        formControlName="transferReason"
+                        placeholder="Reason for property transfer"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        rows="3"
+                    ></textarea>
+                </div>
+
+                <!-- Remarks -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Remarks</label>
+                    <textarea
+                        pInputText
+                        formControlName="remarks"
+                        placeholder="Additional notes or remarks"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        rows="3"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Export to PDF and Save/Cancel Buttons -->
+            <div class="col-span-2 flex justify-end mt-4 gap-2">
+                <p-button
+                    label="Export to PDF"
+                    (onClick)="exportPdf()"
+                    [disabled]="ptrForm.invalid"
+                    styleClass="p-button-warning"
+                ></p-button>
+                <p-button
+                    label="Cancel"
+                    (onClick)="displayDialog = false"
+                    styleClass="p-button-secondary"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    type="submit"
+                    styleClass="p-button-success"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+</div> 

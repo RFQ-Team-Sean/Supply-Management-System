@@ -1,0 +1,13 @@
+[
+    {
+      "id": "1",
+      "contract_id": "1",
+      "obligation_request_date": "2025-02-08",
+      "disbursement_voucher_date": "2025-02-10",
+      "payment_date": "2025-02-10",
+      "amount_paid": "450000",
+      "payment_method": "Check",
+      "certificate_of_completion_issued": true
+    }
+  ]
+  

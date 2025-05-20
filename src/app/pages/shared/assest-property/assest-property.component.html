@@ -1,0 +1,976 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Asset & Property Management</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      Manage and track all company assets and properties efficiently.
+    </mat-card-subtitle>
+
+    <p-tabView (onChange)="onTabChange($event)">
+      <!-- Asset Categories Tab -->
+      <p-tabPanel header="Asset Categories">
+        <div class="flex justify-between items-center mb-4">
+          <p-button
+            label="Add Category"
+            icon="pi pi-plus"
+            [outlined]="true"
+            size="small"
+            (click)="openNewCategory()"
+          ></p-button>
+
+          <div class="relative w-full max-w-[300px]">
+            <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+            <input
+              pInputText
+              type="text"
+              placeholder="Search categories"
+              style="text-indent: 1.5rem;"
+              class="w-full pl-10"
+              [(ngModel)]="categorySearchText"
+              (input)="searchCategories()"
+            />
+          </div>
+        </div>
+
+        <p-table
+          [value]="filteredCategories"
+          [rows]="10"
+          [paginator]="true"
+          [rowHover]="true"
+          styleClass="p-datatable-striped"
+          *ngIf="activeTabIndex === 0"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Category Name</th>
+              <th>Code</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-category>
+            <tr>
+              <td>{{category.name}}</td>
+              <td>{{category.code}}</td>
+              <td>{{category.description}}</td>
+              <td>
+                <div class="flex gap-2">
+                  <button 
+                    pButton 
+                    icon="pi pi-pencil" 
+                    class="p-button-outlined p-button-rounded p-button-sm"
+                    pTooltip="Edit"
+                    (click)="editCategory(category)"
+                  ></button>
+                  <button 
+                    pButton 
+                    icon="pi pi-trash" 
+                    class="p-button-outlined p-button-rounded p-button-danger p-button-sm"
+                    pTooltip="Delete"
+                    (click)="deleteCategory(category)"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="text-center p-4">No categories found.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+
+      <!-- Asset Registration Tab -->
+      <p-tabPanel header="Asset Registration">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex gap-2">
+            <p-button
+              label="Add Asset"
+              icon="pi pi-plus"
+              [outlined]="true"
+              size="small"
+              (click)="openNewAsset()"
+            ></p-button>
+            <p-button
+              label="Import"
+              icon="pi pi-download"
+              [outlined]="true"
+              severity="info"
+              size="small"
+            ></p-button>
+          </div>
+
+          <div class="flex gap-4 items-center">
+            <div class="flex gap-2">
+              <p-dropdown
+                [options]="categories"
+                [(ngModel)]="selectedCategory"
+                placeholder="Category"
+                optionLabel="name"
+                [showClear]="true"
+                (onChange)="filterAssets()"
+              ></p-dropdown>
+
+              <p-dropdown
+                [options]="locations"
+                [(ngModel)]="selectedLocation"
+                placeholder="Location"
+                optionLabel="name"
+                [showClear]="true"
+                (onChange)="filterAssets()"
+              ></p-dropdown>
+
+              <p-dropdown
+                [options]="departments"
+                [(ngModel)]="selectedDepartment"
+                placeholder="Department"
+                optionLabel="name"
+                [showClear]="true"
+                (onChange)="filterAssets()"
+              ></p-dropdown>
+            </div>
+
+            <div class="relative w-full max-w-[300px]">
+              <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+              <input
+                pInputText
+                type="text"
+                placeholder="Search assets"
+                style="text-indent: 1.5rem;"
+                class="w-full pl-10"
+                [(ngModel)]="assetSearchText"
+                (input)="searchAssets()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <p-table
+          [value]="filteredAssets"
+          [rows]="10"
+          [paginator]="true"
+          [rowHover]="true"
+          styleClass="p-datatable-striped"
+          *ngIf="activeTabIndex === 1"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Asset ID</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-asset>
+            <tr>
+              <td>{{asset.id}}</td>
+              <td>
+                <img [src]="asset.image || 'assets/images/placeholder.png'" 
+                     class="w-12 h-12 object-cover rounded" 
+                     alt="Asset Image"/>
+              </td>
+              <td>{{asset.name}}</td>
+              <td>{{asset.category?.name || 'N/A'}}</td>
+              <td>{{asset.location?.name || 'N/A'}}</td>
+              <td>{{asset.department?.name || 'N/A'}}</td>
+              <td>
+                <span class="px-2 py-1 rounded text-xs" 
+                      [ngClass]="{'bg-green-100 text-green-800': asset.status === 'Active',
+                                'bg-red-100 text-red-800': asset.status === 'Inactive'}">
+                  {{asset.status}}
+                </span>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <button 
+                    pButton 
+                    icon="pi pi-eye" 
+                    class="p-button-outlined p-button-rounded p-button-sm"
+                    (click)="viewAsset(asset)"
+                  ></button>
+                  <button 
+                    pButton 
+                    icon="pi pi-pencil" 
+                    class="p-button-outlined p-button-rounded p-button-sm"
+                    (click)="editAsset(asset)"
+                  ></button>
+                  <button 
+                    pButton 
+                    icon="pi pi-trash" 
+                    class="p-button-outlined p-button-rounded p-button-danger p-button-sm"
+                    (click)="deleteAsset(asset)"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="8" class="text-center p-4">No assets found.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+
+      <!-- Asset Auditing Tab -->
+      <p-tabPanel header="Asset Auditing">
+        <p-table 
+          [value]="filteredAssets" 
+          [rows]="10" 
+          [paginator]="true" 
+          [rowHover]="true" 
+          styleClass="p-datatable-striped"
+          *ngIf="activeTabIndex === 2"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Asset ID</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-asset>
+            <tr>
+              <td>{{asset.id}}</td>
+              <td>{{asset.name}}</td>
+              <td>{{asset.category?.name || 'N/A'}}</td>
+              <td>{{asset.location?.name || 'N/A'}}</td>
+              <td>
+                <span class="px-2 py-1 rounded text-xs" 
+                      [ngClass]="{'bg-green-100 text-green-800': asset.status === 'Active',
+                                'bg-red-100 text-red-800': asset.status === 'Inactive'}">
+                  {{asset.status}}
+                </span>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  <button 
+                    pButton 
+                    icon="pi pi-eye" 
+                    class="p-button-outlined p-button-rounded p-button-sm"
+                    (click)="viewAsset(asset)"
+                  ></button>
+                  <button 
+                    pButton 
+                    icon="pi pi-pencil" 
+                    class="p-button-outlined p-button-rounded p-button-sm"
+                    (click)="editAsset(asset)"
+                  ></button>
+                  <button 
+                    pButton 
+                    icon="pi pi-trash" 
+                    class="p-button-outlined p-button-rounded p-button-danger p-button-sm"
+                    (click)="disposeAsset(asset.id)"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center p-4">No assets found.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+    </p-tabView>
+  </mat-card-content>
+</mat-card>
+
+<!-- Add Asset Dialog -->
+<p-dialog 
+  [(visible)]="addAssetDialog" 
+  [modal]="true" 
+  [style]="{width: '900px'}" 
+  header="Add New Asset"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+>
+  <div class="flex flex-col gap-4">
+    <!-- Basic Information -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="field">
+          <label class="font-medium">Asset Name <span class="text-red-500">*</span></label>
+          <input type="text" pInputText [(ngModel)]="newAsset.name" placeholder="Enter asset name" required>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Category <span class="text-red-500">*</span></label>
+          <p-dropdown 
+            [options]="categories" 
+            [(ngModel)]="newAsset.category"
+            optionLabel="name" 
+            [showClear]="true"
+            placeholder="Select category"
+            styleClass="w-full"
+            required
+          ></p-dropdown>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Property Type <span class="text-red-500">*</span></label>
+          <p-dropdown 
+            [options]="propertyTypes" 
+            [(ngModel)]="newAsset.propertyType"
+            optionLabel="name" 
+            [showClear]="true"
+            placeholder="Select property type"
+            styleClass="w-full"
+            required
+          ></p-dropdown>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Status <span class="text-red-500">*</span></label>
+          <p-dropdown 
+            [options]="statusOptions" 
+            [(ngModel)]="newAsset.status"
+            optionLabel="name" 
+            optionValue="value"
+            [showClear]="true"
+            placeholder="Select status"
+            styleClass="w-full"
+            required
+          ></p-dropdown>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Department</label>
+          <p-dropdown 
+            [options]="departments" 
+            [(ngModel)]="newAsset.department"
+            optionLabel="name" 
+            [showClear]="true"
+            placeholder="Select department"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Location</label>
+          <p-dropdown 
+            [options]="locations" 
+            [(ngModel)]="newAsset.location"
+            optionLabel="name" 
+            [showClear]="true"
+            placeholder="Select location"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+      </div>
+    </div>
+
+    <!-- Identification -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Identification Details</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="field">
+          <label class="font-medium">Serial Number <span class="text-red-500">*</span></label>
+          <input type="text" pInputText [(ngModel)]="newAsset.serialNumber" placeholder="Enter serial number" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barcode and QR Code Section -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Barcode & QR Code</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="field">
+          <label class="font-medium">Barcode:</label>
+          <input type="text" pInputText [(ngModel)]="newAsset.barcode" placeholder="Auto-generated barcode" readonly>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">QR Code:</label>
+          <input type="text" pInputText [(ngModel)]="newAsset.qrCode" placeholder="Auto-generated QR code" readonly>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Upload Section -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Image Upload</h3>
+      <div class="grid grid-cols-1 gap-4">
+        <div class="field">
+          <label class="font-medium">Image</label>
+          <div class="flex flex-col gap-2">
+            <div class="w-full h-32 border rounded flex items-center justify-center bg-white overflow-hidden">
+              <img [src]="newAsset.image || 'assets/images/placeholder.png'" 
+                   class="max-w-full max-h-full object-contain"
+                   alt="Asset Image">
+            </div>
+            <div class="flex gap-2">
+              <p-button 
+                icon="pi pi-upload" 
+                label="Upload" 
+                [outlined]="true" 
+                styleClass="w-full"
+                (click)="fileInput.click()"
+              ></p-button>
+              <input 
+                #fileInput 
+                type="file" 
+                (change)="onImageUpload($event)" 
+                accept="image/*" 
+                style="display: none"
+              >
+              <p-button 
+                *ngIf="newAsset.image"
+                icon="pi pi-trash" 
+                severity="danger" 
+                [outlined]="true"
+                (click)="removeImage()"
+              ></p-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Information -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Purchase Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="field">
+          <label class="font-medium">Purchase Date <span class="text-red-500">*</span></label>
+          <p-calendar [(ngModel)]="newAsset.purchaseDate" [showIcon]="true" styleClass="w-full"></p-calendar>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Purchase Cost <span class="text-red-500">*</span></label>
+          <p-inputNumber [(ngModel)]="newAsset.purchaseCost" mode="currency" currency="USD" locale="en-US"></p-inputNumber>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Warranty Expiry</label>
+          <p-calendar [(ngModel)]="newAsset.warrantyExpiry" [showIcon]="true" styleClass="w-full"></p-calendar>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Details -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Additional Details</h3>
+      <div class="grid grid-cols-1 gap-4">
+        <div class="field">
+          <label class="font-medium">Ownership Details</label>
+          <textarea 
+            pInputTextarea 
+            [(ngModel)]="newAsset.ownershipDetails" 
+            [rows]="5" 
+            placeholder="Enter ownership details" 
+            style="height: 100px; width: 100%;"
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Notes</label>
+          <textarea 
+            pInputTextarea 
+            [(ngModel)]="newAsset.notes" 
+            [rows]="5" 
+            placeholder="Enter additional notes" 
+            style="height: 100px; width: 100%;"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <p-button label="Cancel" (click)="hideAddAssetDialog()" styleClass="p-button-outlined"></p-button>
+      <p-button label="Save" (click)="saveAsset()" [disabled]="!isAssetFormValid()"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- View Asset Dialog -->
+<p-dialog 
+  [(visible)]="viewAssetDialog" 
+  [modal]="true" 
+  [style]="{width: '500px'}" 
+  header="Asset Details"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="flex flex-col gap-4" *ngIf="selectedAsset">
+    <div class="flex justify-center mb-4">
+      <img [src]="selectedAsset.image" class="w-32 h-32 object-cover rounded" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="field">
+        <label class="font-medium">Asset ID</label>
+        <p>{{selectedAsset.id}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Name</label>
+        <p>{{selectedAsset.name}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Category</label>
+        <p>{{selectedAsset.category.name || 'N/A'}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Serial Number</label>
+        <p>{{selectedAsset.serialNumber}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Purchase Date</label>
+        <p>{{selectedAsset.purchaseDate | date:'mediumDate'}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Purchase Cost</label>
+        <p>${{selectedAsset.purchaseCost}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Department</label>
+        <p>{{selectedAsset.department.name || 'N/A'}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Location</label>
+        <p>{{selectedAsset.location.name || 'N/A'}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Status</label>
+        <p>{{selectedAsset.status}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Property Type</label>
+        <p>{{selectedAsset.propertyType?.name || 'N/A'}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Barcode</label>
+        <p>{{selectedAsset.barcode}}</p>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">QR Code</label>
+        <p>{{selectedAsset.qrCode}}</p>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="font-medium">Ownership Details</label>
+      <p>{{selectedAsset.ownershipDetails}}</p>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end">
+      <p-button 
+        label="Close" 
+        (click)="hideViewAssetDialog()"
+        styleClass="p-button-outlined"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Edit Asset Dialog -->
+<p-dialog 
+  [(visible)]="editAssetDialog" 
+  [modal]="true" 
+  [style]="{width: '900px'}" 
+  header="Edit Asset"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+>
+  <div class="flex flex-col gap-4" *ngIf="selectedAsset">
+    <!-- Basic Information -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="field">
+          <label class="font-medium">Asset Name <span class="text-red-500">*</span></label>
+          <input type="text" pInputText [(ngModel)]="selectedAsset.name" placeholder="Enter asset name" required>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Category <span class="text-red-500">*</span></label>
+          <p-dropdown 
+            [options]="categories" 
+            [(ngModel)]="selectedAsset.category"
+            optionLabel="name" 
+            [showClear]="true"
+            placeholder="Select category"
+            styleClass="w-full"
+            required
+          ></p-dropdown>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Property Type <span class="text-red-500">*</span></label>
+          <p-dropdown 
+            [options]="propertyTypes" 
+            [(ngModel)]="selectedAsset.propertyType"
+            optionLabel="name" 
+            [showClear]="true"
+            placeholder="Select property type"
+            styleClass="w-full"
+            required
+          ></p-dropdown>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Status <span class="text-red-500">*</span></label>
+          <p-dropdown 
+            [options]="statusOptions" 
+            [(ngModel)]="selectedAsset.status"
+            optionLabel="name" 
+            optionValue="value"
+            [showClear]="true"
+            placeholder="Select status"
+            styleClass="w-full"
+            required
+          ></p-dropdown>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Department</label>
+          <p-dropdown 
+            [options]="departments" 
+            [(ngModel)]="selectedAsset.department"
+            optionLabel="name" 
+            [showClear]="true"
+            placeholder="Select department"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Location</label>
+          <p-dropdown 
+            [options]="locations" 
+            [(ngModel)]="selectedAsset.location"
+            optionLabel="name" 
+            [showClear]="true"
+            placeholder="Select location"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+      </div>
+    </div>
+
+    <!-- Identification -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Identification Details</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="field">
+          <label class="font-medium">Serial Number <span class="text-red-500">*</span></label>
+          <input type="text" pInputText [(ngModel)]="selectedAsset.serialNumber" placeholder="Enter serial number" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barcode and QR Code Section -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Barcode & QR Code</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="field">
+          <label class="font-medium">Barcode</label>
+          <input type="text" pInputText [(ngModel)]="selectedAsset.barcode" placeholder="Auto-generated barcode" readonly>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">QR Code</label>
+          <input type="text" pInputText [(ngModel)]="selectedAsset.qrCode" placeholder="Auto-generated QR code" readonly>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Upload Section -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Image Upload</h3>
+      <div class="grid grid-cols-1 gap-4">
+        <div class="field">
+          <label class="font-medium">Image</label>
+          <div class="flex flex-col gap-2">
+            <div class="w-full h-32 border rounded flex items-center justify-center bg-white overflow-hidden">
+              <img [src]="selectedAsset.image || 'assets/images/placeholder.png'" 
+                   class="max-w-full max-h-full object-contain"
+                   alt="Asset Image">
+            </div>
+            <div class="flex gap-2">
+              <p-button 
+                icon="pi pi-upload" 
+                label="Upload" 
+                [outlined]="true" 
+                styleClass="w-full"
+                (click)="fileInput.click()"
+              ></p-button>
+              <input 
+                #fileInput 
+                type="file" 
+                (change)="onImageUpload($event)" 
+                accept="image/*" 
+                style="display: none"
+              >
+              <p-button 
+                *ngIf="selectedAsset.image"
+                icon="pi pi-trash" 
+                severity="danger" 
+                [outlined]="true"
+                (click)="removeImage()"
+              ></p-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Information -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Purchase Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="field">
+          <label class="font-medium">Purchase Date <span class="text-red-500">*</span></label>
+          <p-calendar [(ngModel)]="selectedAsset.purchaseDate" [showIcon]="true" styleClass="w-full"></p-calendar>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Purchase Cost <span class="text-red-500">*</span></label>
+          <p-inputNumber [(ngModel)]="selectedAsset.purchaseCost" mode="currency" currency="USD" locale="en-US"></p-inputNumber>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Warranty Expiry</label>
+          <p-calendar [(ngModel)]="selectedAsset.warrantyExpiry" [showIcon]="true" styleClass="w-full"></p-calendar>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Details -->
+    <div class="card p-4 bg-gray-50 rounded">
+      <h3 class="text-lg font-semibold mb-4">Additional Details</h3>
+      <div class="grid grid-cols-1 gap-4">
+        <div class="field">
+          <label class="font-medium">Ownership Details</label>
+          <textarea 
+            pInputTextarea 
+            [(ngModel)]="selectedAsset.ownershipDetails" 
+            [rows]="5" 
+            placeholder="Enter ownership details" 
+            style="height: 100px; width: 100%;"
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label class="font-medium">Notes</label>
+          <textarea 
+            pInputTextarea 
+            [(ngModel)]="selectedAsset.notes" 
+            [rows]="5" 
+            placeholder="Enter additional notes" 
+            style="height: 100px; width: 100%;"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <p-button label="Cancel" (click)="hideEditAssetDialog()" styleClass="p-button-outlined"></p-button>
+      <p-button label="Update" (click)="updateAsset()" [disabled]="!isAssetFormValid()"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Add Category Dialog -->
+<p-dialog 
+  [(visible)]="addCategoryDialog" 
+  [modal]="true" 
+  [style]="{width: '500px'}" 
+  header="Add New Category"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+>
+  <div class="card p-4 bg-gray-50 rounded">
+    <div class="grid grid-cols-1 gap-4">
+      <div class="field">
+        <label class="block mb-2">
+          <span class="font-medium">Category Name</span>
+          <span class="text-red-500 ml-1">*</span>
+        </label>
+        <div class="relative">
+          <i class="pi pi-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="newCategory.name"
+            placeholder="Enter category name"
+            class="w-full pl-10"
+            style="text-indent: 1.5rem;"
+          >
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="block mb-2">
+          <span class="font-medium">Category Code</span>
+          <span class="text-red-500 ml-1">*</span>
+        </label>
+        <div class="relative">
+          <i class="pi pi-code absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="newCategory.code"
+            placeholder="Enter category code"
+            class="w-full pl-10"
+            style="text-indent: 1.5rem;"
+            maxlength="10"
+          >
+        </div>
+        <small class="text-gray-500">Maximum 10 characters, automatically converted to uppercase</small>
+      </div>
+
+      <div class="field">
+        <label class="block mb-2">
+          <span class="font-medium">Description</span>
+        </label>
+        <div class="relative">
+          <i class="pi pi-align-left absolute left-3 top-3 text-gray-400"></i>
+          <textarea 
+            pInputTextarea 
+            [(ngModel)]="newCategory.description"
+            [rows]="3"
+            placeholder="Enter category description"
+            class="w-full pl-10"
+            style="text-indent: 1.5rem;"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <p-button 
+        label="Cancel" 
+        (click)="hideAddCategoryDialog()"
+        styleClass="p-button-outlined"
+        icon="pi pi-times"
+      ></p-button>
+      <p-button 
+        label="Save" 
+        (click)="saveCategory()"
+        [disabled]="!newCategory.name || !newCategory.code"
+        icon="pi pi-check"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Edit Category Dialog -->
+<p-dialog 
+  [(visible)]="editCategoryDialog" 
+  [modal]="true" 
+  [style]="{width: '500px'}" 
+  header="Edit Category"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+>
+  <div class="card p-4 bg-gray-50 rounded" *ngIf="selectedCategory">
+    <div class="grid grid-cols-1 gap-4">
+      <div class="field">
+        <label class="block mb-2">
+          <span class="font-medium">Category Name</span>
+          <span class="text-red-500 ml-1">*</span>
+        </label>
+        <div class="relative">
+          <i class="pi pi-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="selectedCategory.name"
+            placeholder="Enter category name"
+            class="w-full pl-10"
+            style="text-indent: 1.5rem;"
+          >
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="block mb-2">
+          <span class="font-medium">Category Code</span>
+          <span class="text-red-500 ml-1">*</span>
+        </label>
+        <div class="relative">
+          <i class="pi pi-code absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="selectedCategory.code"
+            class="w-full pl-10"
+            style="text-indent: 1.5rem;"
+            readonly
+          >
+        </div>
+        <small class="text-gray-500">Category code cannot be modified</small>
+      </div>
+
+      <div class="field">
+        <label class="block mb-2">
+          <span class="font-medium">Description</span>
+        </label>
+        <div class="relative">
+          <i class="pi pi-align-left absolute left-3 top-3 text-gray-400"></i>
+          <textarea 
+            pInputTextarea 
+            [(ngModel)]="selectedCategory.description"
+            [rows]="3"
+            placeholder="Enter category description"
+            class="w-full pl-10"
+            style="text-indent: 1.5rem;"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <p-button 
+        label="Cancel" 
+        (click)="hideEditCategoryDialog()"
+        styleClass="p-button-outlined"
+        icon="pi pi-times"
+      ></p-button>
+      <p-button 
+        label="Update" 
+        (click)="updateCategory()"
+        [disabled]="!selectedCategory?.name"
+        icon="pi pi-check"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-toast position="bottom-right"></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>

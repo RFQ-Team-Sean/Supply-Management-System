@@ -1,0 +1,101 @@
+<div class="p-10 bg-white shadow-md rounded-lg">
+  
+
+  <div *ngIf="purchaseOrderData.contractor">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-bold">PURCHASE ORDER</h2>
+      <h3 class="text-2xl">{{ purchaseOrderData.requestingOffice }}</h3>
+    </div>
+
+    <table class="w-full border-collapse text-xl border border-black mb-6">
+      <tr>
+        <td class="border border-black p-8"><strong>Contractor:</strong> {{ purchaseOrderData.contractor }}</td>
+        <td class="border border-black p-8"><strong>P.O. NO.:</strong> {{ purchaseOrderData.poNo }}</td>
+      </tr>
+      <tr>
+        <td class="border border-black p-8"><strong>Address:</strong> {{ purchaseOrderData.address }}</td>
+        <td class="border border-black p-8"><strong>Date:</strong> {{ purchaseOrderData.poDate }}</td>
+      </tr>
+      <tr>
+        <td class="border border-black p-8"><strong>T.I.N.:</strong> {{ purchaseOrderData.tin }}</td>
+        <td class="border border-black p-8"><strong>PR No.:</strong> {{ purchaseOrderData.prNo }}</td>
+      </tr>
+      <tr>
+        <td class="border border-black p-8"><strong>TEL. NO.:</strong> {{ purchaseOrderData.telNo }}</td>
+        <td class="border border-black p-8"><strong>Date:</strong> {{ purchaseOrderData.prDate }}</td>
+      </tr>
+      <tr>
+        <td class="border border-black p-8"><strong>FAX NO.:</strong> {{ purchaseOrderData.faxNo }}</td>
+        <td class="border border-black p-8"><strong>Mode of Procurement:</strong> {{ purchaseOrderData.modeOfProcurement }}</td>
+      </tr>
+      <tr>
+        <td class="border border-black p-8"><strong>EMAIL ADDRESS:</strong> {{ purchaseOrderData.email }}</td>
+        <td class="border border-black p-8"><strong>Delivery Term:</strong> {{ purchaseOrderData.deliveryTerm }}</td>
+      </tr>
+      <tr>
+        <td class="border border-black p-8"><strong>Place of Delivery:</strong> {{ purchaseOrderData.placeOfDelivery }}</td>
+        <td class="border border-black p-8"><strong>Date of Delivery:</strong> {{ purchaseOrderData.dateOfDelivery }}</td>
+      </tr>
+      <tr>
+        <td colspan="2" class="border border-black p-8"><strong>Payment Term:</strong> {{ purchaseOrderData.paymentTerm }}</td>
+      </tr>
+    </table>
+
+    <table class="w-full border-collapse border text-xl border-black mb-6">
+      <thead>
+        <tr class="bg-gray-200">
+          <th class="border border-black p-8">Item No.</th>
+          <th class="border border-black p-8">Qty.</th>
+          <th class="border border-black p-8">Unit</th>
+          <th class="border border-black p-8">Job Description</th>
+          <th class="border border-black p-8">Unit Cost</th>
+          <th class="border border-black p-8">Total Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of purchaseOrderData.items; let i = index">
+          <td class="border border-black p-8">{{ item.itemNo }}</td>
+          <td class="border border-black p-8">{{ item.qty }}</td>
+          <td class="border border-black p-8">{{ item.unit }}</td>
+          <td class="border border-black p-8">{{ item.description }}</td>
+          <td class="border border-black p-8">₱{{ item.unitCost | number: '1.2-2' }}</td>
+          <td class="border border-black p-8">₱{{ item.totalCost | number: '1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mb-6 text-xl">
+      <p><strong>Total (Gross) Amount in Words:</strong> {{ purchaseOrderData.totalGrossAmountInWords }}</p>
+      <p><strong>Total (Gross):</strong> ₱{{ purchaseOrderData.totalGrossAmount | number: '1.2-2' }}</p>
+    </div>
+
+    <div class="mb-6 text-xl">
+      <p><strong>Penalty Clause:</strong> {{ purchaseOrderData.penaltyClause }}</p>
+    </div>
+
+    <div class="mb-6 text-xl">
+      <p><strong>Conforme:</strong></p>
+      <p class="mt-4">{{ purchaseOrderData.supplierSignature }}</p>
+      <p><strong>{{ purchaseOrderData.supplierName }}</strong></p>
+      <p>{{ purchaseOrderData.supplierDesignation }}</p>
+      <p><strong>Date:</strong> {{ purchaseOrderData.conformeDate }}</p>
+    </div>
+
+    <div class="mb-6 text-xl">
+      <p>{{ purchaseOrderData.fundsAvailable }}</p>
+      <p>{{ purchaseOrderData.supportingDocuments }}</p>
+      <p>{{ purchaseOrderData.dbrNo }}</p>
+      <p>{{ purchaseOrderData.dbrDate }}</p>
+      <p>{{ purchaseOrderData.accountant }}</p>
+    </div>
+
+    <div class="mb-6 text-xl">
+      <p><strong>Requesting Office:</strong></p>
+      <p class="mt-4">{{ purchaseOrderData.requestingOfficeSignature }}</p>
+      <p><strong>{{ purchaseOrderData.requestingOfficeName }}</strong></p>
+      <p>{{ purchaseOrderData.requestingOfficeDesignation }}</p>
+    </div>
+  </div>
+
+  <p-button label="Export Purchase Order to PDF" (onClick)="exportPdf()" class="mt-4"></p-button>
+</div>

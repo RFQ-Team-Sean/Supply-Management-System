@@ -1,0 +1,162 @@
+<app-progress-table [config]="progressTable" />
+
+<p-dialog [(visible)]="showReceiptModal" [modal]="true" [style]="{ width: '30rem' }">
+  <ng-template #header>
+    <div class="py-0 inline-flex items-center justify-center gap-3">
+      <i class="pi pi-receipt text-lg"></i>
+      <span class="font-bold text-lg whitespace-nowrap">{{selectedDeliveryReceipt? 'Edit':'Add'}} Receipt</span>
+    </div>
+  </ng-template>
+  <span class="text-surface-500 dark:text-surface-400 block mb-2">{{selectedDeliveryReceipt? 'Edit':'Add a new'}}
+    receipt.</span>
+  <form [formGroup]="form" (submit)="selectedDeliveryReceipt? editReceipt():addReceipt()">
+    <div class="flex items-center gap-4 mb-2">
+      <label for="delivery_date" class="font-semibold w-32">Delivery Date</label>
+      <p-datepicker placeholder="Enter delivery date" fluid pSize="small" size="small" class="flex-auto" showIcon iconDisplay="input"
+        formControlName="delivery_date"></p-datepicker>
+    </div>
+    
+    <div class="flex items-center gap-4 mb-2">
+      <label for="receipt_number" class="font-semibold w-32">Receipt Number</label>
+      <input placeholder="Enter receipt no." pSize="small" formControlName="receipt_number" pInputText id="receipt_number"
+        class="flex-auto uppercase placeholder:normal-case" autocomplete="off" />
+    </div>
+
+    <div class="flex items-center gap-4 mb-2">
+      <label for="supplier" class="font-semibold w-32">Supplier</label>
+      <p-select [options]="suppliers" formControlName="supplier" optionLabel="name" [filter]="true"
+        filterBy="name,contact_person" [showClear]="true" [appendTo]="'body'" placeholder="Select a supplier" class="flex-auto"
+        (onChange)="onSupplierChange($event)" [virtualScroll]="true" [virtualScrollItemSize]="38">
+        <ng-template pTemplate="selectedItem" let-selectedOption>
+          <div class="flex items-center gap-2">
+            <div>{{ selectedOption.name }} - {{ selectedOption.contact_person || 'No contact person' }}</div>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="item" let-supplier>
+          <div class="flex items-center gap-2">
+            <div>{{ supplier.name }} - {{ supplier.contact_person || 'No contact person' }}</div>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
+
+    <div class="flex items-center gap-4 mb-2">
+      <label class="font-semibold w-32">VAT Type</label>
+      <div class="flex gap-4">
+        <div class="flex items-center gap-2">
+          <p-radioButton 
+            name="vatType" 
+            value="vat" 
+            formControlName="vatType" 
+            inputId="vat">
+          </p-radioButton>
+          <label for="vat" class="cursor-pointer">VAT</label>
+        </div>
+        <div class="flex items-center gap-2">
+          <p-radioButton 
+            name="vatType" 
+            value="non-vat" 
+            formControlName="vatType" 
+            inputId="non-vat">
+          </p-radioButton>
+          <label for="non-vat" class="cursor-pointer">NON-VAT</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4 mb-2" *ngIf="form.get('vatType')?.value">
+      <label for="supplier_tin" class="font-semibold w-32">TIN Number</label>
+      <input 
+        placeholder="XXX-XXX-XXX-XXX" 
+        pInputText 
+        formControlName="supplier_tin"
+        class="flex-auto"
+        maxlength="15"
+        (input)="formatTIN($event)"
+        autocomplete="off"
+      />
+    </div>
+
+     <div class="flex items-center gap-4 mb-2">
+      <label for="purchase_order" class="font-semibold w-32">Purchase Order</label>
+      <p-select [options]="purchaseOrders" formControlName="purchase_order" [showClear]="true" [appendTo]="'body'" placeholder="Select purchase order" class="flex-auto"
+        (onChange)="onPurchaseOrderChange($event)">
+        <ng-template let-order pTemplate="item">
+          <div class="flex items-center gap-2">
+            <div>{{ order.id }} - {{ order.supplierName }}</div>
+          </div>
+        </ng-template>
+        <ng-template let-selectedOption pTemplate="selectedItem">
+          <div class="flex items-center gap-2">
+            <div>{{ selectedOption.id }} - {{ selectedOption.supplierName }}</div>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
+
+
+    <div class="flex items-center gap-4 mb-2">
+      <label for="total_amount" class="font-semibold w-32">Total Amount</label>
+      <p-inputnumber placeholder="Enter total amount" size="small" class="flex-1" formControlName="total_amount" inputId="currency-us" mode="currency"
+        currency="PHP" locale="en-PH" fluid></p-inputnumber>
+    </div>
+
+    <div class="flex items-center gap-4 mb-2">
+      <label for="department_id" class="font-semibold w-32">Department</label>
+      <p-select [options]="departments" formControlName="department" optionLabel="name" [filter]="true"
+        filterBy="name" [showClear]="true" [appendTo]="'body'" placeholder="Designate to department" class="flex-auto">
+        <ng-template #selectedItem let-selectedOption>
+          <div class="flex items-center gap-2">
+            <div>{{ selectedOption.name }}</div>
+          </div>
+        </ng-template>
+        <ng-template let-department #item>
+          <div class="flex items-center gap-2">
+            <div>{{ department.name }}</div>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
+
+    <div class="flex items-center gap-4 mb-2">
+      <label for="notes" class="font-semibold w-32">Receipt Notes</label>
+      <textarea placeholder="Enter receipt notes (Optional)" formControlName="notes" pSize="small" name="notes" rows="5"
+        cols="25" pTextarea id="notes" class="flex-auto" autocomplete="off"></textarea>
+    </div>
+
+    <div class="flex items-center justify-center gap-4 mb-2 w-full">
+      <div class="card w-full">
+
+        <p-fileupload fluid #fileUpload name="demo[]" class="w-full" url="/" [multiple]="true"
+          (onSelect)="onSelectedFiles($event)" (onRemove)="onSelectedFiles($event)" accept="image/*"
+          maxFileSize="10000000" mode="advanced">
+          <ng-template #header let-files let-chooseCallback="chooseCallback" let-clearCallback="clearCallback">
+            <div class="flex gap-3 w-full">
+              <p-button fluid class="flex-1" size="small" (onClick)="chooseCallback()" severity="secondary"
+                icon="pi pi-plus" label="Choose" [outlined]="true"></p-button>
+              <p-button fluid class="flex-1" size="small" (onClick)="clearCallback()" icon="pi pi-times" label="Clear"
+                [outlined]="true" severity="danger" [disabled]="!files || files.length === 0"></p-button>
+            </div>
+          </ng-template>
+
+          <ng-template #content>
+            <div *ngIf="files.length <= 0" class="text-gray-500 flex flex-col gap-6 items-center py-8">
+              <i class="pi pi-cloud-upload !text-3xl "></i>
+              <span>Drag and drop files to here to upload.</span>
+            </div>
+          </ng-template>
+        </p-fileupload>
+      </div>
+    </div>
+  </form>
+  <ng-template #footer>
+    <p-button size="small" label="Cancel" [text]="true" icon="pi pi-times" severity="secondary"
+      (click)="showReceiptModal = false" />
+    <p-button size="small" label="{{selectedDeliveryReceipt? 'Edit':'Add'}}" icon="pi pi-plus" [disabled]="!form.valid"
+      (click)="selectedDeliveryReceipt? editReceipt():addReceipt()" />
+  </ng-template>
+</p-dialog>
+
+<p-toast position="bottom-right" />
+
+<p-confirmpopup />

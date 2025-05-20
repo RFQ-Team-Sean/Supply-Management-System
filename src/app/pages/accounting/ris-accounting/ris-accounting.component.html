@@ -1,0 +1,37 @@
+<p-card>
+    <h1 class="text-2xl font-bold">Requisition and Issue Slip (RIS)</h1>
+    <p class="mb-5">Review recent Requisition and Issue Slips here.</p>
+    <p-table [value]="slips">
+        <ng-template pTemplate="header">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RIS Number</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-slip>
+            <tr>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ slip.risNumber }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ slip.user }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ slip.department }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ slip.date }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ slip.item }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ slip.quantity }}</td>
+                <td class="px-6 py-4 text-sm text-gray-700">
+                    <button pButton type="button" [outlined]="true" class="p-button-success p-button-rounded mr-2" (click)="onApprove(slip)" pTooltip="Approve" tooltipPosition="bottom">
+                        <span class="p-button-icon pi pi-check"></span>
+                    </button>
+                    <button pButton type="button" [outlined]="true" class="p-button-danger p-button-rounded" (click)="onReject(slip)" pTooltip="Reject" tooltipPosition="bottom">
+                        <span class="p-button-icon pi pi-times"></span>
+                    </button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+  
+<p-toast position="bottom-right"></p-toast>

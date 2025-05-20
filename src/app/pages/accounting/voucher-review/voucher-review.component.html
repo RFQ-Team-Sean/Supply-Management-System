@@ -1,0 +1,140 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+      <mat-card-title>Disbursement Vouchers</mat-card-title>
+      <mat-card-subtitle class="mat-body-1 mb-10 !flex justify-between items-center">
+        <span> Review disbursement vouchers in this section. </span>
+        <p-iconfield fluid class="w-full max-w-72">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            fluid
+            class="w-full"
+            pSize="small"
+            [(ngModel)]="searchValue"
+            (input)="dt.filterGlobal(searchValue, 'contains')"
+            type="text"
+            pInputText
+            placeholder="Search"
+          />
+        </p-iconfield>
+      </mat-card-subtitle>
+  
+      <div class="card flex items-center w-full py-3 px-4 gap-3">
+        <div class="flex-1 px-6 border-dotted rounded-xl border-gray-700/25 border-2">
+          <p-stepper [(value)]="activeStep" class="w-full" fluid>
+            <p-step-list>
+              <p-step pTooltip="Click to show unverified receipts" [value]="1" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                  <button class="bg-transparent border-0 flex items-center gap-2 px-2" (click)="activateCallback(); filterByStatus('processing')">
+                    <i [ngClass]="{'text-primary': value == activeStep}" class="pi pi-inbox mr-1"></i>
+                    <span [ngClass]="{'text-primary': value == activeStep}">For Review</span>
+                  </button>
+                </ng-template>
+              </p-step>
+              <p-step pTooltip="Click to show verified receipts" [value]="2" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                  <button class="bg-transparent border-0 flex items-center gap-2 px-2" (click)="activateCallback(); filterByStatus('recorded')">
+                    <i [ngClass]="{'text-primary': value == activeStep}" class="pi pi-verified mr-1"></i>
+                    <span [ngClass]="{'text-primary': value == activeStep}">Recorded</span>
+                  </button>
+                </ng-template>
+              </p-step>
+            </p-step-list>
+          </p-stepper>
+        </div>
+      </div>
+  
+      <!-- Disbursement Voucher Table -->
+      <p-table
+        #dt
+        [value]="filteredDisbursementVouchers"
+        [paginator]="true"
+        [rows]="5"
+        [rowsPerPageOptions]="[5, 10, 20]"
+        [globalFilterFields]="['voucherNo', 'supplierName']"
+        [tableStyle]="{ 'min-width': '50rem' }"
+      >
+        <ng-template #header>
+          <tr>
+            <th>Voucher Number</th>
+            <th>Delivery Receipt Number</th>
+            <th>Supplier Name</th>
+            <th>Total Amount</th>
+            <th style="width: 5rem"></th>
+          </tr>
+        </ng-template>
+  
+        <ng-template #body let-voucher>
+          <tr>
+            <td>{{ voucher.voucherNo }}</td>
+            <td>{{ voucher.deliveryReceiptNo }}</td>
+            <td>{{ voucher.supplierName }}</td>
+            <td>{{ voucher.totalAmountDue | currency: 'PHP' }}</td>
+            <td>
+
+                 @if(voucher.status == 'recorded'){
+                    <i  class="pi pi-verified text-2xl text-green-500"></i>
+                 }@else{>
+                    <div class="flex gap-3">
+                        <p-button
+                          severity="secondary"
+                          pTooltip="Click to print voucher"
+                          [outlined]="true"
+                          size="small"
+                          icon="pi pi-receipt"
+                          rounded
+                          (click)="printVoucher(voucher)"
+                        ></p-button>
+                        <p-button
+                          severity="danger"
+                          pTooltip="Click to reject this voucher"
+                          [outlined]="true"
+                          size="small"
+                          icon="pi pi-times"
+                          rounded
+                          (click)="confirmToReject($event,voucher.voucherNo)"
+                        ></p-button>
+                        <p-button
+                          severity="success"
+                          pTooltip="Click to verify this voucher"
+                          [outlined]="true"
+                          size="small"
+                          icon="pi pi-check"
+                          rounded
+                          (click)="confirmToVerify($event,voucher.voucherNo)"
+                        ></p-button>
+                      </div>
+                 }
+              
+            </td>
+          </tr>
+        </ng-template>
+  
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="6">
+              <div class="flex flex-col w-full items-center justify-center mb-8">
+                <div class="overflow-hidden h-52 w-52 mr-8">
+                  <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+                </div>
+                <span>No disbursement vouchers found.</span>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+  
+      <div class="card flex justify-between">
+        <p-button [disabled]="activeStep <= 1" outlined size="small" label="Back" icon="pi pi-arrow-left" (click)="backStep()" />
+        <p-button [disabled]="activeStep >= 3" outlined size="small" label="Next" icon="pi pi-arrow-right" (click)="nextStep()" iconPos="right" />
+      </div>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Add/Edit Receipt Modal -->
+  <p-dialog [(visible)]="showDisbursementModal" [modal]="true" [style]="{ width: '30rem' }">
+ 
+  </p-dialog>
+  
+  <p-toast position="bottom-right" />
+  <p-confirmpopup />
+  

@@ -1,0 +1,218 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+        <mat-card-title class="select-none font-light">Requested Quotations</mat-card-title>
+        
+        <div class="flex justify-between items-center">
+            <p>View and manage quotation requests from suppliers.</p>
+            <p-iconfield fluid class="w-full max-w-72">
+                <p-inputicon styleClass="pi pi-search" />
+                <input fluid class="w-full" pSize="small" [(ngModel)]="searchValue" 
+                    (input)="dt?.filterGlobal(searchValue,'contains')" 
+                    type="text" pInputText placeholder="Search" />
+            </p-iconfield>
+        </div>
+
+        <!-- Loading indicator -->
+        <div *ngIf="isLoading" class="flex justify-center items-center py-8">
+            <i class="pi pi-spin pi-spinner text-4xl"></i>
+        </div>
+
+        <p-table #dt [value]="quotationRequests" [rowHover]="true" *ngIf="!isLoading"
+            [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 20]"
+            [globalFilterFields]="['id', 'subject', 'supplierName', 'supplierEmail']"
+            [tableStyle]="{'min-width': '60rem'}">
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>ID</th>
+                    <th>Subject</th>
+                    <th>Supplier</th>
+                    <th>Date Requested</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-request>
+                <tr>
+                    <td>{{request.id}}</td>
+                    <td>{{request.subject}}</td>
+                    <td>{{request.supplierName}}</td>
+                    <td>{{request.dateRequested | date:'mediumDate'}}</td>
+                    <td>
+                        <span class="px-2 py-1 rounded-full text-xs font-medium" [ngClass]="getStatusClass(request.status)">
+                            {{request.status | titlecase}}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button icon="pi pi-eye" (click)="viewRequestDetails(request)" 
+                                pTooltip="View Details" [outlined]="true" size="small" />
+                            <p-button icon="pi pi-check-circle" (click)="openResponseModal(request)"
+                                pTooltip="Approve" severity="success" [outlined]="true" size="small" 
+                                [disabled]="request.status !== 'pending'" />
+                            <p-button icon="pi pi-times-circle" (click)="rejectQuotation(request)"
+                                pTooltip="Reject" severity="danger" [outlined]="true" size="small" 
+                                [disabled]="request.status !== 'pending'" />
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6" class="text-center p-4">
+                        No quotation requests found.
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+        <!-- Request Details Dialog -->
+        <p-dialog header="Quotation Request Details" [(visible)]="showDetailsModal" [style]="{width: '50vw'}" [modal]="true">
+            @if(selectedRequest) {
+                <div class="flex flex-col gap-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="font-semibold mb-2">Request Information</h3>
+                            <p><span class="font-medium">ID:</span> {{selectedRequest.id}}</p>
+                            <p><span class="font-medium">Subject:</span> {{selectedRequest.subject}}</p>
+                            <p><span class="font-medium">Date Requested:</span> {{selectedRequest.dateRequested | date:'medium'}}</p>
+                            <p><span class="font-medium">Status:</span> 
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ml-1" [ngClass]="getStatusClass(selectedRequest.status)">
+                                    {{selectedRequest.status | titlecase}}
+                                </span>
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-2">Supplier Information</h3>
+                            <p><span class="font-medium">Name:</span> {{selectedRequest.supplierName}}</p>
+                            <p><span class="font-medium">Contact:</span> {{selectedRequest.supplierContact}}</p>
+                            <p><span class="font-medium">Email:</span> {{selectedRequest.supplierEmail}}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <h3 class="font-semibold mb-2">Message</h3>
+                        <p class="p-3 bg-gray-50 rounded">{{selectedRequest.message}}</p>
+                    </div>
+
+                    <div class="mt-2" *ngIf="selectedRequest.attachments.length > 0">
+                        <h3 class="font-semibold mb-2">Attachments</h3>
+                        <div class="flex flex-col gap-2">
+                            <div *ngFor="let attachment of selectedRequest.attachments" class="flex items-center gap-2">
+                                <i class="pi pi-file-pdf text-red-500"></i>
+                                <span>{{attachment}}</span>
+                                <p-button icon="pi pi-download" pTooltip="Download" [text]="true" size="small" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add this section to display supplier products -->
+                    <div class="mt-4" *ngIf="supplierItems && supplierItems.length > 0">
+                        <h3 class="font-semibold mb-2">My Products/Services</h3>
+                        <p class="text-sm text-gray-500 mb-2">These are your products that may be relevant for this quotation request:</p>
+                        <p-table [value]="supplierItems" [paginator]="true" [rows]="3">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Quantity Available</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-item>
+                                <tr>
+                                    <td>{{item.product}}</td>
+                                    <td>{{item.category}}</td>
+                                    <td>{{item.description || 'No description available'}}</td>
+                                    <td>{{item.quantity}} {{item.unit}}(s)</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+
+                    <!-- Response details (if responded) -->
+                    @if(selectedRequest.status === 'approved' && selectedRequest.price) {
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg">
+                            <h3 class="font-semibold mb-2 text-green-800">Quotation Response</h3>
+                            <p><span class="font-medium">Price Quote:</span> ₱{{selectedRequest.price | number:'1.2-2'}}</p>
+                            <p><span class="font-medium">Estimated Delivery:</span> {{selectedRequest.estimatedDeliveryDate | date:'mediumDate'}}</p>
+                            @if(selectedRequest.responseNotes) {
+                                <p><span class="font-medium">Notes:</span> {{selectedRequest.responseNotes}}</p>
+                            }
+                            <p><span class="font-medium">Response Date:</span> {{selectedRequest.responseDate | date:'medium'}}</p>
+                        </div>
+                    }
+                </div>
+            }
+        </p-dialog>
+
+        <!-- Response Dialog -->
+        <p-dialog header="Respond to Quotation Request" [(visible)]="showResponseModal" [style]="{width: '40vw'}" [modal]="true">
+            @if(selectedRequest) {
+                <form [formGroup]="responseForm" (ngSubmit)="submitResponse()">
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <p><span class="font-medium">Request ID:</span> {{selectedRequest.id}}</p>
+                            <p><span class="font-medium">Subject:</span> {{selectedRequest.subject}}</p>
+                        </div>
+                        
+                        <div class="flex flex-col">
+                            <label class="font-semibold mb-2">Price Quote (PHP)</label>
+                            <input type="number" pInputText formControlName="price" placeholder="Enter amount"/>
+                        </div>
+                        
+                        <div class="flex flex-col">
+                            <label class="font-semibold mb-2">Estimated Delivery Date</label>
+                            <input type="date" pInputText formControlName="estimatedDeliveryDate"/>
+                        </div>
+                        
+                        <div class="flex flex-col">
+                            <label class="font-semibold mb-2">Additional Notes</label>
+                            <textarea rows="4" pInputTextarea formControlName="notes" 
+                                placeholder="Enter any additional information about your quotation..."></textarea>
+                        </div>
+                        
+                        <div class="flex justify-end gap-2 mt-4">
+                            <p-button type="button" label="Cancel" (click)="showResponseModal = false" 
+                                [outlined]="true" severity="secondary"/>
+                            <p-button type="submit" label="Submit Response" 
+                                [disabled]="!responseForm.valid"/>
+                        </div>
+                    </div>
+                </form>
+            }
+        </p-dialog>
+
+        <!-- Reject Dialog -->
+        <p-dialog header="Reject Quotation Request" [(visible)]="showRejectModal" [style]="{width: '40vw'}" [modal]="true">
+            @if(selectedRequest) {
+                <form [formGroup]="rejectForm" (ngSubmit)="submitRejection()">
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <p><span class="font-medium">Request ID:</span> {{selectedRequest.id}}</p>
+                            <p><span class="font-medium">Subject:</span> {{selectedRequest.subject}}</p>
+                        </div>
+                        
+                        <div class="flex flex-col">
+                            <label class="font-semibold mb-2">Reason for Rejection</label>
+                            <textarea rows="4" pInputTextarea formControlName="reason" 
+                                placeholder="Please provide a reason for rejecting this quotation request..."></textarea>
+                        </div>
+                        
+                        <div class="flex justify-end gap-2 mt-4">
+                            <p-button type="button" label="Cancel" (click)="showRejectModal = false" 
+                                [outlined]="true" severity="secondary"/>
+                            <p-button type="submit" label="Confirm Rejection" severity="danger"
+                                [disabled]="!rejectForm.valid"/>
+                        </div>
+                    </div>
+                </form>
+            }
+        </p-dialog>
+    </mat-card-content>
+</mat-card>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+<p-toast position="bottom-right" />

@@ -1,0 +1,57 @@
+<div class="p-6 bg-white rounded-lg shadow-lg">
+  <h2 class="text-3xl font-bold text-gray-900 flex items-center mb-4">
+    📝 Work Financial Plan (WFP)
+  </h2>
+  <p class="text-gray-600 mb-4">
+    Manage Work Financial Plans, submit for approval, and track status.
+  </p>
+
+  <button class="btn btn-add" (click)="addNewWFP()">➕ Add New WFP</button>
+
+  <div class="overflow-x-auto mt-6">
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Department</th>
+          <th>Budget Amount</th>
+          <th>Submission Date</th>
+          <th>Status</th>
+          <th>Submitted By</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let wfp of workFinancialPlans; let i = index">
+          <td>{{ wfp.title }}</td>
+          <td>{{ wfp.department }}</td>
+          <td>₱{{ wfp.budgetAmount.toLocaleString() }}</td>
+          <td>{{ wfp.submissionDate }}</td>
+          <td>
+            <span class="status"
+              [ngClass]="{
+                'status-draft': wfp.status === 'Draft',
+                'status-submitted': wfp.status === 'Submitted',
+                'status-approved': wfp.status === 'Approved',
+                'status-returned': wfp.status === 'Returned for Modification',
+                'status-denied': wfp.status === 'Denied'
+              }">
+              {{ wfp.status }}
+            </span>
+          </td>
+          <td>{{ wfp.submittedBy }}</td>
+          <td class="flex space-x-2 justify-center">
+            <button *ngIf="!wfp.isEditing" class="btn btn-edit" (click)="editWFP(i)">✏️ Edit</button>
+            <button *ngIf="wfp.isEditing" class="btn btn-save" (click)="saveWFP(i)">💾 Save</button>
+            <button *ngIf="wfp.isEditing" class="btn btn-cancel" (click)="cancelEditWFP(i)">❌ Cancel</button>
+            <button class="btn btn-delete" (click)="deleteWFP(i)">🗑️ Delete</button>
+            <button *ngIf="wfp.status === 'Draft'" class="btn btn-submit" (click)="submitWFP(i)">📤 Submit</button>
+            <button *ngIf="wfp.status === 'Submitted'" class="btn btn-approve" (click)="acknowledgeWFP(i)">✅ Approve</button>
+            <button *ngIf="wfp.status === 'Submitted'" class="btn btn-return" (click)="returnWFP(i)">🔄 Return</button>
+            <button *ngIf="wfp.status === 'Submitted'" class="btn btn-deny" (click)="denyWFP(i)">❌ Deny</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

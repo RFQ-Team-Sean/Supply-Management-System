@@ -1,0 +1,1082 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Manage Warehouse</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      View and manage Warehouse, Warehouse Adjustments and Warehouse Transfers in this section.
+    </mat-card-subtitle>
+
+    <p-tabView>
+      <!-- Manage Warehouse Tab -->
+      <p-tabPanel header="Manage Warehouse">
+        <div class="flex justify-between items-center mb-4">
+          <p-button
+            pTooltip="Add Warehouse"
+            (click)="openNewWarehouse()"
+            [outlined]="true"
+            size="small"
+            label="Add Warehouse"
+            icon="pi pi-plus"
+          ></p-button>
+
+          <div class="flex gap-4 items-center">
+            <div class="flex gap-2">
+              <p-dropdown
+                [options]="warehouses"
+                [(ngModel)]="selectedWarehouse"
+                placeholder="Warehouse"
+                optionLabel="name"
+                [showClear]="true"
+                (onChange)="filterStocks()"
+              ></p-dropdown>
+            </div>
+
+            <div class="relative w-full max-w-[300px]">
+              <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+              <input
+                pInputText
+                type="text"
+                #dtStock
+                (input)="dt1.filterGlobal(dtStock.value, 'contains')"
+                placeholder="Search"
+                style="text-indent: 1.5rem;"
+                class="w-full pl-10"
+              />
+            </div>
+          </div>
+        </div>
+
+        <p-table
+          #dt1
+          [value]="warehouseData"
+          [rows]="10"
+          [paginator]="true"
+          [globalFilterFields]="['name', 'building', 'person.name']"
+          [rowHover]="true"
+          dataKey="id"
+          styleClass="p-datatable-striped"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="name">Warehouse <p-sortIcon field="name"></p-sortIcon></th>
+              <th pSortableColumn="building">Building <p-sortIcon field="building"></p-sortIcon></th>
+              <th pSortableColumn="person.name">Person In-Charge</th>
+              <th>Products</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-warehouse>
+            <tr>
+              <td>{{ warehouse.name }}</td>
+              <td>{{ warehouse.building }}</td>
+              <td>
+                <div class="flex items-center gap-2" *ngIf="warehouse.person">
+                  <img [src]="getImageUrl(warehouse.person?.image)" class="w-8 h-8 rounded-full object-cover" />
+                  <div>
+                    <span class="font-medium">{{ warehouse.person?.name }}</span>
+                    <p class="text-sm text-gray-600">{{ warehouse.person?.position }}</p>
+                  </div>
+                </div>
+                <span *ngIf="!warehouse.person" class="text-gray-500">No person assigned</span>
+              </td>
+              <td>
+                <span class="font-medium">{{ warehouse.products?.length || 0 }}</span> items
+              </td>
+              <td>
+                <ng-container *ngTemplateOutlet="actionButtons; context: { $implicit: warehouse }"></ng-container>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+
+      <!-- Warehouse Adjustment Tab -->
+      <p-tabPanel header="Warehouse Adjustment">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-2">
+          </div>
+
+          <div class="flex gap-4 items-center">
+            <div class="flex gap-2">
+              <p-dropdown
+                [options]="warehouses"
+                [(ngModel)]="selectedWarehouse"
+                placeholder="Warehouse"
+                optionLabel="name"
+                [showClear]="true"
+                (onChange)="filterStocks()"
+              ></p-dropdown>
+            </div>
+
+            <div class="relative w-full max-w-[300px]">
+              <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+              <input
+                pInputText
+                type="text"
+                #dtStock
+                (input)="dt1.filterGlobal(dtStock.value, 'contains')"
+                placeholder="Search"
+                style="text-indent: 1.5rem;"
+                class="w-full pl-10"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Adjustments Table -->
+        <p-table
+          #dt2
+          [value]="warehouseData"
+          [rows]="10"
+          [paginator]="true"
+          [globalFilterFields]="['name', 'building']"
+          [rowHover]="true"
+          dataKey="id"
+          styleClass="p-datatable-striped"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="name">Warehouse <p-sortIcon field="name"></p-sortIcon></th>
+              <th pSortableColumn="building">Building <p-sortIcon field="building"></p-sortIcon></th>
+              <th pSortableColumn="person.name">Person In-Charge</th>
+              <th>Total Products</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-warehouse>
+            <tr>
+              <td>{{warehouse.name}}</td>
+              <td>{{warehouse.building}}</td>
+              <td>
+                <div class="flex items-center gap-2" *ngIf="warehouse.person">
+                  <img [src]="warehouse.person.image" class="w-8 h-8 rounded-full object-cover" />
+                  <div>
+                    <span class="font-medium">{{warehouse.person.name}}</span>
+                    <p class="text-sm text-gray-600">{{warehouse.person.position}}</p>
+                  </div>
+                </div>
+                <span *ngIf="!warehouse.person" class="text-gray-500">No person assigned</span>
+              </td>
+              <td>{{warehouse.products?.length || 0}}</td>
+              <td>
+                <button 
+                  pButton 
+                  icon="pi pi-eye" 
+                  class="p-button-rounded p-button-text p-button-sm"
+                  (click)="viewWarehouseAdjustments(warehouse)"
+                  pTooltip="View Adjustments"
+                ></button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+
+      <!-- Add Warehouse Adjustments Dialog -->
+      <p-dialog
+        [(visible)]="adjustmentsDialog"
+        [modal]="true"
+        [style]="{width: '800px'}"
+        [header]="selectedWarehouse?.name + ' - Products'"
+        [draggable]="false"
+        [resizable]="false"
+      >
+        <div class="flex flex-col gap-4" *ngIf="selectedWarehouse">
+          <!-- Warehouse Info -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label class="text-gray-600 text-sm">Building</label>
+                <p class="font-medium">{{selectedWarehouse.building}}</p>
+              </div>
+              <div>
+                <label class="text-gray-600 text-sm">Person In-Charge</label>
+                <div class="flex items-center gap-2 mt-1" *ngIf="selectedWarehouse.person">
+                  <img [src]="selectedWarehouse.person.image" class="w-8 h-8 rounded-full object-cover" />
+                  <span class="font-medium">{{selectedWarehouse.person.name}}</span>
+                </div>
+                <div *ngIf="!selectedWarehouse.person" class="text-gray-500">
+                  No person assigned
+                </div>
+              </div>
+              <div>
+                <label class="text-gray-600 text-sm">Total Products</label>
+                <p class="font-medium">{{selectedWarehouse.products?.length || 0}} items</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products List -->
+          <div class="grid grid-cols-1 gap-3">
+            <div *ngFor="let product of selectedWarehouse.products" 
+                 class="border rounded-lg">
+              <!-- Product Card -->
+              <div class="p-4 cursor-pointer"
+                   (click)="product.showHistory = !product.showHistory"
+                   [class.bg-blue-50]="product.showHistory">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <img [src]="product.image" class="w-12 h-12 rounded object-cover" />
+                    <div>
+                      <h3 class="font-medium">{{product.name}}</h3>
+                      <p class="text-gray-600">Current Stock: {{product.quantity}}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span [class]="getStockStatusClass(product.quantity)">
+                      {{getStockStatus(product.quantity)}}
+                    </span>
+                    <i class="pi" [class.pi-chevron-down]="product.showHistory" 
+                       [class.pi-chevron-right]="!product.showHistory"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Product History Section -->
+              <div class="border-t" *ngIf="product.showHistory">
+                <div class="p-4 bg-gray-50">
+                  <!-- Adjustments History -->
+                  <p-table 
+                    [value]="getProductHistory(selectedWarehouse.id, product.name)"
+                    styleClass="p-datatable-sm"
+                    [paginator]="true"
+                    [rows]="5"
+                  >
+                    <ng-template pTemplate="header">
+                      <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Previous Qty</th>
+                        <th>Adjustment</th>
+                        <th>New Qty</th>
+                        <th>Notes</th>
+                      </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-adjustment>
+                      <tr>
+                        <td>{{adjustment.date | date:'dd MMM yyyy'}}</td>
+                        <td>{{adjustment.type}}</td>
+                        <td>{{adjustment.previousQty}}</td>
+                        <td [ngClass]="{'text-green-500': adjustment.adjustment > 0, 'text-red-500': adjustment.adjustment < 0}">
+                          {{adjustment.adjustment > 0 ? '+' : ''}}{{adjustment.adjustment}}
+                        </td>
+                        <td>{{adjustment.newQty}}</td>
+                        <td>{{adjustment.notes}}</td>
+                      </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                      <tr>
+                        <td colspan="6" class="text-center p-4">
+                          No adjustment history found
+                        </td>
+                      </tr>
+                    </ng-template>
+                  </p-table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Adjustments Dialog -->
+          <p-dialog
+            [(visible)]="showAdjustments"
+            [modal]="true"
+            [style]="{width: '600px'}"
+            [header]="selectedProduct?.name + ' - Adjustment History'"
+            [draggable]="false"
+            [resizable]="false"
+          >
+            <div class="flex flex-col gap-4" *ngIf="selectedProduct">
+              <!-- Current Product Info -->
+              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <img [src]="selectedProduct.image" class="w-16 h-16 rounded object-cover" />
+                <div>
+                  <h3 class="font-medium text-lg">{{selectedProduct.name}}</h3>
+                  <p class="text-gray-600">Current Stock: {{selectedProduct.quantity}}</p>
+                </div>
+              </div>
+
+              <!-- Adjustments History -->
+              <p-table 
+                [value]="getProductHistory(selectedWarehouse.id, selectedProduct.name)"
+                styleClass="p-datatable-sm"
+                [paginator]="true"
+                [rows]="5"
+              >
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Previous Qty</th>
+                    <th>Adjustment</th>
+                    <th>New Qty</th>
+                    <th>Notes</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-adjustment>
+                  <tr>
+                    <td>{{adjustment.date | date:'dd MMM yyyy'}}</td>
+                    <td>{{adjustment.type}}</td>
+                    <td>{{adjustment.previousQty}}</td>
+                    <td [ngClass]="{'text-green-500': adjustment.adjustment > 0, 'text-red-500': adjustment.adjustment < 0}">
+                      {{adjustment.adjustment > 0 ? '+' : ''}}{{adjustment.adjustment}}
+                    </td>
+                    <td>{{adjustment.newQty}}</td>
+                    <td>{{adjustment.notes}}</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
+
+            <ng-template pTemplate="footer">
+              <div class="flex justify-end">
+                <p-button 
+                  label="Close" 
+                  (click)="hideProductAdjustments()"
+                  styleClass="p-button-outlined"
+                ></p-button>
+              </div>
+            </ng-template>
+          </p-dialog>
+        </div>
+
+        <ng-template pTemplate="footer">
+          <div class="flex justify-end">
+            <p-button 
+              label="Close" 
+              (click)="hideAdjustmentsDialog()"
+              styleClass="p-button-outlined"
+            ></p-button>
+          </div>
+        </ng-template>
+      </p-dialog>
+
+      <!-- Warehouse Transfer Tab -->
+      <p-tabPanel header="Warehouse Transfer">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-2">
+            <!-- Add this button -->
+            <p-button
+              pTooltip="Add Transfer"
+              (click)="openNewTransfer()"
+              [outlined]="true"
+              size="small"
+              label="Add Transfer"
+              icon="pi pi-plus"
+            ></p-button>
+          </div>
+
+          <div class="flex gap-4 items-center">
+            <div class="flex gap-2">
+              <p-dropdown
+                [options]="warehouses"
+                [(ngModel)]="selectedWarehouse"
+                placeholder="Warehouse"
+                optionLabel="name"
+                [showClear]="true"
+                (onChange)="filterTransfers()"
+              ></p-dropdown>
+            </div>
+
+            <div class="relative w-full max-w-[300px]">
+              <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+              <input
+                pInputText
+                type="text"
+                #dtTransfer
+                (input)="dt3.filterGlobal(dtTransfer.value, 'contains')"
+                placeholder="Search"
+                style="text-indent: 1.5rem;"
+                class="w-full pl-10"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Transfer actions -->
+        <div class="flex gap-2 mb-4">
+          <p-button
+            icon="pi pi-download"
+            label="Import"
+            (click)="importTransfer()"
+            [outlined]="true"
+            size="small"
+          ></p-button>
+        </div>
+
+        <!-- Transfers Table -->
+        <p-table
+          #dt3
+          [value]="warehouseData"
+          [rows]="10"
+          [paginator]="true"
+          [globalFilterFields]="['name', 'building']"
+          [rowHover]="true"
+          dataKey="id"
+          styleClass="p-datatable-striped"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="name">Warehouse <p-sortIcon field="name"></p-sortIcon></th>
+              <th pSortableColumn="building">Building <p-sortIcon field="building"></p-sortIcon></th>
+              <th pSortableColumn="person.name">Person In-Charge</th>
+              <th>Total Products</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-warehouse>
+            <tr>
+              <td>{{warehouse.name}}</td>
+              <td>{{warehouse.building}}</td>
+              <td>
+                <div class="flex items-center gap-2" *ngIf="warehouse.person">
+                  <img [src]="warehouse.person.image" class="w-8 h-8 rounded-full object-cover" />
+                  <div>
+                    <span class="font-medium">{{warehouse.person.name}}</span>
+                    <p class="text-sm text-gray-600">{{warehouse.person.position}}</p>
+                  </div>
+                </div>
+                <span *ngIf="!warehouse.person" class="text-gray-500">No person assigned</span>
+              </td>
+              <td>{{warehouse.products?.length || 0}}</td>
+              <td>
+                <div class="flex gap-2">
+                  <button 
+                    pButton 
+                    icon="pi pi-eye" 
+                    class="p-button-outlined p-button-rounded p-button-sm"
+                    pTooltip="View"
+                    (click)="viewItem(warehouse)"
+                  ></button>
+                  <button 
+                    pButton 
+                    icon="pi pi-sync" 
+                    class="p-button-rounded p-button-outlined p-button-sm"
+                    (click)="viewWarehouseTransfers(warehouse)"
+                    pTooltip="Transfer Products"
+                  ></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-tabPanel>
+    </p-tabView>
+  </mat-card-content>
+</mat-card>
+
+<!-- Common action buttons template -->
+<ng-template #actionButtons let-item>
+  <div class="flex gap-2">
+    <button 
+      pButton 
+      icon="pi pi-eye" 
+      class="p-button-outlined p-button-rounded p-button-sm"
+      pTooltip="View"
+      (click)="viewItem(item)"
+    ></button>
+    <button 
+      pButton 
+      icon="pi pi-pencil" 
+      class="p-button-outlined p-button-rounded p-button-sm"
+      pTooltip="Edit"
+      (click)="editItem(item)"
+    ></button>
+    <button 
+      pButton 
+      icon="pi pi-trash" 
+      class="p-button-outlined p-button-rounded p-button-danger p-button-sm"
+      pTooltip="Delete"
+      (click)="deleteWarehouse(item)"
+    ></button>
+  </div>
+</ng-template>
+
+<!-- Add Warehouse Dialog -->
+<p-dialog 
+  [(visible)]="addWarehouseDialog" 
+  [modal]="true" 
+  [style]="{width: '450px'}" 
+  header="Add Warehouse"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+>
+  <div class="flex flex-col gap-4">
+    <!-- Warehouse Name -->
+    <div class="field">
+      <label class="font-medium">
+        Warehouse Name
+        <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        pInputText 
+        [(ngModel)]="warehouseName"
+        placeholder="Enter warehouse name"
+        class="w-full"
+      >
+    </div>
+
+    <!-- Building -->
+    <div class="field">
+      <label class="font-medium">
+        Building
+        <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        pInputText 
+        [(ngModel)]="building"
+        placeholder="Enter building"
+        class="w-full"
+      >
+    </div>
+
+    <!-- Responsible Person -->
+    <div class="field">
+      <label class="font-medium">
+        Person In-Charge
+        <span class="text-red-500">*</span>
+      </label>
+      <div class="flex flex-col gap-3">
+        <div class="grid grid-cols-[auto_1fr] gap-4 items-start">
+          <!-- Image Upload Section -->
+          <div class="relative w-32">
+            <img 
+              [src]="personImage || 'assets/placeholder-person.png'" 
+              class="w-32 h-32 object-cover rounded-lg border"
+              alt="Person image"
+            />
+            <div class="absolute -bottom-2 -right-2">
+              <input 
+                type="file" 
+                #fileInput 
+                (change)="onImageUpload($event)" 
+                accept="image/*" 
+                class="hidden"
+              />
+              <button 
+                pButton 
+                type="button" 
+                icon="pi pi-camera" 
+                class="p-button-rounded p-button-sm"
+                (click)="fileInput.click()"
+              ></button>
+            </div>
+          </div>
+
+          <!-- Person Details Form -->
+          <div class="flex flex-col gap-3">
+            <input 
+              type="text" 
+              pInputText 
+              [(ngModel)]="personName"
+              placeholder="Enter name"
+              class="w-full"
+            >
+            <p-dropdown
+              [options]="positions"
+              [(ngModel)]="selectedPosition"
+              placeholder="Select position"
+              optionLabel="name"
+              [showClear]="true"
+              styleClass="w-full"
+            ></p-dropdown>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Initial Products -->
+    <div class="field">
+      <label class="font-medium mb-2 block">
+        Initial Products
+      </label>
+      <div class="flex flex-col gap-3">
+        <div *ngFor="let product of selectedProducts; let i = index" 
+             class="grid grid-cols-12 gap-4 p-3 border rounded-lg bg-gray-50">
+          <!-- Product Name or Dropdown -->
+          <div class="col-span-5">
+            <p-dropdown
+              [options]="products"
+              [(ngModel)]="selectedProducts[i].product"
+              placeholder="Select product"
+              optionLabel="name"
+              [showClear]="true"
+              styleClass="w-full"
+            ></p-dropdown>
+            <input 
+              *ngIf="!selectedProducts[i].product"
+              type="text" 
+              pInputText 
+              [(ngModel)]="selectedProducts[i].newProductName"
+              placeholder="Enter new product name"
+              class="w-full mt-2"
+            >
+          </div>
+
+          <!-- Quantity -->
+          <div class="col-span-4">
+            <input 
+              type="number" 
+              pInputText 
+              [(ngModel)]="selectedProducts[i].quantity"
+              placeholder="Enter quantity"
+              class="w-full"
+            >
+          </div>
+
+          <!-- Remove Button -->
+          <div class="col-span-3 flex items-center justify-end">
+            <button 
+              pButton 
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-danger p-button-sm"
+              (click)="removeProduct(i)"
+            ></button>
+          </div>
+        </div>
+
+        <!-- Add Product Button -->
+        <div class="flex justify-end">
+          <button 
+            pButton 
+            type="button"
+            label="Add Product"
+            icon="pi pi-plus"
+            (click)="addProduct()"
+            [outlined]="true"
+            class="w-full"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog Footer -->
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <p-button 
+        label="Cancel" 
+        (click)="hideAddWarehouseDialog()"
+        styleClass="p-button-outlined"
+      ></p-button>
+      <p-button 
+        label="Add Warehouse" 
+        (click)="saveWarehouse()"
+        [disabled]="!isWarehouseFormValid()"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Add Transfer Dialog -->
+<p-dialog 
+  [(visible)]="addTransferDialog" 
+  [modal]="true" 
+  [style]="{width: '450px'}" 
+  header="Add Transfer"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+>
+  <div class="flex flex-col gap-4">
+    <!-- Warehouse From -->
+    <div class="field">
+      <label class="font-medium">
+        Warehouse From
+        <span class="text-red-500">*</span>
+      </label>
+      <p-dropdown
+        [options]="warehouses"
+        [(ngModel)]="selectedFromWarehouse"
+        placeholder="Select source warehouse"
+        optionLabel="name"
+        [showClear]="true"
+        (onChange)="onFromWarehouseChange($event)"
+        styleClass="w-full"
+      ></p-dropdown>
+    </div>
+
+    <!-- Product Selection - Only shown if source warehouse is selected -->
+    <div class="field" *ngIf="selectedFromWarehouse">
+      <label class="font-medium">
+        Product
+        <span class="text-red-500">*</span>
+      </label>
+      <p-dropdown
+        [options]="availableProducts"
+        [(ngModel)]="selectedProduct"
+        placeholder="Select product"
+        optionLabel="name"
+        [showClear]="true"
+        [filter]="true"
+        styleClass="w-full"
+      >
+        <ng-template pTemplate="item" let-product>
+          <div class="flex items-center gap-2">
+            <img [src]="product.image" class="w-8 h-8 object-cover rounded" />
+            <div>
+              <div>{{product.name}}</div>
+              <div class="text-sm text-gray-600">Available: {{product.quantity}}</div>
+            </div>
+          </div>
+        </ng-template>
+      </p-dropdown>
+    </div>
+
+    <!-- Warehouse To - Only shown if product is selected -->
+    <div class="field" *ngIf="selectedProduct">
+      <label class="font-medium">
+        Warehouse To
+        <span class="text-red-500">*</span>
+      </label>
+      <p-dropdown
+        [options]="warehouses"
+        [(ngModel)]="selectedToWarehouse"
+        placeholder="Select destination warehouse"
+        optionLabel="name"
+        [showClear]="true"
+        [filter]="true"
+        styleClass="w-full"
+      ></p-dropdown>
+    </div>
+
+    <!-- Transfer Quantity - Only shown if destination warehouse is selected -->
+    <div class="field" *ngIf="selectedToWarehouse">
+      <label class="font-medium">
+        Transfer Quantity
+        <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="number" 
+        pInputText 
+        [(ngModel)]="transferQuantity"
+        [max]="selectedProduct?.quantity"
+        [min]="1"
+        class="w-full"
+      />
+      <small class="text-gray-600" *ngIf="selectedProduct">
+        Available: {{selectedProduct.quantity}}
+      </small>
+    </div>
+
+    <!-- Reference Number -->
+    <div class="field">
+      <label class="font-medium">
+        Reference Number
+        <span class="text-red-500">*</span>
+      </label>
+      <input 
+        type="text" 
+        pInputText 
+        [(ngModel)]="referenceNumber"
+        placeholder="Enter reference number"
+        class="w-full"
+      />
+    </div>
+
+    <!-- Notes -->
+    <div class="field">
+      <label class="font-medium">
+        Notes
+        <span class="text-red-500">*</span>
+      </label>
+      <textarea 
+        pInputTextarea 
+        [(ngModel)]="notes"
+        [rows]="3"
+        placeholder="Enter transfer notes"
+        class="w-full"
+      ></textarea>
+    </div>
+  </div>
+
+  <!-- Dialog Footer -->
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <p-button 
+        label="Cancel" 
+        (click)="hideAddTransferDialog()"
+        styleClass="p-button-outlined"
+      ></p-button>
+      <p-button 
+        label="Transfer" 
+        (click)="saveTransfer()"
+        [disabled]="!isTransferValid()"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Add View Dialog -->
+<p-dialog 
+  [(visible)]="viewDialog" 
+  [modal]="true" 
+  [style]="{width: '700px'}" 
+  header="Warehouse Details"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="flex flex-col gap-6" *ngIf="selectedItem">
+    <div class="flex gap-6 p-4 bg-gray-50 rounded-lg">
+      <div class="flex-1">
+        <h3 class="text-xl font-semibold mb-4">{{selectedItem.name}}</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="text-gray-600 text-sm">Building</label>
+            <p class="font-medium">{{selectedItem.building}}</p>
+          </div>
+          <div>
+            <label class="text-gray-600 text-sm">Total Products</label>
+            <p class="font-medium">{{selectedItem.products?.length || 0}} items</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm w-64">
+        <label class="text-gray-600 text-sm block mb-2">Person In-Charge</label>
+        <div class="flex items-center gap-3" *ngIf="selectedItem.person">
+          <img [src]="getImageUrl(selectedItem.person?.image)" 
+               class="w-12 h-12 object-cover rounded-full border-2 border-gray-200" 
+               alt="Person image"/>
+          <div>
+            <h4 class="font-medium">{{selectedItem.person?.name}}</h4>
+            <p class="text-sm text-gray-600">{{selectedItem.person?.position}}</p>
+          </div>
+        </div>
+        <div *ngIf="!selectedItem.person" class="text-gray-500">
+          No person assigned
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-4">
+      <h3 class="text-lg font-medium">Warehouse Inventory</h3>
+      <p-table [value]="selectedItem.products" styleClass="p-datatable-sm" [paginator]="true" [rows]="5">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 50px"></th>
+            <th>Product Name</th>
+            <th>Current Stock</th>
+            <th>Status</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product>
+          <tr>
+            <td>
+              <img [src]="getImageUrl(product.image)" class="w-10 h-10 object-cover rounded" alt="Product image"/>
+            </td>
+            <td>{{product.name}}</td>
+            <td>{{product.quantity}}</td>
+            <td>
+              <span [class]="getStockStatusClass(product.quantity)">
+                {{getStockStatus(product.quantity)}}
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Close" (click)="hideViewDialog()" styleClass="p-button-outlined"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Add Edit Dialog -->
+<p-dialog 
+  [(visible)]="editDialog" 
+  [modal]="true" 
+  [style]="{width: '450px'}" 
+  header="Edit Warehouse"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+>
+  <div class="flex flex-col gap-4" *ngIf="selectedItem">
+    <div class="field">
+      <label class="font-medium">Warehouse Name</label>
+      <input type="text" pInputText [(ngModel)]="warehouseName" class="w-full">
+    </div>
+    <div class="field">
+      <label class="font-medium">Building</label>
+      <input type="text" pInputText [(ngModel)]="building" class="w-full">
+    </div>
+    <div class="field">
+      <label class="font-medium">Person In-Charge</label>
+      <div class="flex flex-col gap-3">
+        <input type="text" pInputText [(ngModel)]="personName" class="w-full">
+        <p-dropdown [options]="positions" [(ngModel)]="selectedPosition" placeholder="Select position" optionLabel="name" [showClear]="true" styleClass="w-full"></p-dropdown>
+      </div>
+    </div>
+    <div class="field">
+      <label class="font-medium">Products</label>
+      <div class="flex flex-col gap-3">
+        <div *ngFor="let product of selectedProducts; let i = index" class="flex items-center gap-2">
+          <p-dropdown [options]="products" [(ngModel)]="selectedProducts[i].product" placeholder="Select product" optionLabel="name" [showClear]="true" styleClass="flex-1"></p-dropdown>
+          <input type="number" pInputText [(ngModel)]="selectedProducts[i].quantity" class="w-24">
+          <button pButton icon="pi pi-trash" class="p-button-danger p-button-outlined" (click)="removeProduct(i)"></button>
+        </div>
+        <button pButton label="Add Product" icon="pi pi-plus" (click)="addProduct()" [outlined]="true"></button>
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" (click)="hideEditDialog()" styleClass="p-button-outlined"></p-button>
+      <p-button label="Update" (click)="updateItem()" [disabled]="!isWarehouseFormValid()"></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Transfer Dialog -->
+<p-dialog
+  [(visible)]="transferDialog"
+  [modal]="true"
+  [style]="{width: '800px'}"
+  [header]="selectedFromWarehouse?.name + ' - Transfer Products'"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="flex flex-col gap-4" *ngIf="selectedFromWarehouse">
+    <!-- Warehouse Info -->
+    <div class="bg-gray-50 p-4 rounded-lg">
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="text-gray-600 text-sm">Building</label>
+          <p class="font-medium">{{selectedFromWarehouse.building}}</p>
+        </div>
+        <div>
+          <label class="text-gray-600 text-sm">Person In-Charge</label>
+          <div class="flex items-center gap-2 mt-1" *ngIf="selectedFromWarehouse.person">
+            <img [src]="selectedFromWarehouse.person.image" class="w-8 h-8 rounded-full object-cover" />
+            <span class="font-medium">{{selectedFromWarehouse.person.name}}</span>
+          </div>
+          <div *ngIf="!selectedFromWarehouse.person" class="text-gray-500">
+            No person assigned
+          </div>
+        </div>
+        <div>
+          <label class="text-gray-600 text-sm">Total Products</label>
+          <p class="font-medium">{{selectedFromWarehouse.products?.length || 0}} items</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products List -->
+    <div class="grid grid-cols-1 gap-3">
+      <div *ngFor="let product of selectedFromWarehouse.products" 
+           class="border rounded-lg">
+        <!-- Product Card -->
+        <div class="p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img [src]="product.image" class="w-12 h-12 rounded object-cover" />
+              <div>
+                <h3 class="font-medium">{{product.name}}</h3>
+                <p class="text-gray-600">Available Stock: {{product.quantity}}</p>
+              </div>
+            </div>
+            <button 
+              pButton 
+              label="Transfer"
+              class="p-button-sm"
+              [disabled]="product.quantity <= 0"
+              (click)="selectTransferProduct(product)"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end">
+      <p-button 
+        label="Close" 
+        (click)="hideTransferDialog()"
+        styleClass="p-button-outlined"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Transfer Product Dialog -->
+<p-dialog
+  [(visible)]="selectedTransferProduct"
+  [modal]="true"
+  [style]="{width: '500px'}"
+  [header]="'Transfer ' + selectedTransferProduct?.name"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="flex flex-col gap-4" *ngIf="selectedTransferProduct">
+    <!-- Product Info -->
+    <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+      <img [src]="selectedTransferProduct.image" class="w-16 h-16 rounded object-cover" />
+      <div>
+        <h3 class="font-medium text-lg">{{selectedTransferProduct.name}}</h3>
+        <p class="text-gray-600">Available Stock: {{selectedTransferProduct.quantity}}</p>
+      </div>
+    </div>
+
+    <!-- Transfer Form -->
+    <div class="flex flex-col gap-4">
+      <div class="field">
+        <label class="font-medium">Destination Warehouse</label>
+        <p-dropdown
+          [options]="warehouses"
+          [(ngModel)]="selectedToWarehouse"
+          placeholder="Select destination warehouse"
+          optionLabel="name"
+          [showClear]="true"
+          [filter]="true"
+          styleClass="w-full"
+        ></p-dropdown>
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Transfer Quantity</label>
+        <input 
+          type="number" 
+          pInputText 
+          [(ngModel)]="transferQuantity"
+          [max]="selectedTransferProduct.quantity"
+          class="w-full"
+        />
+      </div>
+
+      <div class="field">
+        <label class="font-medium">Notes</label>
+        <textarea 
+          pInputTextarea 
+          [(ngModel)]="transferNotes"
+          rows="3"
+          class="w-full"
+          placeholder="Enter transfer notes..."
+        ></textarea>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button 
+        label="Cancel" 
+        (click)="hideTransferProductDialog()"
+        styleClass="p-button-outlined"
+      ></p-button>
+      <p-button 
+        label="Transfer" 
+        (click)="saveTransfer()" 
+        [disabled]="!isTransferValid()"
+      ></p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>

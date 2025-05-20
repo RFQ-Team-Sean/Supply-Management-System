@@ -1,0 +1,190 @@
+  <mat-card class="cardWithShadow">
+      <mat-card-content>
+        <h1 class="font-semibold text-xl">{{config.title}}</h1>
+        <p class="flex justify-between items-center">
+          <span> {{config.description}} </span>
+          <p-iconfield fluid class="w-full max-w-72">
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              fluid
+              class="w-full"
+              [(ngModel)]="searchValue"
+              (input)="dt.filterGlobal(searchValue, 'contains')"
+              type="text"
+              pInputText
+              placeholder="Search"
+            />
+          </p-iconfield>
+        </p>
+    
+        <div class="card mb-1 flex items-center w-full py-3 px-4 gap-3">
+          <div class="flex-1 px-6 border-dotted rounded-xl border-gray-700/25 border-2">
+            <p-stepper [(value)]="config.activeStep" class="w-full" fluid>
+              <p-step-list>
+                  <p-step pTooltip="{{config.steps[0].tooltip??''}}" [value]="0" class="flex flex-row flex-auto gap-2">
+                    <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                      <button class="bg-transparent border-0 flex items-center gap-2 px-2" (click)="activateCallback(); config.steps[0].function ? config.steps[0].function($event,config.steps[0].id) : null">
+                        <i [ngClass]="{'text-primary': value == config.activeStep}" class="{{config.steps[0].icon?config.steps[0].icon + ' mr-1' :''}}"></i>
+                        <span [ngClass]="{'text-primary': value == config.activeStep}">{{config.steps[0].label}}</span>
+                      </button>
+                    </ng-template>
+                  </p-step>
+                  <p-step pTooltip="{{config.steps[1].tooltip??''}}" [value]="1" class="flex flex-row flex-auto gap-2">
+                    <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                      <button class="bg-transparent border-0 flex items-center gap-2 px-2" (click)="activateCallback(); config.steps[1].function ? config.steps[1].function($event,config.steps[1].id) : null">
+                        <i [ngClass]="{'text-primary': value == config.activeStep}" class="{{config.steps[1].icon?config.steps[1].icon + ' mr-1' :''}}"></i>
+                        <span [ngClass]="{'text-primary': value == config.activeStep}">{{config.steps[1].label}}</span>
+                      </button>
+                    </ng-template>
+                  </p-step>
+                  @if(config.steps.length == 3){
+                    <p-step pTooltip="{{config.steps[2].tooltip??''}}" [value]="2" class="flex flex-row flex-auto gap-2">
+                      <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                        <button class="bg-transparent border-0 flex items-center gap-2 px-2" (click)="activateCallback(); config.steps[2].function ? config.steps[2].function($event,config.steps[2].id) : null">
+                          <i [ngClass]="{'text-primary': value == config.activeStep}" class="{{config.steps[2].icon?config.steps[2].icon + ' mr-1' :''}}"></i>
+                          <span [ngClass]="{'text-primary': value == config.activeStep}">{{config.steps[2].label}}</span>
+                        </button>
+                      </ng-template>
+                    </p-step>
+                  }
+                
+              </p-step-list>
+            </p-stepper>
+          </div>
+        <!-- Add Action Buttons -->
+            @for (action of config.topActions; track action){
+              @if (!action.hidden && (action.only == undefined || action.only.includes(config.steps[config.activeStep].id))  ) {
+                <p-button 
+                  [pTooltip]="action.tooltip"
+                  (click)="action.function()"
+                  [outlined]="true"
+                  [severity]="action.color"
+                  [disabled]="!config.dataLoaded"
+                  [label]="action.label"
+                  [icon]="action.icon"
+              ></p-button>
+              
+              }
+          }
+        </div>
+    
+        <!-- Disbursement Voucher Table -->
+        <p-table
+          #dt
+          [rowHover]="true"
+          [value]="filteredData()"
+          [paginator]="true"
+          [rows]="5"
+          [rowsPerPageOptions]="[5, 10, 20]"
+          [globalFilterFields]="getFieldNames()"
+          [tableStyle]="{ 'min-width': '50rem' }"
+        >
+          <ng-template #header>
+            <tr>
+              @for(column of getColumnNames(); track column){
+                  <th>{{column}}</th>
+              }
+              @if(hasActions()){
+                <th style="width: 5rem">Actions</th>
+              }
+            </tr>
+          </ng-template>
+    
+          <ng-template #body let-row>
+            @if(config.dataLoaded){
+              <tr [class]="config.rowHighlight ? config.rowHighlight(row):''">
+                @for(field of getFields(); track field){
+                  <td>{{formatValue(field,row)}}</td>
+                }
+                @if(hasActions()){
+                  <td>
+                    <div class="flex gap-3">
+                      <p-menu 
+                        #menu 
+                        [model]="getMenuItems(row)" 
+                        [popup]="true" 
+                        appendTo="body">
+                      </p-menu>
+                      @if(getMenuItems(row).length > 0){
+                        <p-button
+                        rounded="true"
+                        icon="pi pi-ellipsis-v"
+                        pTooltip="Click for more actions"
+                        [outlined]="true"
+                        size="small"
+                        (click)="menu.toggle($event)">
+                      </p-button>
+                      }
+                      @for(action of getRowActions(row) ; track action.label; let r = $index){
+                        @if(action.hidden ? !action.hidden(row):true){
+                          <p-button
+                            [severity]="action.color"
+                            [pTooltip]="action.tooltip"
+                            [outlined]="true"
+                            size="small"
+                            [disabled]="action.disabled ? action.disabled(row):false"
+                            [icon]="action.icon"
+                            [label]="action.shape == 'rounded' ? '':action.label"
+                            [rounded]="action.shape == 'rounded'"
+                            (click)="action.function ? action.confirmation ? confirm($event, row, action) : triggerRowAction($event, row,action):null"
+                          ></p-button>
+                        }
+                      }
+                    </div>
+                  </td>
+                }
+              </tr>
+            }
+            @else{
+              <tr>
+                @for( field of getFields(); track field){
+                  <td><p-skeleton /></td>
+                }
+                @if(hasActions()){
+                  <td><p-skeleton /></td>
+                }
+              </tr>
+            }
+            
+          </ng-template>
+    
+          <ng-template #emptymessage>
+            @if (config.dataLoaded){
+              <tr>
+                <td [attr.colspan]="getColumnNames().length + (hasActions() ? 1 :0)">
+                  <div class="flex flex-col w-full items-center justify-center mb-8">
+                    <div class="overflow-hidden h-52 w-52 mr-8">
+                      <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+                    </div>
+                    <span>No items found.</span>
+                  </div>
+                </td>
+              </tr>
+            }
+            @else{
+              @for(num of [1,2,3,4,5]; track num){
+                <tr>
+                  @for( field of getFields(); track field){
+                    <td><p-skeleton /></td>
+                  }
+                  @if(hasActions()){
+                    <td><p-skeleton /></td>
+                  }
+                </tr>
+              }
+            }
+          </ng-template>
+        </p-table>
+    
+        <div class="card flex justify-between">
+          <p-button [disabled]="config.activeStep <= 0" outlined  label="Back" icon="pi pi-arrow-left" (click)="prevStep()" />
+          <p-button [disabled]="config.activeStep >= config.steps.length-1" outlined label="Next" icon="pi pi-arrow-right" (click)="nextStep()" iconPos="right" />
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    @if(confirmMode == 'popup'){
+      <p-confirmpopup appendTo="body" />
+    }@else{
+      <p-confirmdialog />
+    }

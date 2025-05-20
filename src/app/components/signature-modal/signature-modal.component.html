@@ -1,0 +1,53 @@
+<!-- signature-modal.component.html -->
+<p-dialog 
+  [(visible)]="config.show" 
+  [modal]="true" 
+  [style]="{width: '30rem'}"
+  [draggable]="false"
+  [resizable]="false">
+  <ng-template #header>
+    <div class="py-0 inline-flex items-center justify-center gap-3">
+        <i class="pi pi-box text-lg"></i>
+        <span class="font-bold text-lg whitespace-nowrap">{{config.title ?? 'Add Signature'}}</span>
+    </div>
+  </ng-template>
+  <span class="p-text-secondary block mb-2">
+    {{config.description ?? 'You can always add your signature on your profile.'}}
+  </span>
+  <div class="border-2 border-gray-300 rounded-lg p-2 bg-white">
+    <canvas
+      id="signatureCanvas"
+      width="350"
+      height="150"
+      class="w-full h-[150px]"
+      (mousedown)="startDrawing($event)"
+      (mousemove)="draw($event)"
+      (mouseup)="stopDrawing()"
+      (mouseleave)="stopDrawing()">
+    </canvas>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button 
+        label="Cancel" 
+        icon="pi pi-times" 
+        severity="secondary"
+        outlined="true"
+        (click)="cancel()">
+      </p-button>
+      <p-button 
+        label="Clear" 
+        icon="pi pi-eraser" 
+        severity="danger"
+        outlined="true"
+        (click)="clearSignature()">
+      </p-button>
+      <p-button 
+        label="Save" 
+        icon="pi pi-check"
+        (click)="saveSignature()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,12 @@
+:host ::ng-deep .p-dialog {
+    height: auto !important; // Allow auto height adjustment
+    overflow: visible !important; // Prevent dropdown clipping
+  }
+  
+  :host ::ng-deep .p-dialog-content {
+    overflow: visible !important; // Ensures dropdown is visible outside modal
+  }
+  
+  :host ::ng-deep .p-dropdown-panel {
+    z-index: 1050 !important; // Ensures dropdown appears above modal
+  }

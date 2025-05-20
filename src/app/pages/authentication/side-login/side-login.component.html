@@ -1,0 +1,87 @@
+<div class="blank-layout-container justify-content-center align-items-center">
+  <img src="assets/images/backgrounds/login-bg.jpg" class="w-full h-full z-0 absolute" alt="">
+  <div class="position-relative row w-100 h-100 bg-gredient justify-content-center z-10">
+    <div class="col-xl-4  d-flex align-items-center">
+      <mat-card class="boxed-auth rounded-[2rem]  border-solid border-8 border-black hover:border-purple-700  ">
+        <mat-card-content class="p-32">
+          <div class="flex flex-col justify-center items-center">
+
+            <div class="flex">
+              <div class="overflow-hidden h-56">
+                <app-lottie-animation animation="box" class="flex-1 h-64" />
+              </div>
+            </div>
+            <!-- <img
+              src="./assets/images/logos/qbyy.png"
+              class="m-2 h-20"
+              alt="logo"
+            /> -->
+
+            <div
+              class="text-[1.7rem] font-extrabold tracking-tight text-transparent bg-clip-text mt-6 bg-gradient-to-r from-blue-800 via-blue-500 to-purple-700">
+              PROCUREMENT SYSTEM</div>
+            <small class="text-sm ">Quanby Solutions Inc.</small>
+            <!-- <small class="text-xs">Efficiently track, manage, and grow your assets.</small> -->
+          </div>
+          <form [formGroup]="form" (submit)="submit()" class="m-t-12 flex flex-col gap-16">
+            <div>
+              <h1 class="text-lg font-bold ml-1">Welcome back!</h1>
+              <p class=" ml-1">Sign in using your account</p>
+            </div>
+            <p-iftalabel>
+              <input pInputText pTooltip="Enter your username" tooltipPosition="left" size="small" id="username"
+                formControlName="username" fluid />
+              <label for="username" class="mt-1">Username</label>
+              <small *ngIf="form.get('username')?.invalid && form.get('username')?.touched" id="username-error"
+                class="ml-1 text-red-500">Username is required.</small>
+            </p-iftalabel>
+            <p-iftalabel>
+              <div class="relative">
+                <p-password pTooltip="Enter your password" tooltipPosition="left" size="small" [toggleMask]="true"
+                  [feedback]="false" inputId="password" type="password" class="rounded-xl" formControlName="password"
+                  fluid />
+              </div>
+              <label for="password" class="mt-1">Password</label>
+              <small *ngIf="form.get('password')?.hasError('required') && form.get('password')?.touched"
+                id="password-error" class="ml-1 text-red-500">Password is required.</small>
+              <small *ngIf="form.get('password')?.hasError('minlength') && form.get('password')?.touched"
+                id="password-error" class="ml-1 text-red-500">Minimum password length is 6 characters.</small>
+            </p-iftalabel>
+            <div class="d-flex align-items-center">
+              <mat-checkbox color="primary">Remember this Device</mat-checkbox>
+              <a (click)="showDialog()" class="text-primary f-w-600 text-decoration-none m-l-auto f-s-14">Forgot
+                Password ?</a>
+            </div>
+            <div class="flex flex-col gap-10 w-100 items-center">
+              <button mat-flat-button color="primary" class="w-full">
+                Sign In
+              </button>
+            </div>
+            <!-- input -->
+          </form>
+          <span class="d-block f-w-500 text-center m-t-24">Doesn't have an account?
+            <a [routerLink]="['/authentication/register']" class="text-decoration-none text-primary f-w-500 f-s-14">
+              Request an account</a>
+          </span>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+
+<p-dialog header="Forget Password" [(visible)]="display" [modal]="true">
+  <ng-template #header>
+    <div class="py-0 inline-flex items-center justify-center gap-3">
+      <i class="pi pi-key text-lg"></i>
+      <span class="font-bold text-lg whitespace-nowrap">Forgot Password</span>
+    </div>
+  </ng-template>
+  <span class="p-text-secondary block">We have sent an OTP to your account email.</span>
+  <small class="p-text-secondary block mb-6">(Please enter it below to reset your password.)</small>
+  <div class="flex justify-center items-center pb-4">
+    <p-inputotp [(ngModel)]="otp" [integerOnly]="true" [size]="'large'" />
+  </div>
+</p-dialog>
+
+<p-toast position="bottom-right" />

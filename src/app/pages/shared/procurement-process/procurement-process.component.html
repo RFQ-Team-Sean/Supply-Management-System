@@ -1,0 +1,11 @@
+<div class="">
+    <app-multi-table class="" [config]="procurementMethod"></app-multi-table>
+    <p-divider layout="horizontal"></p-divider>
+    <app-multi-table class="" [config]="procurementProcess"></app-multi-table>
+</div>
+@if(modeForm.show){
+    <app-dynamic-form [config]="modeForm"></app-dynamic-form>
+}
+@if(processForm.show){
+    <app-dynamic-form [config]="processForm"></app-dynamic-form>
+}

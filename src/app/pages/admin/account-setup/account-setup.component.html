@@ -1,0 +1,137 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Account Setup</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      Manage Payables, Inventory, Purchase Return, and Purchases accounts.
+    </mat-card-subtitle>
+
+    <div class="flex justify-between items-center mt-4">
+      <p-button
+        label="Add Account"
+        icon="pi pi-plus"
+        size="small"
+        outlined="true"
+        (click)="openAccountDialog()"
+      ></p-button>
+
+      <div class="relative w-[300px]">
+        <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+        <input
+          pInputText
+          type="text"
+          #searchInput
+          (input)="accountTable.filterGlobal(searchInput.value, 'contains')"
+          placeholder="Search Accounts"
+          class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+    </div>
+
+    <p-table
+      #accountTable
+      [value]="users"
+      [rows]="10"
+      [paginator]="true"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      styleClass="p-datatable-sm mt-4"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="fullname">Name <p-sortIcon field="fullname"></p-sortIcon></th>
+          <th pSortableColumn="role">Role <p-sortIcon field="role"></p-sortIcon></th>
+          <th pSortableColumn="assignedRole">Access <p-sortIcon field="assignedRole"></p-sortIcon></th>
+          <th class="w-[100px]">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>{{ user.fullname }}</td>
+          <td>
+            <p-badge [value]="user.role" severity="info"></p-badge>
+          </td>
+          <td>
+            <p-badge [value]="user.assignedRole" severity="secondary"></p-badge>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <p-button
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-primary p-button-sm"
+                outlined="true"
+                (click)="openAccountDialog(user)"
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                class="p-button-rounded  p-button-sm"
+                outlined="true"
+                (click)="deleteAccount(user)"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4">
+            <div class="flex flex-col w-full items-center justify-center py-8">
+              <span>No accounts found.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+<!-- Account Setup Dialog -->
+<p-dialog 
+  [(visible)]="accountDialog"
+  [modal]="true" 
+  [position]="'center'"
+  [style]="{ width: '30rem' }"
+>
+  <ng-template pTemplate="header">
+    <div class="py-0 inline-flex items-center justify-center gap-3">
+      <i class="pi pi-file-edit text-lg"></i>
+      <span class="font-bold text-lg whitespace-nowrap">
+        {{ isEditMode ? 'Edit Account' : 'Add Account' }}
+      </span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="accountForm" class="w-full">
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-32">Name</label>
+      <input
+        type="text"
+        pInputText
+        formControlName="fullname"
+        placeholder="Enter name"
+        class="w-full"
+      />
+    </div>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-32">User Type</label>
+      <input
+        type="text"
+        pInputText
+        formControlName="role"
+        class="w-full"
+      />
+    </div>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label class="font-semibold w-32">Role</label>
+      <p-dropdown
+        formControlName="assignedRole"
+        [options]="userRoles"
+        placeholder="Select Role"
+        class="w-full"
+        appendTo="body"
+      ></p-dropdown>
+    </div>
+  </form>
+</p-dialog>

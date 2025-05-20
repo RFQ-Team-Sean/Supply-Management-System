@@ -1,0 +1,323 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+        <mat-card-title>Special Receiving</mat-card-title>
+        <mat-card-subtitle class="text-sm text-gray-500">
+            Record and manage items received as gifts or donations.
+        </mat-card-subtitle>
+
+    <div class="flex justify-end items-center mb-4 gap-4">
+      <div class="relative w-72">
+        <input 
+          type="text" 
+          class="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-300" 
+          [(ngModel)]="searchValue" 
+          (input)="dt.filterGlobal(searchValue,'contains')" 
+          placeholder="Search" 
+        />
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="pi pi-search text-gray-400 text-sm"></i>
+        </span>
+      </div>
+
+      <p-button 
+        pTooltip="Click to add donate" 
+        [outlined]="true" 
+        size="small" 
+        label="Add Donate" 
+        (click)="openNewDialog()" 
+        icon="pi pi-plus">
+      </p-button>
+    </div>
+
+    <p-table #dt [value]="items" [rows]="10" [paginator]="true" [globalFilterFields]="['itemName','donor','description']"
+      [rowHover]="true" dataKey="id" [rowsPerPageOptions]="[10,25,50]"
+      styleClass="p-datatable-sm p-datatable-gridlines">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="w-[200px]" pSortableColumn="itemName">
+            <div class="flex items-center gap-2">
+              Item Name
+              <p-sortIcon field="itemName"></p-sortIcon>
+            </div>
+          </th>
+          <th class="w-[250px]" pSortableColumn="description">
+            <div class="flex items-center gap-2">
+              Description
+              <p-sortIcon field="description"></p-sortIcon>
+            </div>
+          </th>
+          <th class="w-[120px]" pSortableColumn="quantity">
+            <div class="flex items-center gap-2">
+              Quantity
+              <p-sortIcon field="quantity"></p-sortIcon>
+            </div>
+          </th>
+          <th class="w-[120px]" pSortableColumn="unit">
+            <div class="flex items-center gap-2">
+              Unit
+              <p-sortIcon field="unit"></p-sortIcon>
+            </div>
+          </th>
+          <th class="w-[200px]" pSortableColumn="donor">
+            <div class="flex items-center gap-2">
+              Donor
+              <p-sortIcon field="donor"></p-sortIcon>
+            </div>
+          </th>
+          <th class="w-[150px]" pSortableColumn="receivedDate">
+            <div class="flex items-center gap-2">
+              Received Date
+              <p-sortIcon field="receivedDate"></p-sortIcon>
+            </div>
+          </th>
+          <th class="w-[120px]">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr>
+          <td>{{item.itemName}}</td>
+          <td>{{item.description}}</td>
+          <td>{{item.quantity}}</td>
+          <td>{{item.unit}}</td>
+          <td>{{item.donor}}</td>
+          <td>{{item.receivedDate | date:'shortDate'}}</td>
+          <td>
+            <div class="flex gap-2">
+              <button type="button" 
+                      class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                      (click)="viewDetails(item)"
+                      pTooltip="View Details">
+                  <i class="pi pi-eye text-blue-500"></i>
+              </button>
+              <button type="button" 
+                      class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                      (click)="editItem(item)"
+                      pTooltip="Edit">
+                  <i class="pi pi-pencil"></i>
+              </button>
+              <button type="button" 
+                      class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                      (click)="deleteItem($event, item)"
+                      pTooltip="Delete">
+                  <i class="pi pi-trash text-red-500"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="text-center p-4">No items found.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+<!-- Add/Edit Dialog -->
+<p-dialog [(visible)]="showItemDialog" [header]="isEditing ? 'Edit Donate' : 'Add Donate'"
+  [modal]="true" [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">
+  
+  <form [formGroup]="itemForm" class="flex flex-col gap-4">
+    <!-- Basic Information Section -->
+    <div class="border rounded-lg p-4 mb-4">
+      <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="field">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Item Name*</label>
+          <input type="text" pInputText formControlName="itemName" class="w-full" />
+          <small class="text-red-500" *ngIf="itemForm.get('itemName')?.invalid && itemForm.get('itemName')?.touched">
+            Item Name is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Donor*</label>
+          <input type="text" pInputText formControlName="donor" class="w-full" />
+          <small class="text-red-500" *ngIf="itemForm.get('donor')?.invalid && itemForm.get('donor')?.touched">
+            Donor is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Quantity*</label>
+          <p-inputNumber formControlName="quantity" [min]="1" class="w-full"></p-inputNumber>
+          <small class="text-red-500" *ngIf="itemForm.get('quantity')?.invalid && itemForm.get('quantity')?.touched">
+            Valid quantity is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Unit*</label>
+          <p-dropdown [options]="unitOptions" formControlName="unit" placeholder="Select Unit"
+            [style]="{'width':'100%'}"></p-dropdown>
+          <small class="text-red-500" *ngIf="itemForm.get('unit')?.invalid && itemForm.get('unit')?.touched">
+            Unit is required
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Details Section -->
+    <div class="border rounded-lg p-4">
+      <h3 class="text-lg font-semibold mb-4">Additional Details</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="field">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Condition*</label>
+          <p-dropdown [options]="conditionOptions" formControlName="condition" placeholder="Select Condition"
+            [style]="{'width':'100%'}"></p-dropdown>
+          <small class="text-red-500" *ngIf="itemForm.get('condition')?.invalid && itemForm.get('condition')?.touched">
+            Condition is required
+          </small>
+        </div>
+
+        <div class="field">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Received Date*</label>
+          <p-calendar formControlName="receivedDate" [showIcon]="true" [style]="{'width':'100%'}"
+            dateFormat="yy-mm-dd"></p-calendar>
+          <small class="text-red-500" *ngIf="itemForm.get('receivedDate')?.invalid && itemForm.get('receivedDate')?.touched">
+            Received Date is required
+          </small>
+        </div>
+
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+          <textarea pInputTextarea formControlName="description" class="w-full" rows="3"></textarea>
+          <small class="text-red-500" *ngIf="itemForm.get('description')?.invalid && itemForm.get('description')?.touched">
+            Description is required
+          </small>
+        </div>
+
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Remarks</label>
+          <textarea pInputTextarea formControlName="remarks" class="w-full" rows="2"></textarea>
+        </div>
+      </div>
+
+      <!-- Add File Upload Section -->
+      <div class="col-span-2 mt-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
+        <div class="border-2 border-dashed border-gray-200 rounded-lg p-8">
+          <div class="flex flex-col items-center justify-center text-center">
+            <i class="pi pi-cloud-upload text-gray-400 text-4xl mb-4"></i>
+            <p class="text-gray-600 mb-4">Drag and drop files to here to upload.</p>
+            <div class="flex gap-2">
+              <button type="button" 
+                      class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-50 flex items-center gap-2">
+                <i class="pi pi-plus"></i>
+                Choose
+              </button>
+              <button type="button" 
+                      class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-50 flex items-center gap-2 text-red-500">
+                <i class="pi pi-times"></i>
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" (onClick)="hideDialog()" styleClass="p-button-text"></p-button>
+    <p-button *ngIf="!itemForm.disabled" label="Save" icon="pi pi-check" (onClick)="saveItem()" [disabled]="!itemForm.valid"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- View Details Dialog -->
+<p-dialog [(visible)]="showDetailsDialog" 
+          [modal]="true" 
+          [style]="{width: '800px'}"
+          [header]="'Donate Details - ' + selectedItem?.itemName"
+          [closeOnEscape]="true"
+          [closable]="true">
+    <div class="flex flex-col gap-6 p-4">
+        <!-- Top Section -->
+        <div class="grid grid-cols-2 gap-x-32 gap-y-4">
+            <div>
+                <div class="text-gray-600">Item Name</div>
+                <div class="text-indigo-600 font-medium">{{selectedItem?.itemName}}</div>
+            </div>
+            <div>
+                <div class="text-gray-600">Date Received</div>
+                <div>{{selectedItem?.receivedDate | date:'MMM dd, yyyy'}}</div>
+            </div>
+            <div>
+                <div class="text-gray-600">Donor</div>
+                <div>{{selectedItem?.donor}}</div>
+            </div>
+        </div>
+
+        <!-- Item Details Section -->
+        <div>
+            <div class="font-medium text-lg mb-4">Item Details</div>
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b">
+                        <th class="text-left py-2 text-gray-600 font-medium">Description</th>
+                        <th class="text-left py-2 text-gray-600 font-medium">Condition</th>
+                        <th class="text-left py-2 text-gray-600 font-medium">Unit</th>
+                        <th class="text-right py-2 text-gray-600 font-medium">Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-2">{{selectedItem?.description}}</td>
+                        <td class="py-2">
+                          <span [class]="'status-pill ' + getConditionClass(selectedItem?.condition || '')">
+                            {{selectedItem?.condition}}
+                          </span>
+                        </td>
+                        <td class="py-2">{{selectedItem?.unit}}</td>
+                        <td class="py-2 text-right">{{selectedItem?.quantity}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Remarks -->
+        <div>
+            <div class="text-gray-600">Remarks</div>
+            <div class="mt-1 p-3 bg-gray-50 rounded-lg">
+                {{selectedItem?.remarks || 'No remarks provided'}}
+            </div>
+        </div>
+        
+        <!-- Warehouse Selection -->
+        <div>
+            <div class="text-gray-600 mb-2">Select Warehouse*</div>
+            <p-dropdown 
+                [options]="warehouses" 
+                [(ngModel)]="selectedWarehouse" 
+                optionLabel="name" 
+                placeholder="Select a warehouse" 
+                [style]="{'width':'100%'}"
+                [required]="true"
+                appendTo="body">
+            </p-dropdown>
+            <small *ngIf="!selectedWarehouse" class="text-gray-500">
+                Please select a warehouse to continue
+            </small>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-between">
+            <p-button 
+                      (click)="submitItem(selectedItem!)"
+                      label="Submit to Inventory"
+                      icon="pi pi-arrow-right"
+                      styleClass="p-button-success"
+                      [disabled]="!selectedWarehouse">
+            </p-button>
+            <p-button (click)="showDetailsDialog = false"
+                      label="Close"
+                      styleClass="p-button-text">
+            </p-button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmPopup></p-confirmPopup>

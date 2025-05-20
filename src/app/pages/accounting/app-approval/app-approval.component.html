@@ -1,0 +1,48 @@
+<!-- Progress table component -->
+<app-progress-table [config]="progressTable" />
+
+<!-- Edit document modal -->
+<p-dialog 
+  [(visible)]="showAPPModal" 
+  [modal]="true" 
+  [style]="{ width: '50rem' }" 
+  [header]="isEditMode ? 'Edit Annual Procurement Plan' : 'Add Annual Procurement Plan'"
+  [draggable]="false"
+  [resizable]="false">
+  
+  <div class="p-fluid" *ngIf="editingDocument">
+    <div class="field mb-4">
+      <label for="documentName">Document Name</label>
+      <input id="documentName" type="text" pInputText [(ngModel)]="editingDocument.documentName">
+    </div>
+    
+    <div class="field mb-4">
+      <label for="fiscalYear">Fiscal Year</label>
+      <input id="fiscalYear" type="number" pInputText [(ngModel)]="editingDocument.fiscal_year">
+    </div>
+    
+    <div class="field mb-4">
+      <label for="totalCost">Total Estimated Cost</label>
+      <input id="totalCost" type="number" pInputText [(ngModel)]="editingDocument.total_estimated_cost">
+    </div>
+    
+    <div class="field mb-4">
+      <label for="ppmpReference">PPMP Reference</label>
+      <input id="ppmpReference" type="text" pInputText [(ngModel)]="editingDocument.ppmp">
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="showAPPModal = false"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveEditedDocument()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Context menu for more options -->
+<p-menu #menu [popup]="true" appendTo="body"></p-menu>
+
+<!-- Toast for notifications -->
+<p-toast position="bottom-right" />
+
+<!-- Confirm dialog for actions -->
+<p-confirmpopup />

@@ -1,0 +1,211 @@
+<div class="p-fluid">
+    <!-- Table of ICS Reports -->
+    <p-card header="Inventory Custodian Slip (ICS) Reports" styleClass="p-shadow-3 mb-4">
+        <div class="flex flex-row items-center justify-between">
+            <p>Review Inventory Custodian Slips here.</p>
+            <div class="p-field" style="text-align: right; margin-top: 1rem">
+                <p-button
+                    label="Create ICS"
+                    (onClick)="showDialog()"
+                    styleClass="p-button-success"
+                    [size]="'small'"
+                    [outlined]="true"
+                ></p-button>
+            </div>
+        </div>
+        <p-table [value]="icsReports" [paginator]="true" [rows]="5" [loading]="loading">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>ICS No.</th>
+                    <th>Entity Name</th>
+                    <th>Fund Cluster</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ics>
+                <tr>
+                    <td>{{ ics.ics_no }}</td>
+                    <td>{{ ics.entity_name }}</td>
+                    <td>{{ ics.fund_cluster }}</td>
+                    <td>{{ ics.date | date: 'mediumDate' }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button icon="pi pi-pencil" 
+                                    (click)="editICS(ics)"
+                                    styleClass="p-button-rounded p-button-text p-button-primary">
+                            </p-button>
+                            <p-button icon="pi pi-trash" 
+                                    (click)="deleteICS(ics)"
+                                    styleClass="p-button-rounded p-button-text p-button-danger">
+                            </p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+
+    <!-- Dialog for ICS Form -->
+    <p-dialog
+        header="{{ editingIndex === -1 ? 'Create' : 'Edit' }} Inventory Custodian Slip (ICS)"
+        [(visible)]="displayDialog"
+        [modal]="true"
+        [style]="{ width: '60vw' }"
+        [draggable]="false"
+        [resizable]="false"
+        >
+        <form [formGroup]="icsForm" class="p-4 grid grid-cols-2 gap-4" (ngSubmit)="saveICS()">
+            <!-- Left Column -->
+            <div class="col-span-1">
+                <!-- Entity Name -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Entity Name</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="entityName"
+                        placeholder="Agency/Entity Name"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Fund Cluster -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Fund Cluster</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="fundCluster"
+                        [readonly]="false"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-gray-50"
+                    />
+                </div>
+
+                <!-- ICS No. -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">ICS No.</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="icsNo"
+                        [readonly]="true"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-gray-50"
+                    />
+                </div>
+
+                <!-- Date -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Date</label>
+                    <input
+                        type="date"
+                        pInputText
+                        formControlName="date"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-span-1">
+                <!-- Inventory Item No. -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Inventory Item No.</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="inventoryItemNo"
+                        placeholder="Property Number"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Quantity -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                    <input
+                        type="number"
+                        pInputText
+                        formControlName="quantity"
+                        placeholder="Number of units"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Unit -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Unit</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="unit"
+                        placeholder="Measurement unit"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Unit Cost -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Unit Cost</label>
+                    <input
+                        type="number"
+                        pInputText
+                        formControlName="unitCost"
+                        placeholder="Cost per unit"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Estimated Useful Life -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Estimated Useful Life</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="estimatedUsefulLife"
+                        placeholder="Years/Months"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+            </div>
+
+            <!-- Full Width Fields -->
+            <div class="col-span-2">
+                <!-- Description -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea
+                        pInputText
+                        formControlName="description"
+                        placeholder="Item details including serial number"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        [required]="false"
+                        rows="3"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Export to PDF and Save/Cancel Buttons -->
+            <div class="col-span-2 flex justify-end mt-4 gap-2">
+                <p-button
+                    label="Export to PDF"
+                    (onClick)="exportPdf()"
+                    [disabled]="icsForm.invalid"
+                    styleClass="p-button-warning"
+                ></p-button>
+                <p-button
+                    label="Cancel"
+                    (onClick)="displayDialog = false"
+                    styleClass="p-button-secondary"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    type="submit"
+                    styleClass="p-button-success"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+
+    <p-toast></p-toast>
+</div>

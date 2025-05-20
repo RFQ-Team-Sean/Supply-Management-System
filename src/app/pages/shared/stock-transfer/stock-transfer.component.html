@@ -1,0 +1,385 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+
+        <mat-card-title class="select-none font-light">Stock Transfer</mat-card-title>
+       
+        <div class="flex justify-between items-center">
+        
+            <p>View and add stock transfer items in this section.</p>
+
+            <div class="flex-1"></div>
+         
+            <p-iconfield fluid class="w-full max-w-72 mr-2">
+                <p-inputicon styleClass="pi pi-search" />
+                <input fluid class="w-full" pSize="small" [(ngModel)]="searchValue" (input)="dt.filterGlobal(searchValue,'contains')" type="text"
+                    pInputText placeholder="Search" />
+                <!-- <p-inputicon styleClass="pi pi-spinner pi-spin" /> -->
+            </p-iconfield>
+        </div>
+
+        <!-- Status indicators with Add Stock button -->
+        <div class="flex items-center gap-4 my-6">
+            <div class="relative flex-1 flex justify-between items-center p-6 border border-dotted border-gray-300 rounded-lg">
+                <!-- Changed from Pending to For Approval -->
+                <div class="flex items-center gap-2 px-4 bg-white z-10 cursor-pointer" 
+                     (click)="filterByStatus('pending')"
+                     [class.text-indigo-700]="activeStatus === 'pending'"
+                     [class.font-medium]="activeStatus === 'pending'">
+                    <i class="pi pi-inbox" [class.text-indigo-500]="activeStatus === 'pending'"></i>
+                    <span class="text-base">For Approval</span>
+                </div>
+                
+                <!-- Completed indicator -->
+                <div class="flex items-center gap-2 px-4 bg-white z-10 cursor-pointer" 
+                     (click)="filterByStatus('completed')"
+                     [class.text-indigo-700]="activeStatus === 'completed'"
+                     [class.font-medium]="activeStatus === 'completed'">
+                    <i class="pi pi-check-circle" [class.text-indigo-500]="activeStatus === 'completed'"></i>
+                    <span class="text-base">Completed</span>
+                </div>
+                
+                <div class="absolute top-1/2 left-0 right-0 w-full border-t-2 border-dotted border-gray-200 -z-0"></div>
+            </div>
+
+            <p-button 
+                pTooltip="Click to add new transfer" 
+                [outlined]="true" 
+                size="small" 
+                label="Add Transfer"
+                (click)="openAddStockModal()" 
+                icon="pi pi-plus" />
+        </div>
+
+        <p-table #dt [value]="filteredTransfers" 
+                [rows]="10" 
+                [paginator]="true" 
+                [globalFilterFields]="['itemName', 'itemType', 'fromLocation', 'toLocation', 'remarks']"
+                [rowHover]="true"
+                dataKey="id"
+                [scrollable]="true" 
+                scrollHeight="400px"
+                styleClass="p-datatable-gridlines">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="itemName">Name <p-sortIcon field="itemName"></p-sortIcon></th>
+                    <th pSortableColumn="itemType">Type <p-sortIcon field="itemType"></p-sortIcon></th>
+                    <th pSortableColumn="amount">Quantity <p-sortIcon field="amount"></p-sortIcon></th>
+                    <th pSortableColumn="fromLocation">From Location <p-sortIcon field="fromLocation"></p-sortIcon></th>
+                    <th pSortableColumn="toLocation">To Location <p-sortIcon field="toLocation"></p-sortIcon></th>
+                    <th pSortableColumn="remarks">Remarks <p-sortIcon field="remarks"></p-sortIcon></th>
+                    <th *ngIf="!isProcessingView">Actions</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+                <tr>
+                    <td>{{item.itemName}}</td>
+                    <td>{{item.itemType}}</td>
+                    <td>{{item.amount | number}}</td>
+                    <td>{{item.fromLocation || item.location}}</td>
+                    <td>{{item.toLocation || '-'}}</td>
+                    <td>{{item.remarks || 'No remarks'}}</td>
+                    <td *ngIf="!isProcessingView">
+                        <div class="flex gap-2">
+                            @if(item.status === 'pending'){
+                                <button type="button" 
+                                        class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                                        (click)="viewDetails(item)">
+                                    <i class="pi pi-eye text-blue-500"></i>
+                                </button>
+                            }
+                            @if(item.status === 'completed'){
+                                <button type="button"
+                                        class="w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-colors"
+                                        (click)="generatePDF(item)"
+                                        pTooltip="Save as PDF">
+                                    <i class="pi pi-file-pdf text-green-500"></i>
+                                </button>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td [attr.colspan]="7">
+                        <div class="text-center p-4">
+                            <i class="pi pi-inbox text-4xl mb-4 opacity-50"></i>
+                            <p>No transfers found.</p>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </mat-card-content>
+</mat-card>
+
+<!-- Add Stock Modal -->
+<p-dialog [(visible)]="showStockModal" 
+          [header]="selectedStock ? 'Edit Transfer' : 'Add Transfer'" 
+          [modal]="true" 
+          [style]="{width: '450px'}">
+    <!-- Add descriptive text before the form -->
+    <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+        <p class="text-gray-600">
+            Fill out the form below to create a new transfer request. Please ensure all required information is provided accurately.
+        </p>
+    </div>
+
+    <form [formGroup]="stockForm" (ngSubmit)="addStock()">
+        <div class="grid gap-4">
+            <div class="col-12">
+                <label class="block mb-2">Name</label>
+                <input pInputText formControlName="name" class="w-full" placeholder="Enter item name" />
+                @if(stockForm.get('name')?.hasError('required') && stockForm.get('name')?.touched){
+                    <small class="text-red-500">Name is required</small>
+                }
+            </div>
+
+            <div class="col-12">
+                <label class="block mb-2">Type</label>
+                <p-select [options]="products" 
+                         formControlName="type" 
+                         optionLabel="name" 
+                         [filter]="true"
+                         placeholder="Select type"
+                         class="w-full">
+                </p-select>
+                @if(stockForm.get('type')?.hasError('required') && stockForm.get('type')?.touched){
+                    <small class="text-red-500">Type is required</small>
+                }
+            </div>
+
+            <!-- Changed to full width since Unit is removed -->
+            <div class="col-12">
+                <label class="block mb-2">Quantity</label>
+                <p-inputNumber formControlName="quantity" 
+                             [showButtons]="true"
+                             placeholder="Enter quantity"
+                             class="w-full">
+                </p-inputNumber>
+                @if(stockForm.get('quantity')?.hasError('required') && stockForm.get('quantity')?.touched){
+                    <small class="text-red-500">Quantity is required</small>
+                }
+            </div>
+
+            <div class="col-12">
+                <label class="block mb-2">From Location</label>
+                <p-select [options]="inventories" 
+                         formControlName="fromLocation" 
+                         optionLabel="name" 
+                         [filter]="true"
+                         placeholder="Select location"
+                         class="w-full">
+                </p-select>
+                @if(stockForm.get('fromLocation')?.hasError('required') && stockForm.get('fromLocation')?.touched){
+                    <small class="text-red-500">From Location is required</small>
+                }
+            </div>
+
+            <div class="col-12">
+                <label class="block mb-2">To Location</label>
+                <p-select [options]="inventories" 
+                         formControlName="toLocation" 
+                         optionLabel="name" 
+                         [filter]="true"
+                         placeholder="Select location"
+                         class="w-full">
+                </p-select>
+                @if(stockForm.get('toLocation')?.hasError('required') && stockForm.get('toLocation')?.touched){
+                    <small class="text-red-500">To Location is required</small>
+                }
+            </div>
+
+            <div class="col-12">
+                <label class="block mb-2">Requested By</label>
+                <p-select [options]="users" 
+                         formControlName="requestedBy" 
+                         optionLabel="name" 
+                         [filter]="true"
+                         placeholder="Select requestor"
+                         class="w-full">
+                </p-select>
+                @if(stockForm.get('requestedBy')?.hasError('required') && stockForm.get('requestedBy')?.touched){
+                    <small class="text-red-500">Requestor is required</small>
+                }
+            </div>
+
+            <div class="col-12">
+                <label class="block mb-2">Remarks</label>
+                <textarea pInputTextarea 
+                         formControlName="remarks"
+                         rows="3" 
+                         class="w-full"
+                         placeholder="Enter remarks (Optional)">
+                </textarea>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button type="button"
+                      label="Cancel"
+                      severity="secondary"
+                      (click)="closeStockModal()"
+                      [outlined]="true">
+            </p-button>
+            <p-button type="submit"
+                      [label]="selectedStock ? 'Update' : 'Add'"
+                      [disabled]="!stockForm.valid">
+            </p-button>
+        </div>
+    </form>
+</p-dialog>
+
+<!-- Availability Modal -->
+<p-dialog [(visible)]="showAvailabilityModal" 
+          header="Storage Availability" 
+          [modal]="true" 
+          [style]="{width: '500px'}">
+    <div class="mb-4">
+        <span class="p-input-icon-left w-full">
+            <i class="pi pi-search"></i>
+            <input type="text" 
+                   pInputText 
+                   [(ngModel)]="availabilitySearchValue" 
+                   (input)="filterAvailability()"
+                   placeholder="Search locations..." 
+                   class="w-full" />
+        </span>
+    </div>
+
+    <p-table [value]="filteredStorageAvailability"
+             [scrollable]="true" 
+             scrollHeight="300px"
+             styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Location</th>
+                <th>Total</th>
+                <th>Used</th>
+                <th>Available</th>
+                <th>Status</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-location>
+            <tr>
+                <td>{{location.name}}</td>
+                <td>{{location.totalCapacity}}</td>
+                <td>{{location.usedSpace}}</td>
+                <td>{{location.availableSpace}}</td>
+                <td>
+                    <p-tag [severity]="getAvailabilityStatus(location).severity"
+                          [value]="getAvailabilityStatus(location).label">
+                    </p-tag>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <div class="flex justify-end gap-2 mt-4">
+        <p-button type="button"
+                  label="Refresh"
+                  icon="pi pi-refresh"
+                  (click)="refreshAvailability()"
+                  [outlined]="true">
+        </p-button>
+        <p-button type="button"
+                  label="Close"
+                  severity="secondary"
+                  (click)="closeAvailabilityModal()">
+        </p-button>
+    </div>
+</p-dialog>
+
+<!-- Tracking Dialog -->
+<p-dialog [(visible)]="showTrackingDialog" 
+          header="Tracking Details" 
+          [modal]="true" 
+          [style]="{width: '600px'}"
+          styleClass="p-fluid">
+    <div class="grid gap-4" *ngIf="selectedTransfer">
+        <!-- Transfer Info Banner -->
+        <div class="col-12">
+            <div class="p-4 rounded-lg border border-gray-200 bg-white">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xl font-semibold m-0">{{selectedTransfer.itemName}}</h3>
+                    <p-tag [severity]="getStatusSeverity(selectedTransfer.status)"
+                          [value]="getStatusLabel(selectedTransfer.status)">
+                    </p-tag>
+                </div>
+                <div class="text-gray-600">Transfer ID: {{selectedTransfer.id}}</div>
+            </div>
+        </div>
+
+        <!-- Tracking Timeline -->
+        <div class="col-12">
+            <div class="p-4 rounded-lg border border-gray-200 bg-white">
+                <h3 class="text-lg font-medium mb-4">Tracking Timeline</h3>
+                
+                <!-- Timeline Container -->
+                <div class="relative pl-8 border-l-2 border-gray-200">
+                    <!-- Pending -->
+                    <div class="mb-8 relative">
+                        <div class="absolute -left-[33px] w-16 h-16 flex items-center justify-center rounded-full bg-white border-2 
+                            {{selectedTransfer.status === 'pending' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'}}">
+                            <i class="pi pi-inbox text-lg {{selectedTransfer.status === 'pending' ? 'text-indigo-500' : 'text-gray-400'}}"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-base font-medium {{selectedTransfer.status === 'pending' ? 'text-gray-900' : 'text-gray-600'}}">
+                                Request Pending
+                            </h4>
+                            <p class="text-sm {{selectedTransfer.status === 'pending' ? 'text-gray-600' : 'text-gray-400'}}">
+                                Transfer request awaiting approval
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Processing -->
+                    <div class="mb-8 relative">
+                        <div class="absolute -left-[33px] w-16 h-16 flex items-center justify-center rounded-full bg-white border-2 
+                            {{selectedTransfer.status === 'processing' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300'}}">
+                            <i class="pi pi-sync text-lg {{selectedTransfer.status === 'processing' ? 'text-indigo-500' : 'text-gray-400'}}"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="text-base font-medium {{selectedTransfer.status === 'processing' ? 'text-gray-900' : 'text-gray-600'}}">
+                                Ongoing
+                            </h4>
+                            <p class="text-sm {{selectedTransfer.status === 'processing' ? 'text-gray-600' : 'text-gray-400'}}">
+                                Transfer is ongoing
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Details -->
+        <div class="col-12">
+            <div class="p-4 rounded-lg border border-gray-200 bg-white">
+                <h3 class="text-lg font-medium mb-3">Transfer Route</h3>
+                <div class="flex justify-between items-center gap-4">
+                    <div class="flex-1 text-center p-3 bg-gray-50 rounded">
+                        <div class="text-gray-600 mb-1">From</div>
+                        <div class="font-medium">{{selectedTransfer.fromLocation}}</div>
+                    </div>
+                    <i class="pi pi-arrow-right text-indigo-500"></i>
+                    <div class="flex-1 text-center p-3 bg-gray-50 rounded">
+                        <div class="text-gray-600 mb-1">To</div>
+                        <div class="font-medium">{{selectedTransfer.toLocation}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+        <p-button type="button"
+                  label="Close"
+                  severity="secondary"
+                  (click)="closeTrackingDialog()"
+                  [outlined]="true">
+        </p-button>
+    </div>
+</p-dialog>
+
+<p-toast position="bottom-right"></p-toast>
+<p-confirmPopup></p-confirmPopup>

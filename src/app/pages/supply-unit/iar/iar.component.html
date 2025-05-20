@@ -1,0 +1,188 @@
+<div class="p-fluid">
+    <!-- Table of IAR Reports -->
+    <p-card header="Inspection and Acceptance Report (IAR)" styleClass="p-shadow-3 mb-4">
+        <div class="flex flex-row items-center justify-between">
+            <p>Manage and generate Inspection and Acceptance Reports.</p>
+            <div class="p-field" style="text-align: right; margin-top: 1rem">
+                <p-button
+                    label="Create IAR"
+                    (onClick)="showDialog()"
+                    styleClass="p-button-success"
+                    [size]="'small'"
+                    [outlined]="true"
+                ></p-button>
+            </div>
+        </div>
+        <p-table [value]="iarReports" [paginator]="true" [rows]="5" [loading]="loading">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>IAR No.</th>
+                    <th>PO No.</th>
+                    <th>Supplier</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-iar>
+                <tr>
+                    <td>{{ iar.iar_no }}</td>
+                    <td>{{ iar.po_no }}</td>
+                    <td>{{ iar.supplier }}</td>
+                    <td>{{ iar.date | date: 'mediumDate' }}</td>
+                    <td>{{ iar.status }}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button icon="pi pi-pencil" 
+                                    (click)="editIAR(iar)"
+                                    styleClass="p-button-rounded p-button-text p-button-primary">
+                            </p-button>
+                            <p-button icon="pi pi-trash" 
+                                    (click)="deleteIAR(iar)"
+                                    styleClass="p-button-rounded p-button-text p-button-danger">
+                            </p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+
+    <!-- Dialog for IAR Form -->
+    <p-dialog
+        header="{{ editingIndex === -1 ? 'Create' : 'Edit' }} Inspection and Acceptance Report"
+        [(visible)]="displayDialog"
+        [modal]="true"
+        [style]="{ width: '60vw' }"
+        [draggable]="false"
+        [resizable]="false"
+        >
+        <form [formGroup]="iarForm" class="p-4 grid grid-cols-2 gap-4" (ngSubmit)="saveIAR()">
+            <!-- Left Column -->
+            <div class="col-span-1">
+                <!-- IAR No. -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">IAR No.</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="iarNo"
+                        placeholder="IAR Number"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        [readonly]="editingIndex !== -1"
+                    />
+                </div>
+
+                <!-- PO No. -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">PO No.</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="poNo"
+                        placeholder="Purchase Order Number"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        [readonly]="editingIndex !== -1"
+                    />
+                </div>
+
+                <!-- Supplier -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Supplier</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="supplier"
+                        placeholder="Supplier Name"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Date -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Date</label>
+                    <input
+                        type="date"
+                        pInputText
+                        formControlName="date"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-span-1">
+                <!-- Invoice No. -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Invoice No.</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="invoiceNo"
+                        placeholder="Invoice Number"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Total Amount -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Total Amount</label>
+                    <input
+                        type="number"
+                        pInputText
+                        formControlName="totalAmount"
+                        placeholder="Total Amount"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+
+                <!-- Status -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Status</label>
+                    <input
+                        type="text"
+                        pInputText
+                        formControlName="status"
+                        placeholder="Inspection Status"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    />
+                </div>
+            </div>
+
+            <!-- Full Width Fields -->
+            <div class="col-span-2">
+                <!-- Remarks -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Remarks</label>
+                    <textarea
+                        pInputText
+                        formControlName="remarks"
+                        placeholder="Additional notes or remarks"
+                        class="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        rows="3"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Export to PDF and Save/Cancel Buttons -->
+            <div class="col-span-2 flex justify-end mt-4 gap-2">
+                <p-button
+                    label="Export to PDF"
+                    (onClick)="exportPdf()"
+                    [disabled]="iarForm.invalid"
+                    styleClass="p-button-warning"
+                ></p-button>
+                <p-button
+                    label="Cancel"
+                    (onClick)="displayDialog = false"
+                    styleClass="p-button-secondary"
+                ></p-button>
+                <p-button
+                    label="Save"
+                    type="submit"
+                    styleClass="p-button-success"
+                ></p-button>
+            </div>
+        </form>
+    </p-dialog>
+</div> 

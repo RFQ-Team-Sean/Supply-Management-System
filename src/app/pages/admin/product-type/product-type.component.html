@@ -1,0 +1,174 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Product Type Management</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      View and manage product types in this section.
+    </mat-card-subtitle>
+
+    <div class="flex justify-between items-center mt-4">
+      <p-button
+        pTooltip="Add Product Type"
+        (click)="openNewProductTypeDialog()"
+        [outlined]="true"
+        size="small"
+        label="Add Product Type"
+        icon="pi pi-plus"
+      ></p-button>
+
+      <div class="relative w-[300px]">
+        <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+        <input
+          pInputText
+          type="text"
+          #searchInput
+          (input)="dt1.filterGlobal(searchInput.value, 'contains')"
+          placeholder="Search Product Types"
+          style="text-indent: 1.5rem;"
+          class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:ml-6"
+        />
+      </div>
+    </div>
+
+    <p-table
+      #dt1
+      [value]="productTypes"
+      [rows]="10"
+      [paginator]="true"
+      [globalFilterFields]="['name', 'description']"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [loading]="loading"
+      [showCurrentPageReport]="false"
+      [responsive]="true"
+      [rowHover]="true"
+      [scrollable]="true"
+      scrollHeight="600px"
+      styleClass="p-datatable-sm"
+      [tableStyle]="{'min-width': '60rem'}"
+      dataKey="id"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+          <th>Description</th>
+          <th class="w-[100px]">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-productType>
+        <tr class="cursor-pointer">
+          <td>{{ productType.name }}</td>
+          <td>{{ productType.description }}</td>
+          <td>
+            <div class="flex gap-2">
+              <button
+                pButton
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-primary p-button-sm"
+                [outlined]="true"
+                (click)="editProductType(productType)"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-danger p-button-sm"
+                [outlined]="true"
+                (click)="confirmDelete(productType)"
+              ></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="3">
+            <div class="flex flex-col w-full items-center justify-center py-8">
+              <span>No product types found.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <!-- Product Type Dialog -->
+    <p-dialog
+      [(visible)]="productTypeDialog"
+      [modal]="true"
+      [style]="{width: '90vw', maxWidth: '450px'}"
+      [header]="isEditMode ? 'Edit Product Type' : 'Add New Product Type'"
+      styleClass="p-fluid"
+      [dismissableMask]="true"
+      [draggable]="false"
+      [resizable]="false"
+      [position]="'center'"
+    >
+      <form [formGroup]="productTypeForm" class="w-full">
+        <div class="flex items-center gap-4 mb-4">
+          <label for="name" class="font-semibold w-24">Name</label>
+          <div class="flex-auto flex-col flex">
+            <input
+              type="text"
+              pInputText
+              id="name"
+              formControlName="name"
+              placeholder="Enter product type name"
+              class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+              autofocus
+            />
+            <small
+              class="self-end text-red-500 mt-1"
+              *ngIf="submitted && productTypeForm.get('name')?.errors?.['required']"
+            >
+              Name is required.
+            </small>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-4">
+          <label for="description" class="font-semibold w-24">Description</label>
+          <div class="flex-auto flex-col flex">
+            <textarea
+              pInputTextarea
+              id="description"
+              formControlName="description"
+              placeholder="Enter product type description"
+              rows="5"
+              class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            ></textarea>
+            <small
+              class="self-end text-red-500 mt-1"
+              *ngIf="submitted && productTypeForm.get('description')?.errors?.['required']"
+            >
+              Description is required.
+            </small>
+          </div>
+        </div>
+      </form>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+          <button
+            pButton
+            label="Cancel"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideDialog()"
+            size="small"
+          ></button>
+          <button
+            pButton
+            label="Save"
+            icon="pi pi-check"
+            (click)="saveProductType()"
+            size="small"
+          ></button>
+        </div>
+      </ng-template>
+    </p-dialog>
+
+    <!-- Confirm Delete Dialog -->
+    <p-confirmDialog></p-confirmDialog>
+  </mat-card-content>
+</mat-card>

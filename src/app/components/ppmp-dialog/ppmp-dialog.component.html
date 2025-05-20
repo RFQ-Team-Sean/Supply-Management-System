@@ -1,0 +1,434 @@
+<p-dialog 
+  [(visible)]="visible" 
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closeOnEscape]="true"
+  [dismissableMask]="true"
+  [style]="{width: '80vw', maxWidth: '900px'}"
+  styleClass="p-0"
+  [header]="isEditMode ? 'Edit PPMP' : 'New PPMP'"
+  (visibleChange)="visibleChange.emit($event)">
+
+  <form [formGroup]="ppmpForm" class="p-fluid">
+    <!-- Project Information Section -->
+    <div class="mb-6">
+      <div class="bg-gray-50 p-3 rounded-lg mb-4">
+        <h2 class="text-lg font-medium text-gray-800 mb-1">Project Information</h2>
+        <p class="text-sm text-gray-600">Enter the basic project details and requirements</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" formGroupName="project">
+        <!-- Project Title -->
+        <div class="col-span-2">
+          <label for="project_title" class="text-sm font-medium text-gray-700 mb-1 block">
+            Project Title <span class="text-red-500">*</span>
+          </label>
+          <input 
+            pInputText 
+            id="project_title"
+            formControlName="project_title"
+            [class.ng-invalid]="isFieldInvalid('project.project_title')"
+            placeholder="Enter project title"
+            class="w-full"/>
+          <small class="text-red-500" *ngIf="isFieldInvalid('project.project_title')">
+            Project title is required
+          </small>
+        </div>
+
+        <!-- Fiscal Year -->
+        <div class="col-span-2">
+          <label for="fiscal_year" class="text-sm font-medium text-gray-700 mb-1 block">
+            Fiscal Year <span class="text-red-500">*</span>
+          </label>
+          <p-dropdown 
+            id="fiscal_year"
+            [options]="getFutureYears()"
+            formControlName="fiscal_year"
+            [class.ng-invalid]="isFieldInvalid('project.fiscal_year')"
+            placeholder="Select Fiscal Year"
+            styleClass="w-full">
+          </p-dropdown>
+        </div>
+
+        <!-- Project Code -->
+        <div class="col-span-1">
+          <label for="project_code" class="text-sm font-medium text-gray-700 mb-1 block">
+            Project Code
+          </label>
+          <input 
+            pInputText 
+            id="project_code"
+            formControlName="project_code"
+            placeholder="Enter project code"
+            class="w-full"/>
+        </div>
+
+        <!-- Fund Source -->
+        <div> 
+          <label for="fund_id" class="text-sm font-medium text-gray-700 mb-1 block">
+            Fund Source <span class="text-red-500">*</span>
+          </label>
+          <p-dropdown
+            id="fund_id"
+            [options]="fundSources"
+            formControlName="user_budget_id" 
+            placeholder="Select Fund Source"
+            styleClass="w-full"
+            [autoDisplayFirst]="false"
+            [class.ng-invalid]="isFieldInvalid('project.user_budget_id')"
+          > 
+          </p-dropdown>
+          <small class="text-red-500" *ngIf="isFieldInvalid('project.user_budget_id')">
+            Fund source is required
+          </small>
+        </div>
+
+        <!-- Classifications Multiselect -->
+        <div class="col-span-1">
+          <label for="classifications" class="text-sm font-medium text-gray-700 mb-1 block">
+            Classifications <span class="text-red-500">*</span>
+          </label>
+          <p-multiSelect
+            id="classifications"
+            [options]="classifications"
+            formControlName="classifications"
+            [class.ng-invalid]="isFieldInvalid('project.classifications')"
+            placeholder="Select classifications"
+            styleClass="w-full"
+            [showToggleAll]="false">
+          </p-multiSelect>
+          <small class="text-red-500" *ngIf="isFieldInvalid('project.classifications')">
+            At least one classification is required
+          </small>
+        </div>
+
+        <!-- Procurement Mode -->
+        <div>
+          <label for="procurement_mode" class="text-sm font-medium text-gray-700 mb-1 block">
+            Procurement Mode <span class="text-red-500">*</span>
+          </label>
+          <p-dropdown
+            id="procurement_mode"
+            (onChange)="getModeProcesses()"
+            [options]="procurementModes"
+            formControlName="procurement_mode_id"
+            [class.ng-invalid]="isFieldInvalid('project.procurement_mode_id')"
+            placeholder="Select procurement mode"
+            styleClass="w-full"
+            [autoDisplayFirst]="false">
+          </p-dropdown>
+          <small class="text-red-500" *ngIf="isFieldInvalid('project.procurement_mode_id')">
+            Procurement mode is required
+          </small>
+        </div>
+
+        <!-- Project Description -->
+        <div class="col-span-2">
+          <label for="project_description" class="text-sm font-medium text-gray-700 mb-1 block">
+            Project Description <span class="text-red-500">*</span>
+          </label>
+          <textarea 
+            rows="5" 
+            cols="30" 
+            pTextarea
+            id="project_description"
+            formControlName="project_description"
+            [class.ng-invalid]="isFieldInvalid('project.project_description')"
+            placeholder="Enter project description"
+            class="w-full">
+          </textarea>
+          <small class="text-red-500" *ngIf="isFieldInvalid('project.project_description')">
+            Project description is required
+          </small>
+        </div>
+
+        <!-- Contract Scope -->
+        <div class="col-span-2">
+          <label for="contract_scope" class="text-sm font-medium text-gray-700 mb-1 block">
+            Contract Scope
+          </label>
+          <textarea 
+            id="contract_scope"
+            formControlName="contract_scope"
+            rows="5" 
+            cols="30" 
+            pTextarea
+            placeholder="Enter contract scope"
+            class="w-full">
+          </textarea>
+        </div>
+
+        <!-- Project Schedules -->
+        <div class="col-span-2 mt-6" formArrayName="schedules">
+          <div class="bg-gray-50 p-3 rounded-lg mb-4 flex justify-between items-center">
+            <div>
+              <h2 class="text-lg font-medium text-gray-800 mb-1">Project Schedule</h2>
+              <p class="text-sm text-gray-600">Set milestones for the project</p>
+            </div>
+          </div>
+
+          <div *ngFor="let schedule of schedules.controls; let i=index" [formGroupName]="i" class="border rounded-lg p-4 mb-4">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-md font-medium">Milestone {{i + 1}}</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Milestone Name -->
+              <div>
+                <label class="text-sm font-medium text-gray-700 mb-1 block">
+                  Milestone <span class="text-red-500">*</span>
+                </label>
+                <input 
+                  [readonly]="true"
+                  pInputText 
+                  formControlName="milestone"
+                  placeholder="Enter milestone name"
+                  class="w-full"/>
+              </div>
+
+              <!-- Date -->
+              <div>
+                <label class="text-sm font-medium text-gray-700 mb-1 block">
+                  Date <span class="text-red-500">*</span>
+                </label>
+                 <p-datepicker 
+                    formControlName="date"
+                    [showIcon]="true"
+                    dateFormat="yy-mm-dd"
+                    [showTime]="false"
+                    class="w-full">
+                    </p-datepicker>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items Section -->
+    <div class="mb-6" formArrayName="items">
+      <div class="bg-gray-50 p-3 rounded-lg mb-4 flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-medium text-gray-800 mb-1">Items</h2>
+          <p class="text-sm text-gray-600">Add items for this PPMP</p>
+        </div>
+        <button 
+          pButton
+          type="button"
+          label="Add Item"
+          icon="pi pi-plus"
+          (click)="addItem()"
+          class="p-button-sm">
+        </button>
+      </div>
+
+      <div *ngFor="let item of items.controls; let i=index" [formGroupName]="i" class="border rounded-lg p-4 mb-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-md font-medium">Item {{i + 1}}</h3>
+          <button 
+            pButton
+            type="button"
+            icon="pi pi-trash"
+            class="p-button-danger p-button-sm"
+            [outlined]="true"
+            (click)="removeItem(i)">
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- File Upload Section -->
+          <div class="col-span-2">
+            <ng-container [ngSwitch]="item.get('classification')?.value">
+              <div *ngSwitchCase="'goods'">
+                <label class="text-sm font-medium text-gray-700 mb-1 block">
+                  Technical Specifications <span class="text-red-500">*</span>
+                </label>
+                <p-fileUpload 
+                  name="myfile[]" 
+                  url="https://www.primefaces.org/cdn/api/upload.php" 
+                  [multiple]="true" 
+                  accept=".pdf,.doc,.docx,.png" 
+                  [maxFileSize]="100000000" 
+                  (onUpload)="onTemplateUpload()" 
+                  (onSelect)="onSelectedFiles($event, i)">
+                  
+                  <ng-template pTemplate="toolbar" let-files let-uploadCallback="uploadCallback" let-clearCallback="clearCallback">
+                    <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
+                      <div class="flex gap-2">
+                        <p-button icon="pi pi-cloud-upload" label="Upload" (onClick)="uploadEvent(uploadCallback, i)" [rounded]="true" [outlined]="true" severity="success" [disabled]="!files || files.length === 0"></p-button>
+                        <p-button icon="pi pi-times" label="Clear" (onClick)="clearCallback()" [rounded]="true" [outlined]="true" severity="danger" [disabled]="!files || files.length === 0"></p-button>
+                      </div>
+                    </div>
+                  </ng-template>
+
+                  <ng-template pTemplate="empty">
+                    <div class="flex items-center justify-center flex-col">
+                      <i class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"></i>
+                      <p class="mt-6 mb-0">Drag and drop files here to upload.</p>
+                    </div>
+                  </ng-template>
+                </p-fileUpload>
+
+                <small class="text-gray-500">Max size: 1MB. Allowed types: PDF, DOC, DOCX, PNG</small>
+              </div>
+
+              <div *ngSwitchCase="'infrastructure'">
+                <label class="text-sm font-medium text-gray-700 mb-1 block">
+                  Scope of Work <span class="text-red-500">*</span>
+                </label>
+                <p-fileUpload 
+                  name="myfile[]" 
+                  url="https://www.primefaces.org/cdn/api/upload.php" 
+                  [multiple]="true" 
+                  accept=".pdf,.doc,.docx,.png" 
+                  [maxFileSize]="100000000" 
+                  (onUpload)="onTemplateUpload()" 
+                  (onSelect)="onSelectedFiles($event, i)">
+                  
+                  <ng-template pTemplate="toolbar" let-files let-uploadCallback="uploadCallback" let-clearCallback="clearCallback">
+                    <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
+                      <div class="flex gap-2">
+                        <p-button icon="pi pi-cloud-upload" label="Upload" (onClick)="uploadEvent(uploadCallback, i)" [rounded]="true" [outlined]="true" severity="success" [disabled]="!files || files.length === 0"></p-button>
+                        <p-button icon="pi pi-times" label="Clear" (onClick)="clearCallback()" [rounded]="true" [outlined]="true" severity="danger" [disabled]="!files || files.length === 0"></p-button>
+                      </div>
+                    </div>
+                  </ng-template>
+
+                  <ng-template pTemplate="empty">
+                    <div class="flex items-center justify-center flex-col">
+                      <i class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"></i>
+                      <p class="mt-6 mb-0">Drag and drop files here to upload.</p>
+                    </div>
+                  </ng-template>
+                </p-fileUpload>
+
+                <small class="text-gray-500">Max size: 1MB. Allowed types: PDF, DOC, DOCX, PNG</small>
+              </div>
+
+              <div *ngSwitchCase="'consulting'">
+                <label class="text-sm font-medium text-gray-700 mb-1 block">
+                  Terms of Reference <span class="text-red-500">*</span>
+                </label>
+                <p-fileUpload 
+                  name="myfile[]" 
+                  url="https://www.primefaces.org/cdn/api/upload.php" 
+                  [multiple]="true" 
+                  accept=".pdf,.doc,.docx,.png" 
+                  [maxFileSize]="100000000" 
+                  (onUpload)="onTemplateUpload()" 
+                  (onSelect)="onSelectedFiles($event, i)">
+                  
+                  <ng-template pTemplate="toolbar" let-files let-uploadCallback="uploadCallback" let-clearCallback="clearCallback">
+                    <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
+                      <div class="flex gap-2">
+                        <p-button icon="pi pi-cloud-upload" label="Upload" (onClick)="uploadEvent(uploadCallback, i)" [rounded]="true" [outlined]="true" severity="success" [disabled]="!files || files.length === 0"></p-button>
+                        <p-button icon="pi pi-times" label="Clear" (onClick)="clearCallback()" [rounded]="true" [outlined]="true" severity="danger" [disabled]="!files || files.length === 0"></p-button>
+                      </div>
+                    </div>
+                  </ng-template>
+
+                  <ng-template pTemplate="empty">
+                    <div class="flex items-center justify-center flex-col">
+                      <i class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"></i>
+                      <p class="mt-6 mb-0">Drag and drop files here to upload.</p>
+                    </div>
+                  </ng-template>
+                </p-fileUpload>
+
+                <small class="text-gray-500">Max size: 1MB. Allowed types: PDF, DOC, DOCX, PNG</small>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Classification -->
+          <div class="col-span-2">
+            <label class="text-sm font-medium text-gray-700 mb-1 block">
+              Classification <span class="text-red-500">*</span>
+            </label>
+            <p-dropdown
+              [options]="itemClassificationOptions"
+              formControlName="classification"
+              placeholder="Select classification"
+              styleClass="w-full"
+              [autoDisplayFirst]="false">
+            </p-dropdown>
+          </div>
+
+          <!-- Unit of Measurement -->
+          <div>
+            <label class="text-sm font-medium text-gray-700 mb-1 block">
+              Unit of Measurement <span class="text-red-500">*</span>
+            </label>
+            <input 
+              pInputText 
+              formControlName="unit_of_measurement"
+              placeholder="e.g., pieces, lot"
+              class="w-full"/>
+          </div>
+
+          <!-- Estimated Unit Cost -->
+          <div>
+            <label class="text-sm font-medium text-gray-700 mb-1 block">
+              Estimated Unit Cost <span class="text-red-500">*</span>
+            </label>
+            <p-inputNumber 
+              formControlName="estimated_unit_cost"
+              mode="currency" 
+              currency="PHP"
+              [min]="0"
+              placeholder="₱0.00"
+              styleClass="w-full">
+            </p-inputNumber>
+          </div>
+
+          <!-- Quantity Required -->
+          <div>
+            <label class="text-sm font-medium text-gray-700 mb-1 block">
+              Quantity Required <span class="text-red-500">*</span>
+            </label>
+            <p-inputNumber 
+              formControlName="quantity_required"
+              [showButtons]="true"
+              [min]="1"
+              placeholder="Enter quantity"
+              styleClass="w-full">
+            </p-inputNumber>
+          </div>
+          
+          <!-- Estimated Total Cost -->
+          <div>
+            <label class="text-sm font-medium text-gray-700 mb-1 block">
+              Estimated Total Cost
+            </label>
+            <p-inputNumber 
+              formControlName="estimated_total_cost"
+              mode="currency" 
+              currency="PHP"
+              [readonly]="true"
+              styleClass="w-full bg-gray-50">
+            </p-inputNumber>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Dialog Footer -->
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button 
+        label="Cancel" 
+        icon="pi pi-times" 
+        (click)="close()" 
+        styleClass="p-button-text">
+      </p-button>
+      <p-button 
+        label="Save" 
+        icon="pi pi-check" 
+        (click)="onSubmit()"
+        [loading]="loading">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

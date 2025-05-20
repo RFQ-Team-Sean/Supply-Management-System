@@ -1,0 +1,166 @@
+<p-card>
+    <h1 class="text-xl font-semibold">Resolution to Award</h1>
+  
+    <div class="flex justify-between mb-4 items-center">
+      <p class="text-sm">Generate a resolution to award a contract to the selected supplier</p>
+      <div class="flex flex-row gap-2">
+        <p-iconfield styleClass="small">
+          <p-inputicon styleClass="pi pi-search small" />
+          <input
+            type="text"
+            pInputText
+            placeholder="Search"
+            [(ngModel)]="searchQuery"
+            (input)="filterQuotations()"
+          />
+        </p-iconfield>
+      </div>
+    </div>
+  
+    <!-- Table to display quotations -->
+    <p-table
+      [value]="filteredQuotations"
+      responsiveLayout="scroll"
+      [paginator]="true"
+      [rows]="5"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>PR No.</th>
+          <th>Quotation No.</th>
+          <th>Supplier Name</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-quote>
+        <tr>
+          <td>{{ quote.prNo }}</td>
+          <td>{{ quote.quotationNo }}</td>
+          <td>{{ quote.supplierName }}</td>
+          <td>{{ quote.total | currency: 'PHP' }}</td>
+          <td>
+            <span
+              [ngClass]="getStatusClass(quote.status)"
+              class="px-3 py-1 rounded-lg text-white"
+            >
+              {{ quote.status }}
+            </span>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <p-button
+                icon="pi pi-eye"
+                [text]="true"
+                [rounded]="true"
+                severity="info"
+                (click)="viewDetails(quote)"
+              ></p-button>
+              <p-button
+                label="Award"
+                icon="pi pi-check"
+                [text]="true"
+                [rounded]="true"
+                severity="success"
+                (click)="generateResolution(quote)"
+                [disabled]="quote.status !== 'Approved'"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6">
+            <div class="flex flex-col w-full items-center justify-center mb-8">
+              <div class="overflow-hidden h-52 w-52 mr-8">
+                <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+              </div>
+              <span>No approved PR yet.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+</p-card>
+  
+<!-- Dialog for viewing quotation details -->
+<p-dialog
+  header="Quotation Details"
+  [(visible)]="displayDetailsDialog"
+  [modal]="true"
+  [style]="{ width: '40vw' }"
+>
+  <div *ngIf="selectedQuotation">
+    <p><strong>PR No.:</strong> {{ selectedQuotation.prNo }}</p>
+    <p><strong>Quotation No.:</strong> {{ selectedQuotation.quotationNo }}</p>
+    <p><strong>Supplier Name:</strong> {{ selectedQuotation.supplierName }}</p>
+    <p><strong>Status:</strong> {{ selectedQuotation.status }}</p>
+    <p><strong>Items:</strong></p>
+    <p-table [value]="selectedQuotation.items" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Quantity</th>
+          <th>Item Name</th>
+          <th>Unit Price</th>
+          <th>Total Amount</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.unitPrice | currency: 'PHP' }}</td>
+          <td>{{ item.totalAmount | currency: 'PHP' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <p class="mt-4"><strong>Total:</strong> {{ selectedQuotation.total | currency: 'PHP' }}</p>
+  </div>
+</p-dialog>
+  
+<!-- Dialog for generating resolution -->
+<p-dialog
+  header="Generate Resolution to Award"
+  [(visible)]="displayResolutionDialog"
+  [modal]="true"
+  [style]="{ width: '50vw' }"
+>
+  <div *ngIf="selectedQuotation">
+    <p><strong>PR No.:</strong> {{ selectedQuotation.prNo }}</p>
+    <p><strong>Quotation No.:</strong> {{ selectedQuotation.quotationNo }}</p>
+    <p><strong>Supplier Name:</strong> {{ selectedQuotation.supplierName }}</p>
+    <p><strong>Total Amount:</strong> {{ selectedQuotation.total | currency: 'PHP' }}</p>
+  
+    <div class="mt-4">
+      <label for="resolutionRemarks">Remarks</label>
+      <textarea
+        id="resolutionRemarks"
+        pInputTextarea
+        [(ngModel)]="resolutionRemarks"
+        rows="5"
+        placeholder="Enter remarks for the resolution"
+      ></textarea>
+    </div>
+  
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        (click)="displayResolutionDialog = false"
+      ></p-button>
+      <p-button
+        label="Generate"
+        icon="pi pi-check"
+        [outlined]="true"
+        severity="success"
+        (click)="saveResolution()"
+      ></p-button>
+    </div>
+  </div>
+</p-dialog>
+  
+<p-toast position="bottom-right"></p-toast>

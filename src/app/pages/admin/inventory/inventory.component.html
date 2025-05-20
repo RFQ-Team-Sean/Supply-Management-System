@@ -1,0 +1,164 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <p-tabView>
+      
+    
+
+      <!-- TAB 3: INVENTORY CUSTODIAN SLIP (ICS) -->
+<!-- TAB: INVENTORY CUSTODIAN SLIP (ICS) -->
+<p-tabPanel header="Inventory Custodian Slip (ICS)">
+  <mat-card-title>Inventory Custodian Slip Management</mat-card-title>
+  <mat-card-subtitle class="text-sm text-gray-500">
+    Allows administrators to create, view, modify, add, and update inventory custodian slips issued to the end user.
+  </mat-card-subtitle>
+
+  <!-- Header: Add ICS + Search -->
+  <div class="flex justify-between items-center mt-4">
+    <p-button
+      label="Add ICS"
+      icon="pi pi-plus"
+      size="small"
+      [outlined]="true"
+      (click)="openNewICSDialog()"
+    ></p-button>
+
+    <div class="relative w-[300px]">
+      <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+      <input
+        pInputText
+        #icsSearchInput
+        (input)="icsTable.filterGlobal(icsSearchInput.value, 'contains')"
+        type="text"
+        placeholder="Search ICS"
+        style="text-indent: 1.5rem;"
+        class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm
+               focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+  </div>
+
+  <!-- p-table for Inventory Custodian Slips -->
+  <p-table
+    #icsTable
+    [value]="icsList"
+    [rows]="10"
+    [paginator]="true"
+    [globalFilterFields]="['icsNumber','issuedTo']"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    [showCurrentPageReport]="false"
+    [responsive]="true"
+    [rowHover]="true"
+    styleClass="p-datatable-sm mt-4"
+    dataKey="id"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="icsNumber">ICS Number <p-sortIcon field="icsNumber"></p-sortIcon></th>
+        <th pSortableColumn="issuedTo">Issued To <p-sortIcon field="issuedTo"></p-sortIcon></th>
+        <th pSortableColumn="dateIssued">Date Issued <p-sortIcon field="dateIssued"></p-sortIcon></th>
+        <th pSortableColumn="status">Status <p-sortIcon field="status"></p-sortIcon></th>
+        <th pSortableColumn="document">Document</th>
+        <th class="w-[100px]">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-ics>
+      <tr>
+        <td>{{ ics.icsNumber }}</td>
+        <td>{{ ics.issuedTo }}</td>
+        <td>{{ ics.dateIssued }}</td>
+        <td>{{ ics.status }}</td>
+        <td>
+          <button pButton label="View" icon="pi pi-eye" class="p-button-text" (click)="viewICS(ics)"></button>
+        </td>
+        <td>
+          <div class="flex gap-2">
+            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-primary p-button-sm" [outlined]="true" (click)="editICS(ics)"></button>
+            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm" [outlined]="true" ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6">
+          <div class="flex flex-col w-full items-center justify-center py-8">
+            <span>No ICS records found.</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- ICS Dialog (Add/Edit) -->
+  <p-dialog
+    [(visible)]="icsDialog"
+    [modal]="true"
+    [style]="{ width: '90vw', maxWidth: '450px' }"
+    [header]="isICSEditMode ? 'Edit ICS' : 'Add New ICS'"
+    styleClass="p-fluid"
+    [dismissableMask]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [position]="'center'"
+  >
+    <form [formGroup]="icsForm" class="w-full">
+      <!-- ICS NUMBER -->
+      <div class="flex items-center gap-4 mb-4">
+        <label class="font-semibold w-24">ICS Number</label>
+        <input type="text" pInputText formControlName="icsNumber" placeholder="Enter ICS Number" class="w-full" />
+      </div>
+
+      <!-- ISSUED TO -->
+      <div class="flex items-center gap-4 mb-4">
+        <label class="font-semibold w-24">Issued To</label>
+        <input type="text" pInputText formControlName="issuedTo" placeholder="Enter Employee Name" class="w-full" />
+      </div>
+
+      <!-- DATE ISSUED -->
+      <div class="flex items-center gap-4 mb-4">
+        <label class="font-semibold w-24">Date Issued</label>
+        <input type="date" pInputText formControlName="dateIssued" class="w-full" />
+      </div>
+
+      <!-- STATUS -->
+      <div class="flex items-center gap-4 mb-4">
+        <label class="font-semibold w-24">Status</label>
+        <p-dropdown
+          formControlName="status"
+          [options]="icsStatusDropdown"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select Status"
+          class="w-full"
+        ></p-dropdown>
+      </div>
+
+      <!-- DOCUMENT UPLOAD -->
+      <div class="flex items-center gap-4 mb-4">
+        <label class="font-semibold w-24">Upload Document</label>
+        <p-fileUpload mode="basic" accept=".pdf,.doc,.docx" [maxFileSize]="5000000" (onUpload)="onICSUpload($event)"></p-fileUpload>
+      </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-end gap-2">
+        <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideICSDialog()" size="small"></button>
+        <button pButton label="Save" icon="pi pi-check" size="small" (click)="saveICS()" [disabled]="icsForm.invalid && submitted"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</p-tabPanel>
+
+
+    </p-tabView>
+
+    <!-- ConfirmDialog & Toast for success/error feedback -->
+    <p-confirmDialog
+      [style]="{ width: '90vw', maxWidth: '450px' }"
+      rejectButtonStyleClass="p-button-text"
+    ></p-confirmDialog>
+    <p-toast position="bottom-right"></p-toast>
+  </mat-card-content>
+</mat-card>

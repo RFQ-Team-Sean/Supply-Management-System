@@ -1,0 +1,278 @@
+<p-card>
+    <h1 class="text-xl font-semibold">Price Quotation</h1>
+  
+    <div class="flex justify-between mb-4 items-center">
+      <p class="text-sm">Manage price quotations and supplier details</p>
+      <div class="flex flex-row gap-2">
+        <p-iconfield styleClass="small">
+          <p-inputicon styleClass="pi pi-search small" />
+          <input
+            type="text"
+            pInputText
+            placeholder="Search"
+            [(ngModel)]="searchQuery"
+            (input)="filterQuotations()"
+          />
+        </p-iconfield>
+        <p-button
+          label="New Quotation"
+          icon="pi pi-plus"
+          [outlined]="true"
+          (click)="showDialog()"
+        ></p-button>
+      </div>
+    </div>
+  
+    <p-table
+      [value]="filteredQuotations"
+      responsiveLayout="scroll"
+      [paginator]="true"
+      [rows]="5"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>PR No.</th>
+          <th>Quotation No.</th>
+          <th>Supplier Name</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-quote>
+        <tr>
+          <td>{{ quote.prNo }}</td>
+          <td>{{ quote.quotationNo }}</td>
+          <td>{{ quote.supplierName }}</td>
+          <td>{{ quote.total | currency: 'PHP' }}</td>
+          <td>
+            <span
+              [ngClass]="getStatusClass(quote.status)"
+              class="px-3 py-1 rounded-lg text-white"
+            >
+              {{ quote.status }}
+            </span>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <p-button
+                icon="pi pi-eye"
+                [text]="true"
+                [rounded]="true"
+                severity="info"
+                (click)="viewDetails(quote)"
+              ></p-button>
+              <p-button
+                icon="pi pi-pencil"
+                [text]="true"
+                [rounded]="true"
+                severity="warn"
+                (click)="changeStatus(quote)"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+  
+  <!-- Dialog for creating a new quotation -->
+  <p-dialog
+    header="Create New Quotation"
+    [(visible)]="displayDialog"
+    [modal]="true"
+    [style]="{ width: '50vw' }"
+  >
+    <form (ngSubmit)="submitQuotation()">
+      <div class="grid gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="prNo">Purchase Request No.</label>
+          <p-dropdown
+            id="prNo"
+            [(ngModel)]="newQuotation.prNo"
+            name="prNo"
+            [options]="purchaseRequests"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select PR No."
+            required
+          ></p-dropdown>
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="quotationNo">Quotation No.</label>
+          <input
+            pInputText
+            id="quotationNo"
+            [(ngModel)]="newQuotation.quotationNo"
+            name="quotationNo"
+            readonly
+          />
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="supplierName">Supplier Name</label>
+          <input
+            pInputText
+            id="supplierName"
+            [(ngModel)]="newQuotation.supplierName"
+            name="supplierName"
+            required
+          />
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label>Items</label>
+          <div class="grid gap-2" *ngFor="let item of newQuotation.items; let i = index">
+            <div class="flex gap-2 items-center">
+              <input
+                pInputText
+                placeholder="Item Name"
+                [(ngModel)]="item.name"
+                name="itemName{{i}}"
+                required
+              />
+              <input
+                pInputText
+                placeholder="Quantity"
+                type="number"
+                [(ngModel)]="item.quantity"
+                name="quantity{{i}}"
+                (input)="calculateTotal()"
+                required
+              />
+              <input
+                pInputText
+                placeholder="Unit Price"
+                type="number"
+                [(ngModel)]="item.unitPrice"
+                name="unitPrice{{i}}"
+                (input)="calculateTotal()"
+                required
+              />
+              <input
+                pInputText
+                placeholder="Total Amount"
+                [(ngModel)]="item.totalAmount"
+                name="totalAmount{{i}}"
+                readonly
+              />
+              <p-button
+                icon="pi pi-trash"
+                [text]="true"
+                severity="danger"
+                (click)="removeItem(i)"
+              ></p-button>
+            </div>
+          </div>
+          <p-button
+            label="Add Item"
+            icon="pi pi-plus"
+            [outlined]="true"
+            (click)="addItem()"
+          ></p-button>
+        </div>
+  
+        <div class="flex flex-col gap-1">
+          <label for="total">Total</label>
+          <p-inputNumber
+            id="total"
+            [(ngModel)]="newQuotation.total"
+            name="total"
+            mode="currency"
+            currency="PHP"
+            readonly
+          ></p-inputNumber>
+        </div>
+      </div>
+  
+      <div class="flex justify-end gap-2 mt-4">
+        <p-button
+          label="Cancel"
+          icon="pi pi-times"
+          [outlined]="true"
+          severity="secondary"
+          (click)="displayDialog = false"
+        ></p-button>
+        <p-button
+          label="Submit"
+          icon="pi pi-check"
+          type="submit"
+          [outlined]="true"
+          severity="success"
+          [disabled]="!newQuotation.prNo || !newQuotation.supplierName || newQuotation.items.length === 0"
+        ></p-button>
+      </div>
+    </form>
+  </p-dialog>
+  
+  <!-- Dialog for viewing quotation details -->
+  <p-dialog
+    header="Quotation Details"
+    [(visible)]="displayDetailsDialog"
+    [modal]="true"
+    [style]="{ width: '40vw' }"
+  >
+    <div *ngIf="selectedQuotation">
+      <p><strong>PR No.:</strong> {{ selectedQuotation.prNo }}</p>
+      <p><strong>Quotation No.:</strong> {{ selectedQuotation.quotationNo }}</p>
+      <p><strong>Supplier Name:</strong> {{ selectedQuotation.supplierName }}</p>
+      <p><strong>Status:</strong> {{ selectedQuotation.status }}</p>
+      <p><strong>Items:</strong></p>
+      <p-table [value]="selectedQuotation.items" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Quantity</th>
+            <th>Item Name</th>
+            <th>Unit Price</th>
+            <th>Total Amount</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+          <tr>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.unitPrice | currency: 'PHP' }}</td>
+            <td>{{ item.totalAmount | currency: 'PHP' }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <p class="mt-4"><strong>Total:</strong> {{ selectedQuotation.total | currency: 'PHP' }}</p>
+    </div>
+  </p-dialog>
+  
+  <!-- Dialog for changing status -->
+  <p-dialog
+    header="Change Status"
+    [(visible)]="displayStatusDialog"
+    [modal]="true"
+    [style]="{ width: '30vw' }"
+  >
+    <div *ngIf="selectedQuotation">
+      <p-dropdown
+        [(ngModel)]="selectedQuotation.status"
+        [options]="statusOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select Status"
+      ></p-dropdown>
+      <div class="flex justify-end gap-2 mt-4">
+        <p-button
+          label="Cancel"
+          icon="pi pi-times"
+          [outlined]="true"
+          severity="secondary"
+          (click)="displayStatusDialog = false"
+        ></p-button>
+        <p-button
+          label="Save"
+          icon="pi pi-check"
+          [outlined]="true"
+          severity="success"
+          (click)="saveStatus()"
+        ></p-button>
+      </div>
+    </div>
+  </p-dialog>
+  
+  <p-toast position="bottom-right"></p-toast>

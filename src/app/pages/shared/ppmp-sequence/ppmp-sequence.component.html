@@ -1,0 +1,213 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>PPMP Approval Sequence Management</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      Configure the sequence of approvers for PPMP approval workflows.
+    </mat-card-subtitle>
+
+    <div class="flex justify-between items-center mt-4">
+      <div class="relative w-[300px]">
+        <p-iconfield fluid class="w-full max-w-72">
+          <p-inputicon styleClass="pi pi-search"></p-inputicon>
+          <input fluid class="w-full" pSize="small" #searchInput (input)="dt.filterGlobal(searchInput.value, 'contains')" 
+            type="text" pInputText placeholder="Search Sequences" />
+        </p-iconfield>
+      </div>
+
+      <p-button label="Add Sequence" icon="pi pi-plus" (click)="openNewApproverDialog()" [outlined]="true" size="small"></p-button>
+    </div>
+
+    <p-table #dt [value]="sequences" [rows]="10" [paginator]="true" dataKey="id" [loading]="loading"
+             [globalFilterFields]="['id', 'user_fullname', 'user_role', 'entity_name', 'name', 'approval_order']"
+             (onRowReorder)="onRowReorder($event)">
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem"></th>
+          <th pSortableColumn="approval_order">Level</th>
+          <th pSortableColumn="name">Name</th>  
+          <th pSortableColumn="user_fullname">Approver's Name</th>
+          <th pSortableColumn="user_role">Role</th>
+          <th pSortableColumn="entity_name">Entity</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-approver let-i="rowIndex">
+        <tr [pReorderableRow]="i">
+          <td>
+            <i class="pi pi-bars" pReorderableRowHandle></i>
+          </td>
+          <td>{{ approver.approval_order }}</td>
+          <td>{{ approver.name }}</td>
+          <td>{{ approver.user_fullname }}</td>
+          <td>{{ approver.user_role }}</td>
+          <td>{{ approver.entity_name }}</td>
+          <td class="flex gap-x-2">
+            <button pButton icon="pi pi-pencil" class="p-button-rounded" outlined="true" (click)="editApprover(approver)" size="small"></button>
+            <button pButton icon="pi pi-trash" class="p-button-rounded" severity="warn" outlined="true" (click)="deleteApprover(approver)" size="small"></button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center p-4">No approval sequences found.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+<!-- Dialog for Adding/Editing Approval Sequence -->
+<p-dialog
+  [(visible)]="approverDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '450px' }"
+  [header]="isEditMode ? 'Edit Approval Sequence' : 'Add New Approval Sequence'"
+  styleClass="p-fluid"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [position]="'center'"
+  [closeOnEscape]="false"
+>
+  <span class="text-gray-600 block">{{ isEditMode ? 'Editing' : 'Adding new' }} approval sequence.</span>
+  <small class="text-gray-500 block mb-4">(Please fill out all fields)</small>
+
+  <form [formGroup]="approverForm" class="w-full">
+    <div class="field mb-4">
+      <label class="font-semibold block mb-2">User *</label>
+      <p-dropdown
+        [options]="userOptions"
+        formControlName="user_id"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select User"
+        [style]="{ width: '100%' }"
+        appendTo="body"
+        [required]="true"
+      ></p-dropdown>
+      <small *ngIf="submitted && approverForm.controls['user_id'].invalid" class="p-error block mt-1">User is required.</small>
+    </div>
+
+    <div class="field mb-4">
+      <label class="font-semibold block mb-2">Approver Name *</label>
+      <input 
+        type="text" 
+        pInputText 
+        formControlName="name" 
+        placeholder="Enter Approver Name" 
+        class="w-full"
+        [required]="true"
+      />
+      <small *ngIf="submitted && approverForm.controls['name'].invalid" class="p-error block mt-1">Approver name is required.</small>
+    </div>
+
+    <div class="field mb-4" *ngIf="!isEditMode">
+      <label class="font-semibold block mb-2">Approval Order *</label>
+      <input 
+        type="number" 
+        pInputText 
+        formControlName="approval_order" 
+        placeholder="Enter Order" 
+        class="w-full"
+        [required]="true"
+        min="1"
+      />
+      <small *ngIf="submitted && approverForm.controls['approval_order'].invalid" class="p-error block mt-1">
+        Valid approval order is required (minimum 1).
+      </small>
+    </div>
+
+    <div class="field mb-4" *ngIf="!isEditMode">
+      <label class="font-semibold block mb-2">Entity *</label>
+      <p-dropdown
+        [options]="entityOptions"
+        formControlName="entity_id"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select Entity"
+        [style]="{ width: '100%' }"
+        appendTo="body"
+        [disabled]="true"
+      ></p-dropdown>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <button pButton label="Cancel" icon="pi pi-times" outlined="true" class="p-button-text" (click)="hideDialog()" size="small"></button>
+      <button pButton label="Save" icon="pi pi-check" (click)="saveApprover()" [disabled]="loading" size="small"></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Delete Confirmation Modal -->
+<p-dialog [(visible)]="deleteDialogVisible" header="Confirm Delete" [style]="{ width: '400px' }" [closable]="false">
+  <div class="flex flex-col items-center text-center">
+    <i class="pi pi-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+    <p>Are you sure you want to delete <strong>{{ approverToDelete?.name }}</strong>?</p>
+    <p class="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="deleteDialogVisible = false"></button>
+    <button pButton label="Delete" icon="pi pi-trash" class="p-button-danger" (click)="confirmDeleteAction()" [disabled]="loading"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- Reorder Confirmation Modal -->
+<p-dialog [(visible)]="reorderConfirmVisible" header="Confirm Reorder" [style]="{ width: '500px' }" [closable]="false">
+  <div class="flex flex-col items-center">
+    <div class="mb-4 text-center">
+      <i class="pi pi-exclamation-triangle text-yellow-500 text-4xl mb-3"></i>
+      <h3 class="text-lg font-medium">Are you sure you want to reorder this approval sequence?</h3>
+    </div>
+    
+    <div class="w-full mb-3 ">
+      <div class=" p-4 rounded-t-md  border-gray-400  ">
+        <div class="font-semibold text-slate-700 mb-2">Moving:</div>
+        <div class="grid grid-cols-[120px_1fr] gap-2">
+          <div class="text-slate-600">Name:</div>
+          <div class="font-medium text-right">{{ draggedApprover?.name }}</div>
+          
+          <div class="text-slate-600">Approver:</div>
+          <div class="font-medium text-right">{{ draggedApprover?.user_fullname }}</div>
+          
+          <div class="text-slate-600">From Level:</div>
+          <div class="font-medium text-right">{{ draggedApprover?.approval_order }}</div>
+        </div>
+      </div>
+      
+      <div class="flex justify-center items-center h-10 ">
+        <i class="pi pi-arrow-down text-slate-500 text-xl"></i>
+      </div>
+      
+      <div class=" p-4 rounded-b-md bg-slate-50 border-gray-500 border">
+        <div class="font-semibold text-slate-700 mb-2">New Position:</div>
+        <div class="grid grid-cols-[120px_1fr] gap-2">
+
+           <div class="text-slate-600">Name:</div>
+          <div class="font-medium text-right">{{ draggedApprover?.name }}</div>
+          
+          <div class="text-slate-600">Approver:</div>
+          <div class="font-medium text-right">{{ draggedApprover?.user_fullname }}</div>
+          
+          <div class="text-slate-600">To Level:</div>
+          <div class="font-medium text-right">{{ newPosition }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <p class="text-sm text-slate-500 italic mb-4">This will adjust the approval order of all affected sequences.</p>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <div class="flex justify-between w-full">
+      <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="cancelReorder()"></button>
+      <button pButton label="Confirm Reorder" icon="pi pi-check" class="p-button-success" (click)="confirmReorder()"></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Toast for notifications -->
+<p-toast></p-toast>

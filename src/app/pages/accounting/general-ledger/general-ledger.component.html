@@ -1,0 +1,123 @@
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>General Ledger</mat-card-title>
+    <mat-card-subtitle class="mat-body-1 mb-10 !flex justify-between items-center">
+      <span> Review and manage general ledger accounts and transactions. </span>
+      <div>
+        <p-iconfield fluid class="w-full max-w-72">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            fluid
+            class="w-full"
+            pSize="small"
+            [(ngModel)]="searchValue"
+            (input)="dt.filterGlobal(searchValue, 'contains')"
+            type="text"
+            pInputText
+            placeholder="Search"
+          />
+        </p-iconfield>
+      </div>
+    </mat-card-subtitle>
+
+    <!-- General Ledger Table -->
+    <p-table
+      #dt
+      [value]="filteredLedgerAccounts"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [globalFilterFields]="['accountCode', 'accountName']"
+      [tableStyle]="{ 'min-width': '50rem' }"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Account Code</th>
+          <th>Account Name</th>
+          <th>Debit Total</th>
+          <th>Credit Total</th>
+          <th>Balance</th>
+          <th style="width: 5rem">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-account>
+        <tr>
+          <td>{{ account.accountCode }}</td>
+          <td>{{ account.accountName }}</td>
+          <td>{{ account.debitTotal | currency: 'PHP' }}</td>
+          <td>{{ account.creditTotal | currency: 'PHP' }}</td>
+          <td>{{ account.balance | currency: 'PHP' }}</td>
+          <td>
+            <div class="flex gap-3">
+              <!-- View Transactions Button -->
+              <p-button
+                severity="secondary"
+                pTooltip="Click to view transactions"
+                [outlined]="true"
+                size="small"
+                icon="pi pi-eye"
+                rounded
+                (click)="viewAccountTransactions(account)"
+              ></p-button>
+
+              <!-- Export to PDF Button -->
+              <p-button
+                severity="secondary"
+                pTooltip="Export to PDF"
+                [outlined]="true"
+                size="small"
+                icon="pi pi-file-pdf"
+                rounded
+                (click)="exportToPDF(account)"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="6">
+            <div class="flex flex-col w-full items-center justify-center mb-8">
+              <div class="overflow-hidden h-52 w-52 mr-8">
+                <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+              </div>
+              <span>No ledger accounts found.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </mat-card-content>
+</mat-card>
+
+<!-- View Account Transactions Modal -->
+<p-dialog [(visible)]="showTransactionsModal" [modal]="true" [style]="{ width: '50rem' }">
+  <ng-template #header>
+    <h3>Transactions for {{ selectedAccount?.accountName }}</h3>
+  </ng-template>
+  <div *ngIf="selectedAccount">
+    <p-table [value]="selectedAccount.transactions" [tableStyle]="{ 'min-width': '40rem' }">
+      <ng-template #header>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Debit</th>
+          <th>Credit</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-transaction>
+        <tr>
+          <td>{{ transaction.date | date: 'mediumDate' }}</td>
+          <td>{{ transaction.description }}</td>
+          <td>{{ transaction.debit | currency: 'PHP' }}</td>
+          <td>{{ transaction.credit | currency: 'PHP' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</p-dialog>
+
+<p-toast position="bottom-right" />

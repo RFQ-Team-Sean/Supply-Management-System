@@ -1,0 +1,61 @@
+:host ::ng-deep {
+    .p-card {
+        margin-bottom: 2rem;
+    }
+
+    .p-dialog {
+        .p-dialog-content {
+            padding: 2rem;
+        }
+    }
+
+    .p-button {
+        margin-left: 0.5rem;
+    }
+
+    .p-inputtext {
+        width: 100%;
+    }
+
+    .p-dropdown {
+        width: 100%;
+    }
+
+    .p-datatable {
+        .p-datatable-header {
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        .p-datatable-thead > tr > th {
+            text-align: left;
+            padding: 1rem;
+        }
+
+        .p-datatable-tbody > tr > td {
+            text-align: left;
+            padding: 1rem;
+        }
+    }
+
+    .form-field {
+        margin-bottom: 1.5rem;
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+    }
+
+    .actions-column {
+        width: 100px;
+        text-align: center;
+    }
+
+    .dialog-footer {
+        text-align: right;
+        padding-top: 1rem;
+        border-top: 1px solid #dee2e6;
+    }
+} 

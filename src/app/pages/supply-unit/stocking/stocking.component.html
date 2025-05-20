@@ -1,0 +1,484 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+        @if(currentUser?.role == 'supply'){
+            <mat-card-title class="select-none font-light">Supply Stocking</mat-card-title>
+        }@else{
+            <mat-card-title class="select-none font-light">Delivery</mat-card-title>
+        }
+        <div class="flex justify-between items-center">
+            @if(currentUser?.role == 'supply'){
+                <p>View and manage delivery receipt items in this section.</p>
+            }@else{
+                <p>View and check delivery items in this section.</p>
+            }
+            <p-iconfield fluid class="w-full max-w-72">
+                <p-inputicon styleClass="pi pi-search" />
+                <input fluid class="w-full" pSize="small" [(ngModel)]="searchValue" (input)="dt.filterGlobal(searchValue,'contains')" type="text"
+                    pInputText placeholder="Search" />
+                <!-- <p-inputicon styleClass="pi pi-spinner pi-spin" /> -->
+            </p-iconfield>
+        </div>
+        @if(currentUser?.role == 'supply'){
+            <!-- <p-tabs [value]="1">
+                <p-tablist>
+                    <p-tab [value]="1">
+                        <p-overlaybadge badgeSize="small" [value]="countUnstocked()">
+                            <div class="px-3 flex gap-6">
+                                <i class="pi pi-warehouse"></i>
+                                <span>To Stock</span>
+                            </div>
+                        </p-overlaybadge>
+                    </p-tab>
+                </p-tablist>
+            </p-tabs> -->
+        }
+        <p-table #dt dataKey="deliveryReceipt.id" [rowHover]="true" [value]="drItems"
+            [paginator]="true"
+            [rows]="5"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            sortField="deliveryReceipt.supplier_name" sortMode="single" [scrollable]="true" scrollHeight="600px"
+            rowGroupMode="subheader" groupRowsBy="deliveryReceipt.receipt_number"
+            [globalFilterFields]="['deliveryReceipt.supplier_name','deliveryReceipt.receipt_number']"
+            [tableStyle]="{'min-width': '60rem'}">
+
+            <ng-template #header>
+                <tr>
+                    <th pFrozen="left">Name</th>
+                    <th>Property Code</th>
+                    <th>Storage</th>
+                    <th>Type</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Date Added</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+
+            <ng-template #groupheader let-po>
+                <tr class="hover:cursor-pointer" pRowGroupHeader>
+                    <td [attr.colspan]="9">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-5">
+                                <img [alt]="po.deliveryReceipt.supplier_name" src="assets/images/products/dash-prd-4.jpg"
+                                    width="32" class="rounded-full" style="vertical-align: middle" />
+                                <span class="font-bold">{{ po.deliveryReceipt.supplier_name}} </span>
+                                <p-divider layout="vertical" />
+                                <span>Receipt No. {{po.deliveryReceipt.receipt_number.toUpperCase()}}</span>
+                            </div>
+                            <p-buttongroup>
+                                <p-button pTooltip="Click to add new stock"
+                                    (click)="openAddStockModal(po.deliveryReceipt)" [outlined]="true" size="small"
+                                    label="Stock" icon="pi pi-plus" />
+                                <p-button pTooltip="Click to view delivery receipt" [outlined]="true"
+                                    (click)="viewReceipts(po.deliveryReceipt.receipt_files, po.deliveryReceipt)" size="small" label="Receipt"
+                                    icon="pi pi-receipt" />
+                                <p-button [disabled]="po.items.length <=0" pTooltip="Click to finalize stocking from receipt"
+                                    (click)="confirmSubmit($event, po)" size="small" label="Submit"
+                                    icon="pi pi-arrow-right" />
+                            </p-buttongroup>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #groupfooter let-po>
+                <tr class="hover:cursor-pointer">
+                    <td [attr.colspan]="9" class="text-left pr-12 ">
+                        <div class="flex items-center">
+                            <div class="flex gap-2"><span class="font-semibold">Total Price: </span> <span>
+                                    {{calculateItemPriceTotal(po.deliveryReceipt.id) | currency:'PHP' }}</span></div>
+                            <p-divider layout="vertical" />
+                            <div class="flex gap-2"><span class="font-semibold">Total Items: </span> <span>
+                                    {{calculateItemTotal(po.deliveryReceipt.id)}}</span></div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-po let-rowIndex="rowIndex">
+                @for(item of po.items;track item.id){
+                <tr class="hover:cursor-pointer">
+                    <td pFrozen="left"> 
+                        <i class="pi pi-box mr-2"></i>
+                        {{ item.name }}</td>
+                    <td>{{ item.ticker }}</td>
+                    <td>{{ item.storage_name }}</td>
+                    <td>{{ item.product_name }}</td>
+                    <td>{{ item.price | currency:'PHP' }}</td>
+                    <td>{{ item.quantity | number }}</td>
+                    <td>{{ item.dateAdded | date: 'yyyy-MM-dd' }}</td>
+                    <td>{{ item.description || 'No description set.' }}</td>
+                    <td class="w-16">
+                        <div class="flex gap-4 ">
+                            <p-button size="small" icon="pi pi-pencil"
+                                (click)="openEditStockModal(po.deliveryReceipt, item)" [outlined]="true" rounded />
+                            <p-button size="small" icon="pi pi-trash" (click)="confirmDeleteStock($event, item.id)" severity="danger" [outlined]="true"
+                                rounded />
+                        </div>
+                    </td>
+                </tr>
+                }
+            </ng-template>
+            <ng-template #emptymessage>
+                <tr>
+                    <td colspan="8">
+                        <div class="flex flex-col w-full items-center justify-center mb-8">
+                            <div class="overflow-hidden h-52 w-52 mr-8 ">
+                                <app-lottie-animation animation="box" class="w-60 h-60"></app-lottie-animation>
+                            </div>
+                            <span>No delivery receipt items found.</span>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+        </p-table>
+
+
+    </mat-card-content>
+</mat-card>
+
+<p-dialog [position]="'bottom'" [modal]="false" [(visible)]="showReceipt" [style]="{ width: '40rem', height:'auto', maxHeight: '90vh' }">
+    <ng-template #header>
+        <div class="select-none py-0 inline-flex items-center justify-center gap-3">
+            <i class="pi pi-receipt text-xl"></i>
+            <span class="font-bold text-lg whitespace-nowrap">Delivery Receipt</span>
+            <i pTooltip="This container is draggable and can be resized at the bottom right." class="pi pi-question-circle"></i>
+        </div>
+    </ng-template>
+    
+    <!-- Delivery Receipt Details Section -->
+    @if(viewedDeliveryReceipt) {
+    <!-- Receipt Image Gallery Section -->
+    @if(selectedReceipts && selectedReceipts.length > 0) {
+    <div class="mb-4">
+        <h3 class="text-md font-semibold mb-2">Receipt Images</h3>
+        <p-carousel class="select-none" [value]="selectedReceipts" [showNavigators]="true" [numVisible]="1" [numScroll]="1"
+        [circular]="true" [responsiveOptions]="responsiveOptions">
+        <ng-template let-receipt #item>
+            <div class="rounded-xl border border-surface rounded-border p-2">
+                <div class="mb-4">
+                    <div class="relative mx-auto">
+                        <img [src]="receipt" class="w-full rounded-border" />
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </p-carousel>
+    </div>
+    } @else {
+    <div class="mb-4">
+        <h3 class="text-md font-semibold mb-2">Receipt Images</h3>
+        <div class="border border-surface rounded-xl p-4 text-center">
+            <p class="text-surface-500 mt-2">No receipt images available</p>
+        </div>
+    </div>
+    }
+    
+    <!-- Purchase Order Details Section -->
+    @if(viewedPurchaseOrder) {
+    <div class="mb-4">
+        <h3 class="text-md font-semibold mb-2">Purchase Order Details</h3>
+        <div class="border rounded-lg overflow-hidden">
+            <div class="p-4 bg-surface-50">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="font-semibold">PO Number:</span> 
+                        <span class="bg-primary-100 text-primary-900 py-1 px-2 rounded ml-2">{{ viewedPurchaseOrder.id }}</span>
+                    </div>
+                    <div>
+                        <span class="font-semibold">Date Created:</span> 
+                        <span class="text-surface-700 ml-2">{{ viewedPurchaseOrder.dateCreated | date:'mediumDate' }}</span>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="font-semibold">Status:</span>
+                    <span [ngClass]="{
+                        'bg-green-100 text-green-800': viewedPurchaseOrder.status === 'Completed',
+                        'bg-blue-100 text-blue-800': viewedPurchaseOrder.status === 'Pending',
+                        'bg-red-100 text-red-800': viewedPurchaseOrder.status === 'Cancelled'
+                    }" class="py-1 px-2 rounded ml-2">
+                        {{ viewedPurchaseOrder.status }}
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <span class="font-semibold">Total Amount:</span>
+                    <span class="font-medium ml-2">{{ viewedPurchaseOrder.totalAmount | currency:'PHP' }}</span>
+                </div>
+            </div>
+
+            <table class="min-w-full divide-y divide-surface-200">
+                <thead class="bg-surface-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-surface-500 uppercase tracking-wider">Item</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-surface-500 uppercase tracking-wider">Description</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-surface-500 uppercase tracking-wider">Quantity</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-surface-500 uppercase tracking-wider">Unit Price</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-surface-500 uppercase tracking-wider">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-surface-200">
+                    @if(purchaseOrderItems.length > 0) {
+                        @for(item of purchaseOrderItems; track item.id) {
+                        <tr>
+                            <td class="px-4 py-2 whitespace-nowrap">
+                                <div>
+                                    <div class="text-sm font-medium text-surface-900">{{ item.name }}</div>
+                                    <div class="text-xs text-surface-500">{{ item.ticker }}</div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-2 text-sm text-surface-500">
+                                {{ item.description || 'No description' }}
+                            </td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-surface-500">
+                                {{ item.quantity }}
+                            </td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-surface-500">
+                                {{ item.price | currency:'PHP' }}
+                            </td>
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-surface-500">
+                                {{ item.price * item.quantity | currency:'PHP' }}
+                            </td>
+                        </tr>
+                        }
+                    } @else {
+                    <tr>
+                        <td colspan="5" class="px-4 py-4 text-center text-sm text-surface-500">
+                            Purchase order total: {{ viewedPurchaseOrder.totalAmount | currency:'PHP' }}
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+    
+    <!-- Delivery Receipt Basic Details -->
+    <div class="p-4 bg-surface-50 rounded-lg mb-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold">Delivery Receipt</h3>
+            <span class="bg-primary-100 text-primary-900 py-1 px-3 rounded-full text-sm">
+                {{ viewedDeliveryReceipt.receipt_number }}
+            </span>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <h4 class="text-sm font-semibold text-surface-600">Supplier</h4>
+                <p class="font-medium">{{ viewedDeliveryReceipt.supplier_name }}</p>
+                <p class="text-sm">TIN: {{ viewedDeliveryReceipt.supplier_tin }}</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-semibold text-surface-600">Department</h4>
+                <p>{{ viewedDeliveryReceipt.department_name }}</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <h4 class="text-sm font-semibold text-surface-600">Delivery Date</h4>
+                <p>{{ viewedDeliveryReceipt.delivery_date | date:'mediumDate' }}</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-semibold text-surface-600">Total Amount</h4>
+                <p class="font-medium">{{ viewedDeliveryReceipt.total_amount | currency:'PHP' }}</p>
+            </div>
+        </div>
+        
+        @if(viewedDeliveryReceipt.notes) {
+        <div class="mb-4">
+            <h4 class="text-sm font-semibold text-surface-600">Notes</h4>
+            <p class="text-sm bg-surface-100 p-2 rounded">{{ viewedDeliveryReceipt.notes }}</p>
+        </div>
+        }
+        
+        <!-- VAT Type -->
+        <div class="mb-4">
+            <h4 class="text-sm font-semibold text-surface-600">VAT Type</h4>
+            <p class="text-sm">
+                <span [ngClass]="{'bg-green-100 text-green-800': viewedDeliveryReceipt?.vatType === 'vat', 
+                                'bg-blue-100 text-blue-800': viewedDeliveryReceipt?.vatType === 'non-vat'}" 
+                      class="py-1 px-2 rounded-full">
+                    {{ viewedDeliveryReceipt.vatType === 'vat' ? 'VAT' : 'NON-VAT' }}
+                </span>
+            </p>
+        </div>
+    </div>
+    
+    <!-- Stock Items Section -->
+    @if(drItems) {
+    <div class="mb-4">
+        <h3 class="text-md font-semibold mb-2">Stock Items</h3>
+        <div class="border rounded-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-surface-200">
+                <thead class="bg-surface-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-surface-500 uppercase tracking-wider">Item</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-surface-500 uppercase tracking-wider">Price</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-surface-500 uppercase tracking-wider">Quantity</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-surface-500 uppercase tracking-wider">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-surface-200">
+                    @for(item of getSelectedReceiptItems(); track item.id) {
+                    <tr>
+                        <td class="px-4 py-2 whitespace-nowrap">
+                            <div>
+                                <div class="text-sm font-medium text-surface-900">{{ item.name }}</div>
+                                <div class="text-xs text-surface-500">{{ item.ticker }}</div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-surface-500">
+                            {{ item.price | currency:'PHP' }}
+                        </td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-surface-500">
+                            {{ item.quantity }}
+                        </td>
+                        <td class="px-4 py-2 whitespace-nowrap text-sm text-surface-500">
+                            {{ item.price * item.quantity | currency:'PHP' }}
+                        </td>
+                    </tr>
+                    }
+                    @if(getSelectedReceiptItems().length === 0) {
+                    <tr>
+                        <td colspan="4" class="px-4 py-4 text-center text-sm text-surface-500">
+                            No items have been added yet.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+    } @else {
+    <div class="flex flex-col items-center justify-center p-8">
+        <i class="pi pi-exclamation-circle text-4xl text-surface-300 mb-4"></i>
+        <p class="text-surface-600">Receipt data not available</p>
+    </div>
+    }
+</p-dialog>
+
+
+
+<p-dialog [position]="'right'" [(visible)]="showStockModal"
+    [style]="{ width: '25rem' }">
+    <ng-template #header>
+        <div class="py-0 inline-flex items-center justify-center gap-3">
+            <i class="pi pi-box text-lg"></i>
+            <span class="font-bold text-lg whitespace-nowrap">{{selectedStock ?'Edit' :'Add'}} Stock</span>
+        </div>
+    </ng-template>
+    <span class="p-text-secondary block">{{selectedStock ?'Editing' :'Adding new'}} stock from Receipt No. 
+        {{selectedDeliveryReceipt?.receipt_number}}.</span>
+    <small class="p-text-secondary block mb-6">(Please fill out all form fields)</small>
+
+    <form [formGroup]="stockForm" (submit)="selectedStock ? editStock(): addStock()">
+        <div class="flex items-center gap-4 mb-2">
+            <label for="name" class="font-semibold w-24">Item Name</label>
+            <div class="flex-auto flex-col flex">
+                <input placeholder="Enter item name" formControlName="name" pSize="small" pInputText id="name"
+                    autocomplete="off" />
+                @if(stockForm.get('name')?.hasError('required') && stockForm.get('name')?.touched){
+                <small class="self-end text-red-500 mt-2">Item Name is required</small>
+                }
+            </div>
+        </div>
+
+      <div class="flex items-center gap-4 mb-2">
+    <label for="ticker" class="font-semibold w-24">Property Number</label>
+    <div class="flex-auto flex-col flex relative">
+        <input placeholder="Enter item property number" formControlName="ticker" pSize="small" pInputText id="ticker"
+            class="flex-auto uppercase placeholder:normal-case" autocomplete="off" />
+        @if(stockForm.get('ticker')?.hasError('required') && stockForm.get('ticker')?.touched){
+        <small class="self-end text-red-500 mt-2">Item Ticker is required</small>
+        }
+    </div>
+</div>
+
+    
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="price" class="font-semibold w-24">Item Price</label>
+            <div class="flex-auto flex-col flex">
+                <p-inputnumber placeholder="Enter item price" formControlName="price" inputId="price" size="small"
+                    mode="currency" currency="PHP" locale="en-PH" class="flex-auto" autocomplete="off" />
+                @if(stockForm.get('price')?.hasError('required') && stockForm.get('price')?.touched){
+                <small class="self-end text-red-500 mt-2">Item price is required</small>
+                }
+                @if(stockForm.get('price')?.hasError('min') && stockForm.get('price')?.touched){
+                <small class="self-end text-red-500 mt-2">Item price must be greater than zero</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="quantity" class="font-semibold w-24">Quantity</label>
+            <div class="flex-auto flex-col flex">
+                <p-inputnumber placeholder="Enter quantity" formControlName="quantity" size="small" [showButtons]="true"
+                    inputId="quantity" class="flex-auto" mode="decimal" autocomplete="off" />
+                @if(stockForm.get('quantity')?.hasError('required') && stockForm.get('quantity')?.touched){
+                <small class="self-end text-red-500 mt-2">Stock quantity is required</small>
+                }
+                @if(stockForm.get('quantity')?.hasError('min') && stockForm.get('quantity')?.touched){
+                <small class="self-end text-red-500 mt-2">Stock quantity must be greater zero</small>
+                }
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="storage" class="font-semibold w-24">Item Storage</label>
+            <p-select [options]="warehouses" formControlName="storage" optionLabel="name" [filter]="true"
+              filterBy="name" [showClear]="true" [appendTo]="'body'" placeholder="Select storage location" class="flex-auto">
+              <ng-template #selectedItem let-selectedOption>
+                <div class="flex items-center gap-2">
+                  <div>{{ selectedOption.name }}</div>
+                </div>
+              </ng-template>
+              <ng-template let-inventory #item>
+                <div class="flex items-center gap-2">
+                  <div>{{ inventory.name }}</div>
+                </div>
+              </ng-template>
+            </p-select>
+          </div>
+        
+          <div class="flex items-center gap-4 mb-2">
+            <label for="type" class="font-semibold w-24">Category</label>
+            <p-select [options]="categories" formControlName="type" optionLabel="name" [filter]="true"
+              filterBy="name" [showClear]="true" [appendTo]="'body'" placeholder="Select category" class="flex-auto">
+              <ng-template #selectedItem let-selectedOption>
+                <div class="flex items-center gap-2">
+                  <div>{{ selectedOption.name }}</div>
+                </div>
+              </ng-template>
+              <ng-template let-category #item>
+                <div class="flex items-center gap-2">
+                  <div>{{ category.name }}</div>
+                </div>
+              </ng-template>
+            </p-select>
+          </div>
+        
+
+        <div class="flex items-center gap-4 mb-2">
+            <label for="description" class="font-semibold w-24">Description</label>
+            <textarea placeholder="Enter item description (Optional)" formControlName="description" pSize="small"
+                name="description" rows="5" cols="25" pTextarea id="description" class="flex-auto"
+                autocomplete="off"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-6 mt-2">
+            <p-button size="small" label="Cancel" icon="pi pi-times" severity="secondary" (click)="closeStockModal()" />
+            <p-button size="small" label="{{selectedStock ?'Edit' :'Add'}}" icon="pi pi-plus"
+                (click)="selectedStock ? editStock(): addStock()" [disabled]="!stockForm.valid" />
+        </div>
+    </form>
+</p-dialog>
+
+
+
+<p-toast position="bottom-right" />
+<p-confirmpopup />

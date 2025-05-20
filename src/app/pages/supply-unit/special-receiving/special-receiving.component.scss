@@ -1,0 +1,35 @@
+/* Status styling */
+.status-pill {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: normal;
+  display: inline-block;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.status-pending {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+.status-approved {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.status-issued {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.status-returned {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.status-cancelled {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}

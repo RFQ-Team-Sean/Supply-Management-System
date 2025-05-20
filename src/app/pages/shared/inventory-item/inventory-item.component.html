@@ -1,0 +1,986 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+        <mat-card-title>Inventory Management</mat-card-title>
+        <mat-card-subtitle class="text-sm text-gray-500">
+            View and manage inventory items, stock requests, and adjustments in this section.
+        </mat-card-subtitle>
+
+        <p-tabView>
+            <!-- Inventory Items Tab -->
+            <p-tabPanel header="Inventory Items">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex gap-2">
+                        <!-- <p-button *ngIf="!isEndUser" 
+                            pTooltip="Request Stock" 
+                            (click)="openAddProductModal()" 
+                            [outlined]="true" 
+                            size="small" 
+                            label="Request Stock" 
+                            icon="pi pi-plus">
+                        </p-button> -->
+                        
+                        <!-- End User Buttons -->
+                        <ng-container *ngIf="isEndUser">
+                            <!-- <p-button
+                                pTooltip="Request Stock" 
+                                (click)="openAddProductModal()" 
+                                [outlined]="true" 
+                                size="small" 
+                                label="Request Stock" 
+                                icon="pi pi-plus">
+                            </p-button> -->
+                            
+                            <p-button
+                                pTooltip="Request Item" 
+                                (click)="openRequestItemModal()" 
+                                [outlined]="true" 
+                                size="small" 
+                                label="Request Item" 
+                                icon="pi pi-shopping-cart">
+                            </p-button>
+
+                            <!-- Borrow Item Button -->
+                            <!-- <p-button
+                                pTooltip="Borrow Item" 
+                                (click)="openBorrowItemModal()" 
+                                [outlined]="true" 
+                                size="small" 
+                                label="Borrow Item" 
+                                icon="pi pi-book">
+                            </p-button> -->
+                        </ng-container>
+                    </div>
+
+                    <div class="flex gap-4 items-center">
+                        <!-- Warehouse Filter Dropdown -->
+                        <div class="flex gap-2">
+                            <p-dropdown [options]="warehouses" 
+                                [(ngModel)]="selectedWarehouse" 
+                                (onChange)="onWarehouseChange($event)"
+                                placeholder="Warehouse" 
+                                [showClear]="true"
+                                optionLabel="name"
+                                [appendTo]="'body'"
+                                class="w-48">
+                            </p-dropdown>
+                        </div>
+                        
+                        <!-- Search Bar -->
+                        <div class="relative w-full max-w-[300px]">
+                            <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-500"></i>
+                            <input class="w-full p-inputtext p-component pl-10" 
+                                pInputText [(ngModel)]="searchValue" 
+                                (input)="dt.filterGlobal(searchValue,'contains')" 
+                                type="text"
+                                placeholder="Search items..." 
+                                style="text-indent: 1.5rem;"/>
+                        </div>
+                        
+                        <!-- Refresh Button Only -->
+                        <div class="flex gap-2">
+                            <p-button 
+                                icon="pi pi-refresh"
+                                pTooltip="Refresh Inventory" 
+                                (click)="refreshInventory()" 
+                                [outlined]="true" 
+                                size="small">
+                            </p-button>
+                        </div>
+                    </div>
+                </div>
+
+                <p-table #dt [value]="filteredInventoryItems"
+                    [rows]="10" [paginator]="true" 
+                    [globalFilterFields]="['product', 'barcode', 'category']"
+                    [rowHover]="true" dataKey="id"
+                    styleClass="p-datatable-striped"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [showCurrentPageReport]="true">
+
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th pSortableColumn="product">Product <p-sortIcon field="product"></p-sortIcon></th>
+                            <th pSortableColumn="barcode">Property Code <p-sortIcon field="barcode"></p-sortIcon></th>
+                            <th pSortableColumn="category">Category <p-sortIcon field="category"></p-sortIcon></th>
+                            <th pSortableColumn="warehouse">Warehouse <p-sortIcon field="warehouse"></p-sortIcon></th>
+                            <th pSortableColumn="quantity">Quantity <p-sortIcon field="quantity"></p-sortIcon></th>
+                            <th>Status</th>
+                            <th pSortableColumn="dateAdded">Date Added <p-sortIcon field="dateAdded"></p-sortIcon></th>
+                            <th>Actions</th>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="body" let-item>
+                        <tr>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <img [src]="item.imageUrl || 'https://placehold.co/200x200?text=No+Image'" 
+                                        [alt]="item.product"
+                                        class="w-12 h-12 object-cover rounded-lg shadow-sm" />
+                                    <span>{{item.product}}</span>
+                                </div>
+                            </td>
+                            <td>{{ item.barcode }}</td>
+                            <td>{{item.category}}</td>
+                            <td>{{item.warehouse || 'Not Assigned'}}</td>
+                            <td>{{item.quantity}}</td>
+                            <td>
+                                <span [ngClass]="{
+                                    'bg-red-100 text-red-800': item.quantity === 0,
+                                    'bg-yellow-100 text-yellow-800': item.quantity < item.minimumQty && item.quantity > 0,
+                                    'bg-green-100 text-green-800': item.quantity >= item.minimumQty
+                                }" class="px-3 py-1 rounded-full text-sm font-medium">
+                                    {{item.quantity === 0 ? 'Out of Stock' : (item.quantity < item.minimumQty ? 'Low Stock' : 'In Stock')}}
+                                </span>
+                            </td>
+                            <td>{{ item.dateAdded | date: 'MM/dd/yy, hh:mm a' }}</td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <button pButton pRipple icon="pi pi-eye" 
+                                        class="p-button-rounded p-button-info p-button-text"
+                                        (click)="viewDetails(item)"
+                                        pTooltip="View Details">
+                                    </button>
+
+                                    <!-- Show Requisition button for end-users -->
+                                    <button *ngIf="isEndUser" 
+                                        pButton pRipple icon="pi pi-shopping-cart"
+                                        class="p-button-rounded p-button-success p-button-text"
+                                        (click)="requestItem(item, $event)"
+                                        pTooltip="Request Item">
+                                    </button>
+
+                                    <!-- Show Edit/Delete buttons for non-end-users -->
+                                    <ng-container *ngIf="!isEndUser">
+                                        <button pButton pRipple icon="pi pi-pencil"
+                                            class="p-button-rounded p-button-warning p-button-text"
+                                            (click)="editProduct(item)"
+                                            pTooltip="Edit">
+                                        </button>
+                                        <button pButton pRipple icon="pi pi-trash"
+                                            class="p-button-rounded p-button-danger p-button-text"
+                                            (click)="deleteProduct($event, item)"
+                                            pTooltip="Delete">
+                                        </button>
+                                    </ng-container>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="8">
+                                <div class="flex flex-col items-center justify-center py-6">
+                                    <i class="pi pi-inbox text-6xl text-gray-300 mb-4"></i>
+                                    <span>No inventory items found</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabPanel>
+
+            <!-- Stock Requests Tab -->
+            <!-- <p-tabPanel header="Stock Requests">
+                <div class="flex justify-end items-center mb-4">
+                    <div class="relative w-full max-w-[300px]">
+                        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-500"></i>
+                        <input class="w-full p-inputtext p-component pl-10" 
+                            pInputText 
+                            #dtRequests
+                            (input)="dtReq.filterGlobal(dtRequests.value,'contains')" 
+                            type="text"
+                            placeholder="Search requests..." 
+                            style="text-indent: 1.5rem;"/>
+                    </div>
+                </div> -->
+
+                <!-- Stock Requests Table -->
+                <!--<p-table #dtReq [value]="stockRequests"
+                    [rows]="10" [paginator]="true" 
+                    [rowHover]="true" dataKey="id"
+                    styleClass="p-datatable-striped">
+                    
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Requester</th>
+                            <th>Department</th>
+                            <th>Item Name</th>
+                            <th>Quantity</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Request Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="body" let-request>
+                        <tr>
+                            <td>{{request.requestId}}</td>
+                            <td>{{request.requesterName}}</td>
+                            <td>{{request.requesterDepartment}}</td>
+                            <td>{{request.itemName}}</td>
+                            <td>{{request.quantityRequested}} {{request.unitOfMeasurement}}</td>
+                            <td>
+                                <span [ngClass]="{
+                                    'bg-red-100 text-red-800': request.priorityLevel === 'High',
+                                    'bg-yellow-100 text-yellow-800': request.priorityLevel === 'Medium',
+                                    'bg-blue-100 text-blue-800': request.priorityLevel === 'Low'
+                                }" class="px-3 py-1 rounded-full text-sm font-medium">
+                                    {{request.priorityLevel}}
+                                </span>
+                            </td>
+                            <td>
+                                <span [ngClass]="{
+                                    'bg-yellow-100 text-yellow-800': request.approvalStatus === 'Pending',
+                                    'bg-green-100 text-green-800': request.approvalStatus === 'Approved',
+                                    'bg-red-100 text-red-800': request.approvalStatus === 'Rejected'
+                                }" class="px-3 py-1 rounded-full text-sm font-medium">
+                                    {{request.approvalStatus}}
+                                </span>
+                            </td>
+                            <td>{{ request.requestDate | date: 'MM/dd/yy, hh:mm a' }}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <button pButton icon="pi pi-eye" 
+                                        class="p-button-rounded p-button-outlined p-button-sm"
+                                        (click)="viewRequestDetails(request)"
+                                        pTooltip="View Details">
+                                    </button>
+                                    <button pButton icon="pi pi-check" 
+                                        class="p-button-rounded p-button-outlined p-button-success p-button-sm"
+                                        (click)="approveRequest(request)"
+                                        [disabled]="request.approvalStatus !== 'Pending'"
+                                        pTooltip="Approve">
+                                    </button>
+                                    <button pButton icon="pi pi-times" 
+                                        class="p-button-rounded p-button-outlined p-button-danger p-button-sm"
+                                        (click)="rejectRequest(request)"
+                                        [disabled]="request.approvalStatus !== 'Pending'"
+                                        pTooltip="Reject">
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="9">
+                                <div class="flex flex-col items-center justify-center py-6">
+                                    <i class="pi pi-inbox text-6xl text-gray-300 mb-4"></i>
+                                    <span>No stock requests found</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabPanel> -->   
+
+            <!-- Borrow Tab -->
+            <!-- <p-tabPanel *ngIf="isEndUser" header="Borrow">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex gap-2"></div>
+
+                    <div class="flex gap-4 items-center"> -->
+                        <!-- Search Bar -->
+                        <!-- <div class="relative w-full max-w-[300px]">
+                            <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 z-10 text-gray-500"></i>
+                            <input class="w-full p-inputtext p-component pl-10" 
+                                pInputText [(ngModel)]="borrowSearchValue" 
+                                (input)="filterBorrowedItems()" 
+                                type="text"
+                                placeholder="Search borrowed items..." 
+                                style="text-indent: 1.5rem;" />
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Borrowed Items Table -->
+                <!-- <p-table #dtBorrow [value]="filteredBorrowedItems"
+                    [rows]="10" [paginator]="true" 
+                    [globalFilterFields]="['itemName', 'borrowerName', 'status']"
+                    [rowHover]="true" dataKey="id"
+                    styleClass="p-datatable-striped"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [showCurrentPageReport]="true">
+                    
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th pSortableColumn="itemName">Item Name <p-sortIcon field="itemName"></p-sortIcon></th>
+                            <th pSortableColumn="borrowerName">Borrower <p-sortIcon field="borrowerName"></p-sortIcon></th>
+                            <th pSortableColumn="quantity">Quantity <p-sortIcon field="quantity"></p-sortIcon></th>
+                            <th pSortableColumn="borrowDate">Borrow Date <p-sortIcon field="borrowDate"></p-sortIcon></th>
+                            <th pSortableColumn="returnDate">Return Date <p-sortIcon field="returnDate"></p-sortIcon></th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="body" let-borrowedItem>
+                        <tr>
+                            <td>{{borrowedItem.itemName}}</td>
+                            <td>{{borrowedItem.borrowerName}}</td>
+                            <td>{{borrowedItem.quantity}}</td>
+                            <td>{{ borrowedItem.borrowDate | date: 'MM/dd/yy, hh:mm a' }}</td>
+                            <td>{{ borrowedItem.returnDate | date: 'MM/dd/yy, hh:mm a' }}</td>
+                            <td>
+                                <span [ngClass]="{
+                                    'bg-green-100 text-green-800': borrowedItem.status === 'Returned',
+                                    'bg-yellow-100 text-yellow-800': borrowedItem.status === 'Pending',
+                                    'bg-red-100 text-red-800': borrowedItem.status === 'Overdue'
+                                }" class="px-3 py-1 rounded-full text-sm font-medium">
+                                    {{borrowedItem.status}}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="flex gap-2 justify-center">
+                                    <button pButton pRipple icon="pi pi-eye" 
+                                        class="p-button-rounded p-button-info p-button-text"
+                                        (click)="viewBorrowDetails(borrowedItem)"
+                                        pTooltip="View Details">
+                                    </button>
+                                    <button pButton pRipple icon="pi pi-check" 
+                                        class="p-button-rounded p-button-success p-button-text"
+                                        (click)="markAsReturned(borrowedItem)"
+                                        [disabled]="borrowedItem.status === 'Returned'"
+                                        pTooltip="Mark as Returned">
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="7">
+                                <div class="flex flex-col items-center justify-center py-6">
+                                    <i class="pi pi-inbox text-6xl text-gray-300 mb-4"></i>
+                                    <span>No borrowed items found</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-tabPanel> -->
+        </p-tabView>
+    </mat-card-content>
+</mat-card>
+
+<p-dialog [header]="isEndUser ? 'Requisition' : (selectedProduct ? 'Edit Item' : 'Request Stock')" 
+    [(visible)]="showStockModal" [modal]="true" [style]="{width: '650px'}"
+    [draggable]="false" [resizable]="false">
+    
+    <form [formGroup]="stockForm" class="flex flex-col gap-4">
+        <!-- Request Information Section -->
+        <div class="border rounded-lg p-4 mb-4">
+            <h3 class="text-lg font-semibold mb-4">Request Information</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <!-- RIS Number - Auto Generated -->
+                <div class="field">
+                    <label for="requestId" class="font-medium mb-2 block">Request ID (RIS Number)</label>
+                    <input pInputText id="requestId" 
+                           [value]="stockForm.get('requestId')?.value" 
+                           class="w-full" 
+                           [readonly]="true" />
+                </div>
+
+                <!-- Request Date -->
+                <div class="field">
+                    <label for="requestDate" class="font-medium mb-2 block">Request Date</label>
+                    <input pInputText id="requestDate" 
+                           [value]="stockForm.get('requestDate')?.value | date:'MM/dd/yy, hh:mm a'" 
+                           class="w-full" 
+                           [readonly]="true" />
+                </div>
+
+                <!-- Requester Name -->
+                <div class="field">
+                    <label for="requesterName" class="font-medium mb-2 block">Requester Name*</label>
+                    <input pInputText id="requesterName" formControlName="requesterName" 
+                           class="w-full" placeholder="Enter your name" />
+                    <small class="text-red-500" *ngIf="stockForm.get('requesterName')?.invalid && (stockForm.get('requesterName')?.dirty || stockForm.get('requesterName')?.touched)">
+                        Requester Name is required
+                    </small>
+                </div>
+
+                <!-- Department Dropdown -->
+                <div class="field">
+                    <label for="requesterDepartment" class="font-medium mb-2 block">Department*</label>
+                    <p-dropdown id="requesterDepartment" formControlName="requesterDepartment" 
+                        [options]="departments" 
+                        optionLabel="name"
+                        optionValue="id"
+                        [appendTo]="'body'"
+                        [filter]="true" 
+                        filterBy="name"
+                        placeholder="Select department" 
+                        class="w-full">
+                    </p-dropdown>
+                    <small class="text-red-500" *ngIf="stockForm.get('requesterDepartment')?.invalid && (stockForm.get('requesterDepartment')?.dirty || stockForm.get('requesterDepartment')?.touched)">
+                        Department is required
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Details Section -->
+        <div class="border rounded-lg p-4 mb-4">
+            <h3 class="text-lg font-semibold mb-4">Item Details</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="field">
+                    <label for="itemName" class="font-medium mb-2 block">Item Name*</label>
+                    <input pInputText id="itemName" formControlName="itemName" class="w-full" placeholder="Enter item name" />
+                    <small class="text-red-500" *ngIf="stockForm.get('itemName')?.invalid && stockForm.get('itemName')?.touched">
+                        Item Name is required
+                    </small>
+                </div>
+
+                <!-- Quantity Input -->
+                <div class="field">
+                    <label for="quantityRequested" class="font-medium mb-2 block">Quantity*</label>
+                    <p-inputNumber id="quantityRequested" formControlName="quantityRequested" 
+                        [showButtons]="true" 
+                        [min]="1" 
+                        [max]="stockForm.get('product')?.value?.quantity || 1" 
+                        [maxFractionDigits]="0"
+                        [useGrouping]="false"
+                        (onInput)="validateMaxQuantity($event)"
+                        (keydown)="preventExceedingMaxValue($event)"
+                        class="w-full">
+                    </p-inputNumber>
+                    <small class="text-gray-600" *ngIf="stockForm.get('product')?.value">
+                        Available: {{stockForm.get('product')?.value?.quantity || 0}} {{stockForm.get('product')?.value?.unit}}
+                    </small>
+                    <small class="text-red-500" *ngIf="stockForm.get('quantityRequested')?.invalid && stockForm.get('quantityRequested')?.touched">
+                        Quantity is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="unitOfMeasurement" class="font-medium mb-2 block">Unit*</label>
+                    <input pInputText id="unitOfMeasurement" formControlName="unitOfMeasurement" class="w-full" placeholder="Enter unit" />
+                    <small class="text-red-500" *ngIf="stockForm.get('unitOfMeasurement')?.invalid && stockForm.get('unitOfMeasurement')?.touched">
+                        Unit is required
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Details Section -->
+        <div class="border rounded-lg p-4">
+            <h3 class="text-lg font-semibold mb-4">Additional Details</h3>
+            <div class="flex flex-col gap-4">
+                <div class="field">
+                    <label for="address" class="font-medium mb-2 block">Address*</label>
+                    <input pInputText 
+                        id="address" 
+                        formControlName="deliveryLocation" 
+                        class="w-full"
+                        placeholder="Enter delivery address" />
+                    <small class="text-red-500" *ngIf="stockForm.get('deliveryLocation')?.invalid && (stockForm.get('deliveryLocation')?.dirty || stockForm.get('deliveryLocation')?.touched)">
+                        Address is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="remarks" class="font-medium mb-2 block">Remarks</label>
+                    <textarea pInputTextarea id="remarks" formControlName="remarks" 
+                        class="w-full" rows="3" placeholder="Enter remarks">
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+            <p-button label="Cancel" icon="pi pi-times" (click)="closeStockModal()"
+                [outlined]="true" severity="secondary"></p-button>
+            <p-button label="Submit Request" icon="pi pi-check" 
+                (click)="requestStock()"
+                [disabled]="!stockForm.valid || !stockForm.get('deliveryLocation')?.value"></p-button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<p-dialog header="Product Details" [(visible)]="showDetailsModal" 
+    [modal]="true" [style]="{width: '800px'}" [draggable]="false" [resizable]="false">
+    <div *ngIf="selectedProduct" class="p-4">
+        <!-- Add Barcode Section at the top -->
+        <div class="mb-4 flex flex-col items-center">
+            <canvas id="viewBarcodeCanvas" class="mb-2"></canvas>
+            <div class="text-sm text-gray-600">Property Code</div>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="grid grid-cols-2 gap-4">
+            <div class="border rounded p-3">
+                <div class="font-bold mb-2">Product</div>
+                <div>{{selectedProduct.product}}</div>
+            </div>
+            <div class="border rounded p-3">
+                <div class="font-bold mb-2">Category</div>
+                <div>{{selectedProduct.category}}</div>
+            </div>
+            <div class="border rounded p-3">
+                <div class="font-bold mb-2">Sub Category</div>
+                <div>{{selectedProduct.subCategory || 'None'}}</div>
+            </div>
+            <div class="border rounded p-3">
+                <div class="font-bold mb-2">Brand</div>
+                <div>{{selectedProduct.brand || 'None'}}</div>
+            </div>
+            <div class="border rounded p-3">
+                <div class="font-bold mb-2">Unit</div>
+                <div>{{selectedProduct.unit}}</div>
+            </div>
+            <div class="border rounded p-3">
+                <div class="font-bold mb-2">Minimum Qty</div>
+                <div>{{selectedProduct.minimumQty}}</div>
+            </div>
+            <div class="border rounded p-3">
+                <div class="font-bold mb-2">Quantity</div>
+                <div>{{selectedProduct.quantity}}</div>
+            </div>
+            <div class="border rounded p-3">
+                <div class="font-bold mb-2">Status</div>
+                <div>{{selectedProduct.status}}</div>
+            </div>
+            <div class="border rounded p-3">
+                <div class="font-bold mb-2">Warehouse</div>
+                <div>{{selectedProduct?.warehouse || 'Not Assigned'}}</div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="border rounded p-3 mt-4">
+            <div class="font-bold mb-2">Description</div>
+            <div>{{selectedProduct.description}}</div>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end">
+            <p-button label="Print" icon="pi pi-print" (click)="printDetails()" [outlined]="true"></p-button>
+            <p-button label="Close" icon="pi pi-times" 
+                (click)="showDetailsModal = false" 
+                [outlined]="true">
+            </p-button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<p-dialog header="Edit Product Details" [(visible)]="showEditProductModal" 
+    [modal]="true" [style]="{width: '800px'}" [draggable]="false" [resizable]="false">
+    
+    <form [formGroup]="editProductForm" class="flex flex-col gap-4">
+        <!-- Basic Information Section -->
+        <div class="border rounded-lg p-4 mb-4">
+            <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="field">
+                    <label for="editProductName" class="font-medium mb-2 block">Product Name*</label>
+                    <input pInputText id="editProductName" formControlName="name" class="w-full" placeholder="Enter product name" />
+                    <small class="text-red-500" *ngIf="editProductForm.get('name')?.invalid && editProductForm.get('name')?.touched">
+                        Product Name is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="editProductItemCode" class="font-medium mb-2 block">Property Code</label>
+                    <input pInputText id="editProductItemCode" formControlName="barcode" class="w-full" [readonly]="true" />
+                </div>
+
+                <div class="field">
+                    <label for="editProductBrand" class="font-medium mb-2 block">Brand</label>
+                    <input pInputText id="editProductBrand" formControlName="brand" class="w-full" placeholder="Enter brand name" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Category and Location Section -->
+        <div class="border rounded-lg p-4 mb-4">
+            <h3 class="text-lg font-semibold mb-4">Category and Warehouse</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="field">
+                    <label for="editProductStorage" class="font-medium mb-2 block">Warehouse*</label>
+                    <p-dropdown id="editProductStorage" formControlName="storage_name" 
+                        [options]="warehouses" optionLabel="name" 
+                        placeholder="Select warehouse" [showClear]="true"
+                        [appendTo]="'body'" 
+                        class="w-full">
+                    </p-dropdown>
+                    <small class="text-red-500" *ngIf="editProductForm.get('storage_name')?.invalid && editProductForm.get('storage_name')?.touched">
+                        Warehouse is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="editProductType" class="font-medium mb-2 block">Category*</label>
+                    <p-dropdown id="editProductType" formControlName="product_name" 
+                        [options]="products" optionLabel="name" 
+                        placeholder="Select category" [showClear]="true"
+                        [appendTo]="'body'"
+                        class="w-full">
+                    </p-dropdown>
+                    <small class="text-red-500" *ngIf="editProductForm.get('product_name')?.invalid && editProductForm.get('product_name')?.touched">
+                        Category is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="editProductSubCategory" class="font-medium mb-2 block">Sub Category</label>
+                    <input pInputText id="editProductSubCategory" formControlName="subCategory" class="w-full" placeholder="Enter sub category" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantity and Price Section -->
+        <div class="border rounded-lg p-4 mb-4">
+            <h3 class="text-lg font-semibold mb-4">Quantity and Price</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="field">
+                    <label for="editProductQuantity" class="font-medium mb-2 block">Quantity*</label>
+                    <p-inputNumber id="editProductQuantity" formControlName="quantity" 
+                        [showButtons]="true" [min]="0" class="w-full">
+                    </p-inputNumber>
+                    <small class="text-red-500" *ngIf="editProductForm.get('quantity')?.invalid && editProductForm.get('quantity')?.touched">
+                        Quantity is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="editProductMinimumQty" class="font-medium mb-2 block">Minimum Quantity*</label>
+                    <p-inputNumber id="editProductMinimumQty" formControlName="minimumQty" 
+                        [showButtons]="true" [min]="0" class="w-full">
+                    </p-inputNumber>
+                    <small class="text-red-500" *ngIf="editProductForm.get('minimumQty')?.invalid && editProductForm.get('minimumQty')?.touched">
+                        Minimum Quantity is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="editProductUnit" class="font-medium mb-2 block">Unit</label>
+                    <input pInputText id="editProductUnit" formControlName="unit" class="w-full" placeholder="Enter unit (e.g., pcs, kg)" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Description Section -->
+        <div class="border rounded-lg p-4">
+            <h3 class="text-lg font-semibold mb-4">Description</h3>
+            <div class="field">
+                <label for="editProductDescription" class="font-medium mb-2 block">Product Description</label>
+                <textarea pInputTextarea id="editProductDescription" formControlName="description" 
+                    class="w-full" rows="3" placeholder="Enter product description">
+                </textarea>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+            <p-button label="Cancel" icon="pi pi-times" (click)="closeEditProductModal()"
+                [outlined]="true" severity="secondary"></p-button>
+            <p-button label="Save Changes" icon="pi pi-check" (click)="updateProduct()"
+                [disabled]="!editProductForm.valid"></p-button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<p-toast position="bottom-right"></p-toast>
+<p-confirmPopup></p-confirmPopup>
+
+<!-- Add new dialog for Request Item -->
+<p-dialog header="Request Items" 
+    [(visible)]="showRequestItemModal" 
+    [modal]="true" 
+    [style]="{width: '800px'}"
+    [draggable]="false" 
+    [resizable]="false">
+    
+    <form [formGroup]="stockForm" class="flex flex-col gap-6">
+        <!-- Request Information Section -->
+        <div class="border rounded-lg p-4 mb-4">
+            <h3 class="text-lg font-semibold mb-4">Request Information</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <!-- RIS Number - Auto Generated -->
+                <div class="field">
+                    <label for="requestId" class="font-medium mb-2 block">Request ID (RIS Number)</label>
+                    <input pInputText id="requestId" 
+                           [value]="stockForm.get('requestId')?.value" 
+                           class="w-full" 
+                           [readonly]="true" />
+                </div>
+
+                <!-- Request Date -->
+                <div class="field">
+                    <label for="requestDate" class="font-medium mb-2 block">Request Date</label>
+                    <input pInputText id="requestDate" 
+                           [value]="stockForm.get('requestDate')?.value | date:'MM/dd/yy, hh:mm a'" 
+                           class="w-full" 
+                           [readonly]="true" />
+                </div>
+
+                <!-- Requester Name -->
+                <div class="field">
+                    <label for="requesterName" class="font-medium mb-2 block">Requester Name*</label>
+                    <input pInputText id="requesterName" formControlName="requesterName" 
+                           class="w-full" placeholder="Enter your name" />
+                    <small class="text-red-500" *ngIf="stockForm.get('requesterName')?.invalid && stockForm.get('requesterName')?.touched">
+                        Requester Name is required
+                    </small>
+                </div>
+
+                <!-- Department Dropdown -->
+                <div class="field">
+                    <label for="requesterDepartment" class="font-medium mb-2 block">Department*</label>
+                    <p-dropdown id="requesterDepartment" formControlName="requesterDepartment" 
+                        [options]="departments" 
+                        optionLabel="name"
+                        optionValue="id"
+                        [appendTo]="'body'"
+                        [filter]="true" 
+                        filterBy="name"
+                        placeholder="Select department" 
+                        class="w-full">
+                    </p-dropdown>
+                    <small class="text-red-500" *ngIf="stockForm.get('requesterDepartment')?.invalid && (stockForm.get('requesterDepartment')?.dirty || stockForm.get('requesterDepartment')?.touched)">
+                        Department is required
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected Items Section -->
+        <div class="border rounded-lg p-4">
+            <h3 class="text-lg font-semibold mb-4">Selected Items</h3>
+            
+            <!-- Add Item Button -->
+            <button pButton label="Add Item" icon="pi pi-plus" 
+                class="w-full p-button-outlined mb-4" 
+                (click)="toggleAddItemFields()"
+                *ngIf="!showAddItemFields">
+            </button>
+
+            <!-- Add Item Fields - Shows below the button when toggled -->
+            <div class="mb-4" *ngIf="showAddItemFields">
+                <div class="border rounded-lg p-4 bg-gray-50">
+                    <h4 class="text-md font-semibold mb-3">Add New Item</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Product Dropdown -->
+                        <div class="field">
+                            <label for="product" class="font-medium mb-2 block">Select Item*</label>
+                            <p-dropdown id="product" formControlName="product" 
+                                [options]="inventoryItems" 
+                                optionLabel="product" 
+                                [filter]="true" 
+                                filterBy="product"
+                                [appendTo]="'body'"
+                                placeholder="Select an item" 
+                                class="w-full"
+                                (onChange)="onItemSelect($event)">
+                            </p-dropdown>
+                            <small class="text-red-500" *ngIf="stockForm.get('product')?.invalid && stockForm.get('product')?.touched">
+                                Item selection is required
+                            </small>
+                        </div>
+
+                        <!-- Quantity Input -->
+                        <div class="field">
+                            <label for="quantityRequested" class="font-medium mb-2 block">Quantity*</label>
+                            <p-inputNumber id="quantityRequested" formControlName="quantityRequested" 
+                                [showButtons]="true" 
+                                [min]="1" 
+                                [max]="stockForm.get('product')?.value?.quantity || 1" 
+                                [maxFractionDigits]="0"
+                                [useGrouping]="false"
+                                (onInput)="validateMaxQuantity($event)"
+                                (keydown)="preventExceedingMaxValue($event)"
+                                class="w-full">
+                            </p-inputNumber>
+                            <small class="text-gray-600" *ngIf="stockForm.get('product')?.value">
+                                Available: {{stockForm.get('product')?.value?.quantity || 0}} {{stockForm.get('product')?.value?.unit}}
+                            </small>
+                            <small class="text-red-500" *ngIf="stockForm.get('quantityRequested')?.invalid && stockForm.get('quantityRequested')?.touched">
+                                Quantity is required
+                            </small>
+                        </div>
+
+                        <!-- Unit of Measurement -->
+                        <div class="field">
+                            <label for="unitOfMeasurement" class="font-medium mb-2 block">Unit*</label>
+                            <input pInputText id="unitOfMeasurement" formControlName="unitOfMeasurement" 
+                                class="w-full" placeholder="Enter unit" />
+                            <small class="text-red-500" *ngIf="stockForm.get('unitOfMeasurement')?.invalid && stockForm.get('unitOfMeasurement')?.touched">
+                                Unit is required
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Add and Cancel Buttons -->
+                    <div class="flex justify-end gap-2 mt-4">
+                        <button pButton label="Cancel" icon="pi pi-times" 
+                            (click)="toggleAddItemFields()" 
+                            class="p-button-outlined">
+                        </button>
+                        <button pButton label="Add" icon="pi pi-check" 
+                            (click)="addItem()"
+                            [disabled]="!stockForm.get('product')?.value || 
+                                       !stockForm.get('quantityRequested')?.value || 
+                                       !stockForm.get('unitOfMeasurement')?.value">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Items Table -->
+            <p-table [value]="selectedItems" [paginator]="true" [rows]="5" styleClass="p-datatable-striped">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                        <th>Unit</th>
+                        <th>Actions</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item>
+                    <tr>
+                        <td>{{ item.itemName }}</td>
+                        <td>{{ item.quantityRequested }}</td>
+                        <td>{{ item.unitOfMeasurement }}</td>
+                        <td>
+                            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text"
+                                (click)="removeItem(item)" pTooltip="Remove Item"></button>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="4">
+                            <div class="flex flex-col items-center justify-center py-6">
+                                <i class="pi pi-inbox text-6xl text-gray-300 mb-4"></i>
+                                <span>No items added</span>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Additional Details Section -->
+        <div class="border rounded-lg p-4">
+            <h3 class="text-lg font-semibold mb-4">Additional Details</h3>
+            <div class="flex flex-col gap-4">
+                <div class="field">
+                    <label for="address" class="font-medium mb-2 block">Address*</label>
+                    <input pInputText 
+                        id="address" 
+                        formControlName="deliveryLocation" 
+                        class="w-full"
+                        placeholder="Enter delivery address" />
+                    <small class="text-red-500" *ngIf="stockForm.get('deliveryLocation')?.invalid && (stockForm.get('deliveryLocation')?.dirty || stockForm.get('deliveryLocation')?.touched)">
+                        Address is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="remarks" class="font-medium mb-2 block">Remarks</label>
+                    <textarea pInputTextarea id="remarks" formControlName="remarks" 
+                        class="w-full" rows="3" placeholder="Enter remarks">
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+            <p-button label="Cancel" icon="pi pi-times" (click)="closeRequestItemModal()"
+                [outlined]="true" severity="secondary"></p-button>
+            <p-button label="Submit Request" icon="pi pi-check" 
+                (click)="submitRequestItems()"
+                [disabled]="selectedItems.length === 0 || !stockForm.get('requesterName')?.value || !stockForm.get('requesterDepartment')?.value || !stockForm.get('deliveryLocation')?.value">
+            </p-button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- Add new dialog for Borrow Item -->
+<p-dialog header="Borrow Item" 
+    [(visible)]="showBorrowItemModal" 
+    [modal]="true" 
+    [style]="{width: '650px'}"
+    [draggable]="false" 
+    [resizable]="false">
+    
+    <form [formGroup]="borrowForm" class="flex flex-col gap-4">
+        <div class="border rounded-lg p-4 mb-4">
+            <h3 class="text-lg font-semibold mb-4">Borrow Information</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="field">
+                    <label for="borrowerName" class="font-medium mb-2 block">Borrower Name*</label>
+                    <input pInputText id="borrowerName" formControlName="borrowerName" class="w-full" placeholder="Enter your name" />
+                    <small class="text-red-500" *ngIf="borrowForm.get('borrowerName')?.invalid && borrowForm.get('borrowerName')?.touched">
+                        Borrower Name is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="borrowDate" class="font-medium mb-2 block">Borrow Date</label>
+                    <input pInputText id="borrowDate" 
+                           [value]="borrowForm.get('borrowDate')?.value | date: 'MM/dd/yy, hh:mm a'" 
+                           class="w-full" 
+                           [readonly]="true" />
+                </div>
+
+                <div class="field">
+                    <label for="itemName" class="font-medium mb-2 block">Item Name*</label>
+                    <p-dropdown id="itemName" formControlName="itemName" 
+                        [options]="inventoryItems" 
+                        optionLabel="product"
+                        [filter]="true" 
+                        filterBy="product"
+                        [appendTo]="'body'"
+                        placeholder="Select an item" 
+                        class="w-full">
+                    </p-dropdown>
+                    <small class="text-red-500" *ngIf="borrowForm.get('itemName')?.invalid && borrowForm.get('itemName')?.touched">
+                        Item Name is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="quantity" class="font-medium mb-2 block">Quantity*</label>
+                    <p-inputNumber id="quantity" formControlName="quantity" 
+                        [showButtons]="true" [min]="1" class="w-full">
+                    </p-inputNumber>
+                    <small class="text-red-500" *ngIf="borrowForm.get('quantity')?.invalid && borrowForm.get('quantity')?.touched">
+                        Quantity is required
+                    </small>
+                </div>
+
+                <div class="field">
+                    <label for="returnDate" class="font-medium mb-2 block">Return Date*</label>
+                    <input pInputText id="returnDate" formControlName="returnDate" class="w-full" placeholder="Enter return date" />
+                    <small class="text-red-500" *ngIf="borrowForm.get('returnDate')?.invalid && borrowForm.get('returnDate')?.touched">
+                        Return Date is required
+                    </small>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+            <p-button label="Cancel" icon="pi pi-times" (click)="closeBorrowItemModal()"
+                [outlined]="true" severity="secondary"></p-button>
+            <p-button label="Submit" icon="pi pi-check" 
+                (click)="submitBorrowRequest()"
+                [disabled]="!borrowForm.valid"></p-button>
+        </div>
+    </ng-template>
+</p-dialog>

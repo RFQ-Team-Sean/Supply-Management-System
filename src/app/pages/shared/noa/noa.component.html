@@ -1,0 +1,55 @@
+<div class="p-10 bg-white shadow-md text-left" style="width: 100%; font-family: Arial, sans-serif;">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold">NOTICE OF AWARD</h1>
+    <p class="text-2xl">NOA No.: {{ mockData.noaNumber }}</p>
+    <p class="text-2xl">{{ mockData.date }}</p>
+  </div>
+
+  <div class="mb-6 text-xl">
+    <p class="font-bold">{{ mockData.recipient?.name }}</p>
+    <p>{{ mockData.recipient?.position }}</p>
+    <p>{{ mockData.recipient?.company }}</p>
+    <p>{{ mockData.recipient?.address }}</p>
+    <p>{{ mockData.recipient?.email }}</p>
+  </div>
+
+  <div class="mb-6 text-xl">
+    <p class="font-bold">Dear {{ mockData.recipient?.name }}:</p>
+    <p class="mt-2">
+      This is to inform you that the Anti-Red Tape Authority has recommended the award
+      of contract in your favor for the Procurement of Semi-Expendable ICT Equipment
+      for the Office of the Director General, and you are hereby issued this NOTICE OF
+      AWARD:
+    </p>
+  </div>
+
+  <table class="w-full border-collapse border border-black mb-6 text-xl">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="border border-black p-2">Lot No.</th>
+        <th class="border border-black p-2">Item/Description</th>
+        <th class="border border-black p-2">Quantity</th>
+        <th class="border border-black p-2">Unit</th>
+        <th class="border border-black p-2">Total Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of mockData.items; let i = index">
+        <td class="border border-black p-2 text-center">{{ i + 1 }}</td>
+        <td class="border border-black p-2">{{ item.description }}</td>
+        <td class="border border-black p-2 text-center">{{ item.quantity }}</td>
+        <td class="border border-black p-2 text-center">{{ item.unit }}</td>
+        <td class="border border-black p-2 text-right">{{ item.price }}</td>
+      </tr>
+      <tr>
+        <td colspan="4" class="border border-black p-2 text-right font-bold">TOTAL</td>
+        <td class="border border-black p-2 text-right font-bold">{{ mockData.totalPrice }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="mb-8 text-xl">
+    <p class="font-bold mb-2">Delivery Instructions:</p>
+    <p>{{ mockData.deliveryInstructions }}</p>
+  </div>
+</div>

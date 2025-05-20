@@ -1,14 +1,18 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{html,ts}",
+    './src/**/*.{html,ts,scss}', 
+    './src/app/components/**/*.{html,ts,scss}', 
   ],
   theme: {
     extend: {
-      colors: {
-        'navy-blue': '#000080',
-      }
-    }
+      fontFamily: {
+        manrope: ['Manrope', 'sans-serif'],
+      },
+      screens: {
+        'print': {'raw': 'print'},
+      },
+    },
   },
   plugins: [],
-}
+};

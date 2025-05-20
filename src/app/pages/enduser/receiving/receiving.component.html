@@ -1,0 +1,90 @@
+<p-card header="Receiving" class="mb-4">
+    <p>View requisitions with Level 7 approval.</p>
+    <p-table
+      [value]="level7Requisitions"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      responsiveLayout="scroll"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Approval Level</th>
+          <th>Date Created</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-req>
+        <tr>
+          <td>{{ req.id }}</td>
+          <td>{{ req.title }}</td>
+          <td>{{ req.description }}</td>
+          <td>{{ req.currentApprovalLevel }}</td>
+          <td>{{ req.dateCreated | date: 'short' }}</td>
+          <td class="flex flex-row gap-x-4">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-check"
+              outlined="true"
+              class="p-button-sm p-button-success"
+              (click)="openSignatureDialog(req)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-times"
+              outlined="true"
+              class="p-button-sm p-button-danger"
+              (click)="disapproveRequisition(req)"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">No requisitions found for Level 7.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  
+    <p-dialog
+      header="Signature Required"
+      [(visible)]="displaySignatureDialog"
+      [modal]="true"
+      [closable]="false"
+      [style]="{ width: '400px' }"
+    >
+      <div>
+        <h3>Please provide your signature to approve</h3>
+        <canvas
+          #signatureCanvas
+          width="350"
+          height="150"
+          style="border: 1px solid #ccc; margin-bottom: 10px;"
+        ></canvas>
+        <div class="flex justify-between">
+          <button
+            pButton
+            type="button"
+            label="Clear"
+            icon="pi pi-refresh"
+            class="p-button-secondary"
+            (click)="clearSignature()"
+          ></button>
+          <button
+            pButton
+            type="button"
+            label="Submit"
+            icon="pi pi-check"
+            class="p-button-success"
+            (click)="submitApproval()"
+          ></button>
+        </div>
+      </div>
+    </p-dialog>
+  </p-card>
+  

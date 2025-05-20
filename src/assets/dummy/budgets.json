@@ -1,0 +1,23 @@
+[
+    {
+      "id": "1",
+      "department_id": "1",
+      "fiscal_year": 2025,
+      "total_budget": 5000000,
+      "allocated_budget": 3000000,
+      "remaining_budget": 2000000,
+      "created_by": 1,
+      "date_created": "2025-01-01"
+    },
+    {
+      "id": "2",
+      "department_id": "2",
+      "fiscal_year": 2025,
+      "total_budget": 3000000,
+      "allocated_budget": 1500000,
+      "remaining_budget": 1500000,
+      "created_by": 2,
+      "date_created": "2025-02-01"
+    }
+  ]
+  

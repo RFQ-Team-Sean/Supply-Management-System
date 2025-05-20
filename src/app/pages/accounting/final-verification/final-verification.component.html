@@ -1,0 +1,265 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+      <mat-card-title>Final Verification</mat-card-title>
+      <mat-card-subtitle class="mat-body-1 mb-4">
+        Review and verify supporting documents for classified receipts.
+      </mat-card-subtitle>
+  
+      <!-- Steps -->
+      <div class="mb-6">
+        <p-steps [model]="steps" [readonly]="false" [activeIndex]="currentStep"></p-steps>
+      </div>
+  
+      <!-- Main Table -->
+      <p-table
+        [value]="getFilteredReceipts()"
+        [tableStyle]="{ 'min-width': '60rem' }"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [loading]="loading"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Receipt Number</th>
+            <th>Supplier</th>
+            <th>Amount</th>
+            <th>Documents</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+  
+        <ng-template pTemplate="body" let-receipt>
+          <tr>
+            <td>{{ receipt.receipt_number }}</td>
+            <td>{{ receipt.supplier_name }}</td>
+            <td>{{ receipt.total_amount | currency:'PHP' }}</td>
+            <td>
+              <div class="flex gap-2">
+                <!-- Supply Ledger Card -->
+                <p-button
+                  [severity]="documentStatus[receipt.id!].supplyLedger ? 'success' : 'secondary'"
+                  [outlined]="!documentStatus[receipt.id!].supplyLedger"
+                  icon="pi pi-file"
+                  size="small"
+                  pTooltip="Supply Ledger Card"
+                  (click)="currentStep === 0 ? uploadDocument(receipt.id!, 'supplyLedger') : previewDocument(receipt.id!, 'supplyLedger')"
+                ></p-button>
+  
+                <!-- JEV -->
+                <p-button
+                  [severity]="documentStatus[receipt.id!].jev ? 'success' : 'secondary'"
+                  [outlined]="!documentStatus[receipt.id!].jev"
+                  icon="pi pi-file-pdf"
+                  size="small"
+                  pTooltip="Journal Entry Voucher"
+                  (click)="currentStep === 0 ? uploadDocument(receipt.id!, 'jev') : previewDocument(receipt.id!, 'jev')"
+                ></p-button>
+  
+                <!-- Supporting Documents -->
+                <p-button
+                  [severity]="documentStatus[receipt.id!].supportingDocs ? 'success' : 'secondary'"
+                  [outlined]="!documentStatus[receipt.id!].supportingDocs"
+                  icon="pi pi-images"
+                  size="small"
+                  pTooltip="Supporting Documents"
+                  (click)="currentStep === 0 ? uploadDocument(receipt.id!, 'supportingDocs') : previewDocument(receipt.id!, 'supportingDocs')"
+                ></p-button>
+  
+                <!-- General Journal -->
+                <p-button
+                  [severity]="documentStatus[receipt.id!].generalJournal ? 'success' : 'secondary'"
+                  [outlined]="!documentStatus[receipt.id!].generalJournal"
+                  icon="pi pi-book"
+                  size="small"
+                  pTooltip="General Journal"
+                  (click)="currentStep === 0 ? uploadDocument(receipt.id!, 'generalJournal') : previewDocument(receipt.id!, 'generalJournal')"
+                ></p-button>
+              </div>
+            </td>
+            <!-- Status Column in the Table -->
+                <td>
+                    <span [class]="isReceiptFullyVerified(receipt.id!) ? 'text-green-500' : 'text-orange-500'">
+                    {{
+                        currentStep === 2 ? 'Completed' :
+                        isReceiptFullyVerified(receipt.id!) ? 'Ready for Final Verification' : 'Pending Documents'
+                    }}
+                    </span>
+                </td>
+            <td>
+              <div class="flex gap-2">
+                <p-button
+                  severity="secondary"
+                  icon="pi pi-eye"
+                  size="small"
+                  pTooltip="View Details"
+                  [outlined]="true"
+                  (click)="openDetails(receipt)"
+                ></p-button>
+                <p-button
+                  *ngIf="currentStep === 1 && isReceiptFullyVerified(receipt.id!)"
+                  severity="success"
+                  icon="pi pi-check"
+                  size="small"
+                  pTooltip="Confirm Entry"
+                  [outlined]="true"
+                  (click)="confirmEntry(receipt)"
+                ></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+  
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6">
+              <div class="flex flex-col items-center justify-center p-6">
+                <p class="text-gray-500">
+                  {{ currentStep === 0 ? 'No pending receipts found.' : currentStep === 1 ? 'No approved receipts found.' : 'No completed receipts found.' }}
+                </p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Details Modal -->
+  <p-dialog 
+    [(visible)]="showDetailsModal" 
+    [modal]="true" 
+    [style]="{ width: '50rem' }" 
+    [header]="'Receipt Details'"
+  >
+    <div *ngIf="selectedReceipt" class="p-4">
+      <p-tabView [(activeIndex)]="activeTabIndex">
+        <p-tabPanel header="Basic Information">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p><strong>Receipt Number:</strong></p>
+              <p>{{ selectedReceipt.receipt_number }}</p>
+            </div>
+            <div>
+              <p><strong>Supplier Name:</strong></p>
+              <p>{{ selectedReceipt.supplier_name }}</p>
+            </div>
+            <div>
+              <p><strong>Delivery Date:</strong></p>
+              <p>{{ selectedReceipt.delivery_date | date:'mediumDate' }}</p>
+            </div>
+            <div>
+              <p><strong>Total Amount:</strong></p>
+              <p>{{ selectedReceipt.total_amount | currency:'PHP' }}</p>
+            </div>
+          </div>
+        </p-tabPanel>
+        <p-tabPanel header="Documents Status">
+          <div class="space-y-4">
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+              <span>Supply Ledger Card</span>
+              <div class="flex items-center gap-2">
+                <span [class]="documentStatus[selectedReceipt.id!].supplyLedger ? 'text-green-500' : 'text-orange-500'">
+                  {{ documentStatus[selectedReceipt.id!].supplyLedger ? 'Verified' : 'Pending' }}
+                </span>
+                <p-button
+                  *ngIf="documentFiles[selectedReceipt.id!]?.supplyLedger"
+                  icon="pi pi-eye"
+                  size="small"
+                  pTooltip="Preview Document"
+                  (click)="previewDocument(selectedReceipt.id!, 'supplyLedger')"
+                ></p-button>
+              </div>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+              <span>Journal Entry Voucher</span>
+              <div class="flex items-center gap-2">
+                <span [class]="documentStatus[selectedReceipt.id!].jev ? 'text-green-500' : 'text-orange-500'">
+                  {{ documentStatus[selectedReceipt.id!].jev ? 'Verified' : 'Pending' }}
+                </span>
+                <p-button
+                  *ngIf="documentFiles[selectedReceipt.id!]?.jev"
+                  icon="pi pi-eye"
+                  size="small"
+                  pTooltip="Preview Document"
+                  (click)="previewDocument(selectedReceipt.id!, 'jev')"
+                ></p-button>
+              </div>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+              <span>Supporting Documents</span>
+              <div class="flex items-center gap-2">
+                <span [class]="documentStatus[selectedReceipt.id!].supportingDocs ? 'text-green-500' : 'text-orange-500'">
+                  {{ documentStatus[selectedReceipt.id!].supportingDocs ? 'Verified' : 'Pending' }}
+                </span>
+                <p-button
+                  *ngIf="documentFiles[selectedReceipt.id!]?.supportingDocs"
+                  icon="pi pi-eye"
+                  size="small"
+                  pTooltip="Preview Document"
+                  (click)="previewDocument(selectedReceipt.id!, 'supportingDocs')"
+                ></p-button>
+              </div>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+              <span>General Journal</span>
+              <div class="flex items-center gap-2">
+                <span [class]="documentStatus[selectedReceipt.id!].generalJournal ? 'text-green-500' : 'text-orange-500'">
+                  {{ documentStatus[selectedReceipt.id!].generalJournal ? 'Verified' : 'Pending' }}
+                </span>
+                <p-button
+                  *ngIf="documentFiles[selectedReceipt.id!]?.generalJournal"
+                  icon="pi pi-eye"
+                  size="small"
+                  pTooltip="Preview Document"
+                  (click)="previewDocument(selectedReceipt.id!, 'generalJournal')"
+                ></p-button>
+              </div>
+            </div>
+          </div>
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+  </p-dialog>
+  
+  <!-- File Upload Modal -->
+  <p-dialog 
+    [(visible)]="showUploadModal" 
+    [modal]="true" 
+    [header]="'Upload ' + (currentDocumentType | titlecase)"
+    [style]="{width: '500px'}"
+  >
+    <div class="p-4">
+      <p-fileUpload
+        #fileUpload
+        mode="basic"
+        [auto]="true"
+        chooseLabel="Choose File"
+        [maxFileSize]="5000000"
+        accept="application/pdf,image/*"
+        (uploadHandler)="onFileSelected($event)"
+        [customUpload]="true"
+      ></p-fileUpload>
+      
+      <div *ngIf="selectedFile" class="mt-4">
+        <p>Selected file: {{ selectedFile.name }}</p>
+        <div class="flex gap-2 mt-2">
+          <p-button 
+            label="Confirm Upload" 
+            (click)="confirmUpload()"
+            severity="success"
+          ></p-button>
+          <p-button 
+            label="Cancel" 
+            (click)="cancelUpload()"
+            severity="secondary"
+            [outlined]="true"
+          ></p-button>
+        </div>
+      </div>
+    </div>
+  </p-dialog>
+  
+  <!-- Toast Messages -->
+  <p-toast position="bottom-right"></p-toast>

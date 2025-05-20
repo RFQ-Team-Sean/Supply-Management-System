@@ -1,0 +1,279 @@
+<!-- src/app/components/payment-terms/payment-terms.component.html -->
+<mat-card class="cardWithShadow">
+  <mat-card-content>
+    <mat-card-title>Payment Terms Management</mat-card-title>
+    <mat-card-subtitle class="text-sm text-gray-500">
+      Configure and manage payment terms for procurement.
+    </mat-card-subtitle>
+
+    <div class="flex justify-between items-center mt-4">
+      <p-button
+        pTooltip="Add Payment Term"
+        (click)="openNewTermDialog()"
+        [outlined]="true"
+        size="small"
+        label="Add Term"
+        icon="pi pi-plus"
+      ></p-button>
+
+      <div class="relative w-[300px]">
+        <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+        <input
+          pInputText
+          type="text"
+          #searchInput
+          (input)="dt.filterGlobal(searchInput.value, 'contains')"
+          placeholder="Search Terms"
+          style="text-indent: 1.5rem;"
+          class="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:ml-6"
+        />
+      </div>
+    </div>
+
+    <p-table
+      #dt
+      [value]="terms"
+      [rows]="10"
+      [paginator]="true"
+      [globalFilterFields]="['code', 'name', 'description']"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [loading]="loading"
+      [showCurrentPageReport]="false"
+      [responsive]="true"
+      [rowHover]="true"
+      [scrollable]="true"
+      scrollHeight="400px"
+      styleClass="p-datatable-sm"
+      [tableStyle]="{'min-width': '60rem'}"
+      dataKey="id"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="code">Code <p-sortIcon field="code"></p-sortIcon></th>
+          <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>
+          <th pSortableColumn="days">Days <p-sortIcon field="days"></p-sortIcon></th>
+          <th pSortableColumn="percentageRequired">% Required <p-sortIcon field="percentageRequired"></p-sortIcon></th>
+          <th pSortableColumn="isActive">Status <p-sortIcon field="isActive"></p-sortIcon></th>
+          <th class="w-[100px]">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-term>
+        <tr>
+          <td>{{ term.code }}</td>
+          <td>{{ term.name }}</td>
+          <td>{{ term.description }}</td>
+          <td>{{ term.days }} days</td>
+          <td>{{ term.percentageRequired }}%</td>
+          <td>
+            <span [class]="term.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+                  class="px-2 py-1 rounded-full text-xs font-medium">
+              {{ term.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <button
+                pButton
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-primary p-button-sm"
+                [outlined]="true"
+                (click)="editTerm(term)"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-danger p-button-sm"
+                [outlined]="true"
+                (click)="deleteTerm(term)"
+              ></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="flex flex-col w-full items-center justify-center py-8">
+              <span>No payment terms found.</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <!-- Dialog Form -->
+    <p-dialog
+      [(visible)]="termDialog"
+      [modal]="true"
+      [style]="{ width: '90vw', maxWidth: '450px' }"
+      [header]="isEditMode ? 'Edit Payment Term' : 'Add New Payment Term'"
+      styleClass="p-fluid"
+      [dismissableMask]="true"
+      [draggable]="false"
+      [resizable]="false"
+      [position]="'center'"
+      [contentStyle]="{ overflow: 'visible' }"
+    >
+      <form [formGroup]="termForm" class="w-full">
+        <!-- Code -->
+        <div class="flex items-center gap-4 mb-4">
+          <label for="code" class="font-semibold w-24">Code</label>
+          <div class="flex-auto flex-col flex">
+            <input
+              type="text"
+              pInputText
+              id="code"
+              formControlName="code"
+              placeholder="Enter term code"
+              class="w-full"
+              required
+              autofocus
+              [readonly]="isEditMode"
+            />
+            <small
+              class="self-end text-red-500 mt-1"
+              *ngIf="submitted && termForm.get('code')?.errors?.['required']"
+            >
+              Code is required.
+            </small>
+          </div>
+        </div>
+
+        <!-- Name -->
+        <div class="flex items-center gap-4 mb-4">
+          <label for="name" class="font-semibold w-24">Name</label>
+          <div class="flex-auto flex-col flex">
+            <input
+              type="text"
+              pInputText
+              id="name"
+              formControlName="name"
+              placeholder="Enter term name"
+              class="w-full"
+              required
+            />
+            <small
+              class="self-end text-red-500 mt-1"
+              *ngIf="submitted && termForm.get('name')?.errors?.['required']"
+            >
+              Name is required.
+            </small>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="flex items-center gap-4 mb-4">
+          <label for="description" class="font-semibold w-24">Description</label>
+          <div class="flex-auto flex-col flex">
+            <textarea
+              pInputTextarea
+              id="description"
+              formControlName="description"
+              placeholder="Enter description"
+              class="w-full"
+              required
+              rows="3"
+            ></textarea>
+            <small
+              class="self-end text-red-500 mt-1"
+              *ngIf="submitted && termForm.get('description')?.errors?.['required']"
+            >
+              Description is required.
+            </small>
+          </div>
+        </div>
+
+        <!-- Days -->
+        <div class="flex items-center gap-4 mb-4">
+          <label for="days" class="font-semibold w-24">Days</label>
+          <div class="flex-auto flex-col flex">
+            <p-inputNumber
+              id="days"
+              formControlName="days"
+              [min]="0"
+              [showButtons]="false"
+              placeholder="Enter days"
+              class="w-full"
+            ></p-inputNumber>
+            <small
+              class="self-end text-red-500 mt-1"
+              *ngIf="submitted && termForm.get('days')?.errors?.['required']"
+            >
+              Days is required.
+            </small>
+          </div>
+        </div>
+
+        <!-- Percentage Required -->
+        <div class="flex items-center gap-4 mb-4">
+          <label for="percentageRequired" class="font-semibold w-24">% Required</label>
+          <div class="flex-auto flex-col flex">
+            <p-inputNumber
+              id="percentageRequired"
+              formControlName="percentageRequired"
+              [min]="0"
+              [max]="100"
+              [showButtons]="false"
+              placeholder="Enter percentage"
+              suffix="%"
+              class="w-full"
+            ></p-inputNumber>
+            <small
+              class="self-end text-red-500 mt-1"
+              *ngIf="submitted && termForm.get('percentageRequired')?.errors?.['required']"
+            >
+              Percentage is required.
+            </small>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="flex items-center gap-4 mb-4">
+          <label for="isActive" class="font-semibold w-24">Status</label>
+          <div class="flex items-center">
+            <p-inputSwitch
+              id="isActive"
+              formControlName="isActive"
+            ></p-inputSwitch>
+          </div>
+        </div>
+      </form>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2">
+          <button
+            pButton
+            label="Cancel"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideDialog()"
+            size="small"
+          ></button>
+          <button
+            pButton
+            label="Save"
+            icon="pi pi-check"
+            class="p-button-primary"
+            (click)="saveTerm()"
+            size="small"
+          ></button>
+        </div>
+      </ng-template>
+    </p-dialog>
+  </mat-card-content>
+</mat-card>
+
+<p-confirmDialog 
+    header="Confirmation" 
+    icon="pi pi-exclamation-triangle"
+    [style]="{width: '450px'}"
+    acceptButtonStyleClass="p-button-danger"
+    rejectButtonStyleClass="p-button-text"
+    acceptLabel="Delete"
+    rejectLabel="Cancel">
+</p-confirmDialog>
+
+<p-toast></p-toast>
